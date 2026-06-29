@@ -1,0 +1,18 @@
+{
+  "name": "ecommerce-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend-storefront",
+    "frontend-backoffice"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "node -e \"console.log('\\n === ĐỊA CHỈ TRUY CẬP HỆ THỐNG ===\\n Frontend Storefront : http://localhost:3000\\n Frontend Backoffice : http://localhost:3001\\n Backend NestJS API  : http://localhost:4000\\n=================================\\n')\" && npm run dev:all",
+    "dev:all": "concurrently --kill-others-on-fail \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend-storefront\" \"npm run dev --prefix frontend-backoffice\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
+
+enum Category {
+  Electronics
+  Fashion
+  Home_Living
+  Cosmetics
+  Food
+}
+
+enum ProductStatus {
+  Draft
+  Pending
+  Published
+  Hidden
+}
+
+enum OrderStatus {
+  Pending
+  Confirmed
+  Shipped
+  Delivered
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  products     Product[]
+  orders       Order[]
+  reviews      Review[]
+  waitlists    Waitlist[]
+}
+
+model Product {
+  id            String        @id @default(uuid())
+  name          String        @db.VarChar(100)
+  description   String        @db.VarChar(2000)
+  price         Decimal       @db.Decimal(10, 2)
+  category      Category
+  stock         Int           @default(0)
+  images        String[]
+  status        ProductStatus @default(Pending)
+  averageRating Float         @default(0.0)
+  version       Int           @default(1) // Phục vụ cơ chế Optimistic Locking chống Race Condition
+  sellerId      String
+  seller        User          @relation(fields: [sellerId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  orderItems    OrderItem[]
+  reviews       Review[]
+  waitlists     Waitlist[]
+}
+
+model Order {
+  id           String        @id @default(uuid())
+  customerId   String
+  customer     User          @relation(fields: [customerId], references: [id])
+  totalAmount  Decimal       @db.Decimal(10, 2)
+  status       OrderStatus   @default(Pending)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  items        OrderItem[]
+  transactions Transaction[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  accountId   String
+  amount      Decimal  @db.Decimal(10, 2)
+  type        String   // "DEBIT" hoặc "CREDIT"
+  description String
+  createdAt   DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @db.SmallInt
+  comment   String?  @db.VarChar(200)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Waitlist {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
