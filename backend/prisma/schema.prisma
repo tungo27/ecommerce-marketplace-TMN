@@ -64,7 +64,7 @@ model Product {
   images        String[]
   status        ProductStatus @default(Pending)
   averageRating Float         @default(0.0)
-  version       Int           @default(1) // Phục vụ cơ chế Optimistic Locking chống Race Condition
+  version       Int           @default(1) // Support Optimistic Locking to prevent Race Conditions
   sellerId      String
   seller        User          @relation(fields: [sellerId], references: [id])
   createdAt     DateTime      @default(now())
@@ -102,7 +102,7 @@ model Transaction {
   order       Order    @relation(fields: [orderId], references: [id])
   accountId   String
   amount      Decimal  @db.Decimal(10, 2)
-  type        String   // "DEBIT" hoặc "CREDIT"
+  type        String   // "DEBIT" or "CREDIT"
   description String
   createdAt   DateTime @default(now())
 }
