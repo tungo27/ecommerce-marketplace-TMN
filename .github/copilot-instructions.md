@@ -26,10 +26,13 @@ Dự án áp dụng mô hình Modular Monolith, chia làm 3 phân hệ độc l�
   + **Tailwind v4 Compatibility**: Sử dụng trực tiếp các inline utility classes trên các component (không sử dụng `@layer components` kết hợp với `@apply` trong `globals.css` vì có thể gây lỗi compile CSS với các biến custom).
 - **Route Guard**: Các trang trong phân hệ Backoffice (như `ProductModeration`, `UserManagement`) phải được bảo vệ bởi Role Guard.
 
-# 5. Git Workflow (Quy ước cho Team 2 người)
+# 5. Git Workflow & Development Rules (Quy ước cho Team 2 người)
 - Nhánh làm việc tuân thủ định dạng gọn nhẹ: `<type>/<mô-tả-ngắn-gọn>`.
 - Các `type` hợp lệ bắt buộc:
   + `feat/`: Phát triển tính năng mới (Ví dụ: `feat/register-api`, `feat/cart-ui`).
   + `fix/`: Sửa lỗi bug (Ví dụ: `fix/login-crash`).
   + `refactor/`: Tối ưu lại code nhưng không làm thay đổi chức năng.
   + `chore/`: Cấu hình dự án, cài đặt thư viện (Ví dụ: `chore/setup-tailwind`). 
+- **Testing & Cleanup**: Thực hiện Unit Test để đảm bảo chất lượng code. Tuy nhiên, sau khi test xong và pass thành công, **BẮT BUỘC phải xóa toàn bộ các file dùng để test** (như các file `.spec.ts` trong backend, hoặc các trang test tạm trên frontend) để tránh làm rác source code.
+  # 6. Xử lý File & Hình ảnh
+- Toàn bộ hình ảnh sản phẩm hoặc avatar phải được upload lên Cloudinary thông qua `UploadModule` ở backend. Database chỉ lưu lại chuỗi URL trả về từ Cloudinary, tuyệt đối không lưu file vật lý trong source code.
