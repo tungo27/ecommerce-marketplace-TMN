@@ -59,12 +59,14 @@ export const RegisterForm: React.FC = () => {
       };
 
       const response = await authApi.register(payload);
+      // Store token if it's returned or login automatically? The backend register currently doesn't return accessToken.
+      // So we just set user or redirect to login.
       setUser(response.data);
       setLoading(false);
       router.push('/login');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
-      setError(errorMessage);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed';
+      setError(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
       setLoading(false);
     }
   };
@@ -77,7 +79,7 @@ export const RegisterForm: React.FC = () => {
       error={error}
     >
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
           Full Name
         </label>
         <input
@@ -85,14 +87,14 @@ export const RegisterForm: React.FC = () => {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="input-primary"
           placeholder="John Doe"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
           Email Address
         </label>
         <input
@@ -100,14 +102,14 @@ export const RegisterForm: React.FC = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="input-primary"
           placeholder="you@example.com"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
           Password
         </label>
         <div className="relative">
@@ -116,16 +118,16 @@ export const RegisterForm: React.FC = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="input-primary"
             placeholder="••••••••"
             required
           />
         </div>
-        <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+        <p className="text-xs text-gray-500 mt-2">Minimum 8 characters</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
           Confirm Password
         </label>
         <input
@@ -133,16 +135,16 @@ export const RegisterForm: React.FC = () => {
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="input-primary"
           placeholder="••••••••"
           required
         />
       </div>
 
-      <div className="text-center mt-4">
+      <div className="text-center mt-6">
         <p className="text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/login" className="text-orange-500 hover:text-orange-600 font-bold">
+          <Link href="/login" className="text-primary hover:text-primary-hover font-semibold transition-colors">
             Sign In
           </Link>
         </p>

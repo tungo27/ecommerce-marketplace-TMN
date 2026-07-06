@@ -25,7 +25,9 @@ export const useAuthApi = () => {
     setError(null);
     try {
       const response = await authApi.login(email, password);
-      setUser(response.data);
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      setUser(response.data.user);
       setLoading(false);
       return true;
     } catch (err: any) {

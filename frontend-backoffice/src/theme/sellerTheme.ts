@@ -3,36 +3,55 @@ import { createTheme } from '@mui/material/styles';
 export const sellerTheme = createTheme({
   palette: {
     primary: {
-      main: '#FF8C42',
-      light: '#FFB380',
-      dark: '#E67E22',
+      main: '#FF4742', // New modern Orange-Red brand color
+      light: '#FFECEB',
+      dark: '#E03E39',
     },
     secondary: {
-      main: '#FFFFFF',
+      main: '#111827', // Gray 900
     },
     background: {
-      default: '#FF8C42',
+      default: '#F9FAFB', // Gray 50
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#1F2937',
-      secondary: '#6B7280',
+      primary: '#111827',
+      secondary: '#4B5563', // Gray 600
     },
+    divider: '#E5E7EB',
+  },
+  shape: {
+    borderRadius: 8,
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h6: {
       fontWeight: 600,
     },
+    h4: {
+      fontWeight: 800,
+    },
   },
   components: {
     MuiButton: {
+      defaultProps: {
+        disableElevation: true, // Flat design
+      },
       styleOverrides: {
-        contained: {
-          backgroundColor: '#FF8C42',
-          '&:hover': {
-            backgroundColor: '#E67E22',
-          },
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+          padding: '8px 24px',
+        },
+      },
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 0,
+      },
+      styleOverrides: {
+        root: {
+          border: '1px solid #E5E7EB',
         },
       },
     },
@@ -40,11 +59,12 @@ export const sellerTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
+            backgroundColor: '#FFFFFF',
             '&:hover fieldset': {
-              borderColor: '#FF8C42',
+              borderColor: '#FF4742',
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#FF8C42',
+              borderColor: '#FF4742',
             },
           },
         },

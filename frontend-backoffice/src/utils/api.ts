@@ -23,8 +23,13 @@ export interface User {
   role: string;
 }
 
+export interface LoginResponse {
+  accessToken: string;
+  user: User;
+}
+
 export const authApi = {
   register: (data: RegisterPayload) => apiClient.post<User>('/auth/register', data),
   login: (email: string, password: string) => 
-    apiClient.post<User>('/auth/login', { email, password }),
+    apiClient.post<LoginResponse>('/auth/login', { email, password }),
 };

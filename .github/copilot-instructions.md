@@ -17,7 +17,12 @@ Dự án áp dụng mô hình Modular Monolith, chia làm 3 phân hệ độc l�
 
 # 4. Rules - Frontend UI & Call API (Quy tắc Giao diện)
 - **Axios & Token**: Mọi request cần bảo mật phải đi qua Axios Interceptor để đính kèm `Authorization: Bearer <token>`. Phải bắt lỗi 401 Unauthorized để điều hướng đăng xuất.
-- **UI/UX**: Dùng Tailwind CSS theo phong cách hiện đại. Sử dụng tông màu đỏ làm điểm nhấn chủ đạo cho các thành phần quan trọng (Nút Call-to-Action chính, trạng thái nổi bật, cảnh báo) để tạo tính đồng bộ và thẩm mỹ chuyên nghiệp cho toàn bộ sàn.
+- **UI/UX Design Principles**:
+  + **Tuyệt đối KHÔNG sử dụng màu Gradient** (No Gradients).
+  + **Flat Design & High Contrast**: Thiết kế phẳng, viền tinh tế (subtle borders), đổ bóng nhẹ (`shadow-sm`, `shadow-md`), ưu tiên độ tương phản cao để dễ đọc. 
+  + **Đồng bộ hóa Backoffice (MUI)**: Cấu hình `theme` của Material UI phải loại bỏ hiệu ứng nổi (vd: dùng `disableElevation` cho Button), sử dụng màu nền nhạt (`#F9FAFB` - gray-50) và Paper border tinh tế (`#E5E7EB`).
+  + **Alignment & Spacing**: Sử dụng White-space (khoảng trắng) hợp lý, canh lề (padding/margin) nhất quán, thiết kế gọn gàng.
+  + **Màu sắc chủ đạo (Brand Color)**: Sử dụng tông màu **Orange-Red (Hex: #FF4742)** làm điểm nhấn chủ đạo cho các thành phần quan trọng (Nút Call-to-Action chính, icon nổi bật, cảnh báo) để tạo sự đồng bộ trên toàn bộ Storefront và Backoffice.
 - **Route Guard**: Các trang trong phân hệ Backoffice (như `ProductModeration`, `UserManagement`) phải được bảo vệ bởi Role Guard.
 
 # 5. Git Workflow (Quy ước cho Team 2 người)

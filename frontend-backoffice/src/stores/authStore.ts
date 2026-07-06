@@ -18,13 +18,29 @@ interface AuthStore {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  isLoading: false,
-  error: null,
-  setUser: (user) => set({ user }),
-  setLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-  logout: () => set({ user: null, isLoading: false, error: null }),
-}));
+export const useAuthStore = create<AuthStore>((set) => {
+  let initialUser = null;
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      initialUser = JSON.parse(storedUser);
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e);
+    }
+  }
+
+  return {
+    user: initialUser,
+    isLoading: false,
+    error: null,
+    setUser: (user) => set({ user }),
+    setLoading: (loading) => set({ isLoading: loading }),
+    setError: (error) => set({ error }),
+    clearError: () => set({ error: null }),
+    logout: () => {
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      set({ user: null, isLoading: false, error: null });
+    },
+  };
+});

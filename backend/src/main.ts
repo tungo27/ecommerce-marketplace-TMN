@@ -24,7 +24,13 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
-  app.enableCors(); // Enable CORS cho frontend
+ app.enableCors({
+    // Khai báo rõ ràng các cổng được phép truy cập (Storefront 3000 và Backoffice 3001)
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Các phương thức được phép
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+  });
 
   // Swagger Configuration
   const config = new DocumentBuilder()

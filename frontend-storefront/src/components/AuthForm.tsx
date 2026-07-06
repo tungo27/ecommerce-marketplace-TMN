@@ -17,25 +17,25 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   children,
 }) => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 p-8">
+          <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8 tracking-tight">
             {title}
           </h2>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 bg-primary-light border border-primary rounded-md">
+              <p className="text-sm text-primary font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-5">
             {children}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50"
+              className="btn-primary w-full mt-2 disabled:opacity-50"
             >
               {isLoading ? 'Loading...' : 'Submit'}
             </button>
