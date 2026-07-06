@@ -4,8 +4,10 @@ import { SellerRegister } from './pages/seller/SellerRegister';
 import { SellerDashboard } from './pages/seller/SellerDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { RoleGuard } from './components/RoleGuard';
 
 export const router = createBrowserRouter([
+  // Public routes
   {
     path: '/seller/login',
     element: <SellerLogin />,
@@ -15,17 +17,33 @@ export const router = createBrowserRouter([
     element: <SellerRegister />,
   },
   {
-    path: '/seller/dashboard',
-    element: <SellerDashboard />,
-  },
-  {
     path: '/admin/login',
     element: <AdminLogin />,
   },
+
+  // Protected: SELLER or ADMIN can access seller dashboard
   {
-    path: '/admin/dashboard',
-    element: <AdminDashboard />,
+    element: <RoleGuard allowedRoles={['SELLER', 'ADMIN']} redirectPath="/seller/login" />,
+    children: [
+      {
+        path: '/seller/dashboard',
+        element: <SellerDashboard />,
+      },
+    ],
   },
+
+  // Protected: ADMIN only can access admin dashboard
+  {
+    element: <RoleGuard allowedRoles={['ADMIN']} redirectPath="/admin/login" />,
+    children: [
+      {
+        path: '/admin/dashboard',
+        element: <AdminDashboard />,
+      },
+    ],
+  },
+
+  // Default redirect
   {
     path: '/',
     element: <Navigate to="/seller/login" replace />,
