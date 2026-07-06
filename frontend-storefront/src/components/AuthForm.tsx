@@ -35,7 +35,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full mt-2 disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-6 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-2 disabled:opacity-50"
             >
               {isLoading ? 'Loading...' : 'Submit'}
             </button>

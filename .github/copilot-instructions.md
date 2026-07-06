@@ -23,6 +23,7 @@ Dự án áp dụng mô hình Modular Monolith, chia làm 3 phân hệ độc l�
   + **Đồng bộ hóa Backoffice (MUI)**: Cấu hình `theme` của Material UI phải loại bỏ hiệu ứng nổi (vd: dùng `disableElevation` cho Button), sử dụng màu nền nhạt (`#F9FAFB` - gray-50) và Paper border tinh tế (`#E5E7EB`).
   + **Alignment & Spacing**: Sử dụng White-space (khoảng trắng) hợp lý, canh lề (padding/margin) nhất quán, thiết kế gọn gàng.
   + **Màu sắc chủ đạo (Brand Color)**: Sử dụng tông màu **Orange-Red (Hex: #FF4742)** làm điểm nhấn chủ đạo cho các thành phần quan trọng (Nút Call-to-Action chính, icon nổi bật, cảnh báo) để tạo sự đồng bộ trên toàn bộ Storefront và Backoffice.
+  + **Tailwind v4 Compatibility**: Sử dụng trực tiếp các inline utility classes trên các component (không sử dụng `@layer components` kết hợp với `@apply` trong `globals.css` vì có thể gây lỗi compile CSS với các biến custom).
 - **Route Guard**: Các trang trong phân hệ Backoffice (như `ProductModeration`, `UserManagement`) phải được bảo vệ bởi Role Guard.
 
 # 5. Git Workflow (Quy ước cho Team 2 người)

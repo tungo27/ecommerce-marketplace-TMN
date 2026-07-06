@@ -63,10 +63,10 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register" className="btn-primary w-full sm:w-auto text-center">
+              <Link href="/register" className="bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-6 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 w-full sm:w-auto text-center">
                 Create new account
               </Link>
-              <Link href="/login" className="btn-outline w-full sm:w-auto text-center">
+              <Link href="/login" className="border border-primary text-primary hover:bg-primary-light font-medium py-2.5 px-6 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-transparent w-full sm:w-auto text-center">
                 Login to your account
               </Link>
             </div>
