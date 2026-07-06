@@ -49,13 +49,13 @@ export default function Home() {
           {user ? (
             <div className="flex flex-col items-center bg-gray-50 border border-gray-100 rounded-md p-6 w-full max-w-md mx-auto">
               <div className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center text-2xl font-bold mb-4">
-                {user.name.charAt(0).toUpperCase()}
+                {(user.name || 'User').charAt(0).toUpperCase()}
               </div>
               <p className="text-xl text-gray-900 font-bold mb-1">
-                {user.name}
+                {user.name || 'User'}
               </p>
               <p className="text-sm text-gray-500 mb-3">
-                {user.email}
+                {user.email || 'No email'}
               </p>
               <span className="px-3 py-1 bg-primary text-white rounded-full text-xs font-bold uppercase tracking-wide shadow-sm">
                 {user.role}
