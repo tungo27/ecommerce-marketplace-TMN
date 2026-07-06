@@ -1,33 +1,14 @@
-import { CssBaseline, ThemeProvider, createTheme, Box, AppBar, Toolbar, Typography } from '@mui/material';
-import { ImageUpload } from './components/ImageUpload';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    background: {
-      default: '#f4f6f8',
-    },
-  },
-});
+import { RouterProvider } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { router } from './router';
+import { sellerTheme } from './theme/sellerTheme';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={sellerTheme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1, minHeight: '100vh' }}>
-        <AppBar position="static" elevation={1}>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-              Backoffice -  TMN
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ p: 4 }}>
-          <ImageUpload />
-        </Box>
-      </Box>
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }
