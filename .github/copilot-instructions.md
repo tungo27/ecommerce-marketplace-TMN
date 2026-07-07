@@ -30,6 +30,9 @@ Dự án áp dụng mô hình Modular Monolith, chia làm 3 phân hệ độc l�
   + **Backend**: Sử dụng `JwtAuthGuard` + `RolesGuard` từ `src/auth/guards/`. Kết hợp với decorator `@Roles()` từ `roles.decorator.ts`. Thứ tự guard bắt buộc: `@UseGuards(JwtAuthGuard, RolesGuard)`. JWT payload có cấu trúc `{ sub, email, role }`, được giải mã bởi `JwtStrategy` và gắn vào `request.user`.
   + **Backoffice**: Component `<RoleGuard allowedRoles={[...]}>` sử dụng React Router v6 `<Outlet>`. Chưa đăng nhập → redirect về `/seller/login`. Sai role → trang 403. Route `/admin/dashboard` chỉ nhận `ADMIN`, `/seller/dashboard` nhận `SELLER` hoặc `ADMIN`.
   + **Storefront**: `src/proxy.ts` chạy ở Edge Runtime (Next.js 16+ đổi tên từ `middleware.ts` → `proxy.ts`), đọc cookie `accessToken` để bảo vệ các private routes (`/profile`, `/orders`, `/checkout`, `/account`). Token phải được ghi vào cookie khi đăng nhập (thực hiện trong `LoginForm.tsx`).
+  + **Màu sắc chủ đạo (Brand Color)**: Sử dụng tông màu **Orange-Red (Hex: #FF4742)** làm điểm nhấn chủ đạo cho các thành phần quan trọng (Nút Call-to-Action chính, icon nổi bật, cảnh báo) để tạo sự đồng bộ trên toàn bộ Storefront và Backoffice.
+  + **Tailwind v4 Compatibility**: Sử dụng trực tiếp các inline utility classes trên các component (không sử dụng `@layer components` kết hợp với `@apply` trong `globals.css` vì có thể gây lỗi compile CSS với các biến custom).
+- **Route Guard**: Các trang trong phân hệ Backoffice (như `ProductModeration`, `UserManagement`) phải được bảo vệ bởi Role Guard.
 
 # 5. Git Workflow & Development Rules (Quy ước cho Team 2 người)
 - Nhánh làm việc tuân thủ định dạng gọn nhẹ: `<type>/<mô-tả-ngắn-gọn>`.

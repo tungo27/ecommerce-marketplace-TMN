@@ -1,3 +1,12 @@
-import "dotenv/config";
-// Prisma configuration is handled via schema.prisma and .env
+import 'dotenv/config';
 
+export default {
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+    seed: 'ts-node prisma/seed.ts',
+  },
+  datasource: {
+    url: process.env.DATABASE_URL,
+  },
+};

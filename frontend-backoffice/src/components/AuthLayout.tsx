@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Paper, AppBar, Toolbar, Typography } from '@mui/material';
+import { Box, Container, Paper, Typography } from '@mui/material';
 
 interface AuthLayoutProps {
   title: string;
@@ -33,7 +33,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           component="div" 
           sx={{ 
             fontWeight: 800, 
-            color: '#FFFFFF', 
+            color: headerColor || '#FFFFFF',
             mb: 4,
             textShadow: '0 2px 4px rgba(0,0,0,0.5)',
             letterSpacing: '-1px'
@@ -43,6 +43,9 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
         </Typography>
         <Container maxWidth="sm">
           <Paper elevation={3} sx={{ p: 4, backgroundColor: '#FFFFFF' }}>
+            <Typography variant="h5" component="h1" sx={{ fontWeight: 700, mb: 3 }}>
+              {title}
+            </Typography>
             {children}
           </Paper>
         </Container>

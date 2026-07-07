@@ -1,46 +1,66 @@
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-
-// Set DATABASE_URL directly
-process.env.DATABASE_URL = 'postgresql://postgres:root@localhost:5432/ecommerce_TMN_db?schema=public';
-
-console.log('DATABASE_URL set to:', process.env.DATABASE_URL?.substring(0, 50) + '...');
+import { seedProducts } from './seeds/product.seed';
+import { seedUsers } from './seeds/user.seed';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  // Check if admin already exists
-  const adminExists = await prisma.user.findUnique({
+async function ensureLegacyAdmin() {
+  const passwordHash = await bcrypt.hash('Admin@123456', 10);
+
+  await prisma.user.upsert({
     where: { email: 'admin@tmn.com' },
-  });
-
-  if (adminExists) {
-    console.log('Admin account already exists');
-    return;
-  }
-
-  // Hash the default password
-  const defaultPassword = 'Admin@123456';
-  const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-
-  // Create default admin
-  const admin = await prisma.user.create({
-    data: {
+    update: {
+      name: 'Administrator',
+      passwordHash,
+      role: Role.ADMIN,
+      isActive: true,
+    },
+    create: {
       email: 'admin@tmn.com',
       name: 'Administrator',
-      passwordHash: hashedPassword,
-      role: 'ADMIN',
+      passwordHash,
+      role: Role.ADMIN,
       isActive: true,
     },
   });
+}
 
-  console.log('Admin account created:', admin);
+async function main() {
+  console.log('=== Start database seed ===');
+
+  const users = await seedUsers(prisma);
+  await ensureLegacyAdmin();
+
+  const sellerAccount = users.find((user) => user.role === Role.SELLER);
+
+  if (!sellerAccount) {
+    throw new Error('Cannot find a SELLER account to link seeded products.');
+  }
+
+  await seedProducts(prisma, sellerAccount.id);
+
+  const [userCount, productCount, publicProductCount] = await Promise.all([
+    prisma.user.count(),
+    prisma.product.count(),
+    prisma.product.count({
+      where: {
+        status: 'Published',
+        stock: { gt: 0 },
+      },
+    }),
+  ]);
+
+  console.log(
+    `Seed completed: ${userCount} users, ${productCount} products, ${publicProductCount} public products.`,
+  );
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
+  .catch((error) => {
+    console.error('Seed failed:', error);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
