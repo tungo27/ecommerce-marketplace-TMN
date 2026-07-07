@@ -9,6 +9,34 @@ export const apiClient = axios.create({
   },
 });
 
+// Request interceptor to add the token
+apiClient.interceptors.request.use((config) => {
+  let token = null;
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('accessToken');
+  }
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor to handle 401 Unauthorized
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface RegisterPayload {
   email: string;
   password: string;
