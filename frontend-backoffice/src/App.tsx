@@ -1,5 +1,5 @@
 import { CssBaseline, ThemeProvider, createTheme, Box, AppBar, Toolbar, Typography } from '@mui/material';
-import { ImageUpload } from './components/ImageUpload';
+// import { ImageUpload } from './components/ImageUpload';
 
 const theme = createTheme({
   palette: {
@@ -25,7 +25,7 @@ function App() {
           </Toolbar>
         </AppBar>
         <Box sx={{ p: 4 }}>
-          <ImageUpload />
+          {/* <ImageUpload /> */}
         </Box>
       </Box>
     </ThemeProvider>

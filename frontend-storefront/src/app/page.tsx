@@ -1,70 +1,226 @@
 import ProductCard from '@/components/ProductCard';
 
-// Giả lập hàm gọi API SSR
-async function fetchProducts(searchParams: any) {
-  const query = new URLSearchParams(searchParams).toString();
-  const res = await fetch(`http://127.0.0.1:4000/api/products?${query}`, { cache: 'no-store' });
-  if (!res.ok) return { products: [], meta: { total: 0 } };
-  return res.json();
+type SearchParams = {
+  [key: string]: string | string[] | undefined;
+};
+
+const getFirstParam = (value: string | string[] | undefined) => {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value[0];
+  return undefined;
+};
+
+async function fetchProducts(resolvedParams: SearchParams) {
+  try {
+    const params = new URLSearchParams();
+    params.set('page', '1');
+    params.set('limit', '12');
+
+    const category = getFirstParam(resolvedParams.category);
+    const search = getFirstParam(resolvedParams.search);
+    const minPrice = getFirstParam(resolvedParams.minPrice);
+    const maxPrice = getFirstParam(resolvedParams.maxPrice);
+
+    if (category) params.set('category', category);
+    if (search) params.set('search', search);
+    if (minPrice) params.set('minPrice', minPrice);
+    if (maxPrice) params.set('maxPrice', maxPrice);
+
+    const res = await fetch(`http://127.0.0.1:4000/api/products?${params.toString()}`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return { products: [], meta: { total: 0 } };
+    const result = await res.json();
+    return result.data ?? result;
+  } catch {
+    return { products: [], meta: { total: 0 } };
+  }
 }
 
-export default async function MarketplacePage({ searchParams }: { searchParams: any }) {
-  const data = await fetchProducts(searchParams);
+export default async function MarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<any> | any;
+}) {
+  const resolvedParams = await searchParams;
+  const data = await fetchProducts(resolvedParams);
   const products = data.products || [];
   const total = data.meta?.total || 0;
 
+  const buildHref = (overrides: Record<string, string | undefined>) => {
+    const urlParams = new URLSearchParams();
+
+    Object.entries(resolvedParams || {}).forEach(([key, value]) => {
+      if (value === undefined) return;
+      if (Array.isArray(value)) {
+        value.forEach((item) => urlParams.append(key, item));
+        return;
+      }
+      urlParams.set(key, value);
+    });
+
+    Object.entries(overrides).forEach(([key, value]) => {
+      if (value === undefined) urlParams.delete(key);
+      else urlParams.set(key, value);
+    });
+
+    const query = urlParams.toString();
+    return query ? `/?${query}` : '/';
+  };
+
   return (
-    <div className="flex gap-6 items-start">
-      {/* STICKY SIDEBAR */}
-      <aside className="w-60 sticky top-[120px] flex-shrink-0">
-        <div className="bg-white p-4 border border-gray-100 rounded-sm shadow-sm mb-4">
-          <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase">Categories</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="/" className="block py-1 hover:text-[#FF4742]">All</a></li>
-            <li><a href="/?category=Electronics" className="block py-1 hover:text-[#FF4742]">Electronics</a></li>
-            <li><a href="/?category=Fashion" className="block py-1 hover:text-[#FF4742]">Fashion</a></li>
-            <li><a href="/?category=Home_Living" className="block py-1 hover:text-[#FF4742]">Home & Living</a></li>
-            <li><a href="/?category=Cosmetics" className="block py-1 hover:text-[#FF4742]">Cosmetics</a></li>
-            <li><a href="/?category=Food" className="block py-1 hover:text-[#FF4742]">Food</a></li>
-          </ul>
+    <div className="space-y-6">
+      <section className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#FF654C] via-[#FF4B39] to-[#FF2A24] px-6 py-12 text-white shadow-lg">
+        <div className="absolute inset-y-0 left-0 w-72 opacity-30 blur-3xl">
+          <div className="h-full w-full rounded-full bg-white/20" />
         </div>
-
-        <div className="bg-white p-4 border border-gray-100 rounded-sm shadow-sm">
-          <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase">Price Range</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li><a href="/" className="block py-1 hover:text-[#FF4742] bg-red-50 text-[#FF4742] px-2 -mx-2 rounded">All Prices</a></li>
-            <li><a href="/?maxPrice=500000" className="block py-1 hover:text-[#FF4742]">Under 500.000₫</a></li>
-            <li><a href="/?minPrice=500000&maxPrice=2000000" className="block py-1 hover:text-[#FF4742]">500K - 2 Million</a></li>
-            <li><a href="/?minPrice=2000000&maxPrice=10000000" className="block py-1 hover:text-[#FF4742]">2 - 10 Million</a></li>
-            <li><a href="/?minPrice=10000000" className="block py-1 hover:text-[#FF4742]">Over 10 Million</a></li>
-          </ul>
+        <div className="absolute inset-y-0 right-0 w-72 opacity-20 blur-3xl">
+          <div className="h-full w-full rounded-full bg-white/20" />
         </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1">
-        {/* FLAT BANNER (No Gradients) */}
-        <div className="bg-[#FF4742] rounded-sm p-8 mb-6 text-white flex flex-col justify-center min-h-[200px] shadow-sm">
-          <p className="text-sm font-bold tracking-wider mb-2 uppercase opacity-90">Welcome to</p>
-          <h1 className="text-5xl font-extrabold mb-4">VietMart</h1>
-          <p className="text-lg opacity-90 mb-6">Millions of products. Best prices everyday.</p>
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-6">
           <div>
-            <button className="bg-white text-[#FF4742] font-bold px-6 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition-colors">
-              Shop Now →
-            </button>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
+              Welcome to
+            </p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-tight sm:text-5xl">
+              TMN Shop
+            </h1>
+            <p className="mt-4 max-w-2xl text-base text-white/90 sm:text-lg">
+              Millions of products, best prices every day.
+            </p>
           </div>
+          <a
+            href="/"
+            className="inline-flex w-fit items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#FF4742] shadow-md transition hover:bg-gray-100"
+          >
+            Shop Now →
+          </a>
         </div>
+      </section>
 
-        <div className="mb-4 text-sm text-gray-600 font-medium">
-          <span className="text-gray-900 font-bold">{total}</span> items found
-        </div>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <aside className="w-full lg:w-60 shrink-0">
+          <div className="sticky top-32 space-y-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.24em] text-gray-500">
+                Categories
+              </h2>
+              <ul className="mt-4 space-y-2">
+                <li>
+                  <a
+                    href={buildHref({ category: null })}
+                    className="block rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 transition hover:text-[#FF4742]"
+                  >
+                    All
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ category: 'Electronics' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Electronics
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ category: 'Fashion' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Fashion
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ category: 'Home_Living' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Home & Living
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ category: 'Cosmetics' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Cosmetics
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ category: 'Food' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Food
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-        {/* PRODUCT GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.map((product: any) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.24em] text-gray-500">
+                Price Range
+              </h2>
+              <ul className="mt-4 space-y-2">
+                <li>
+                  <a
+                    href={buildHref({ minPrice: null, maxPrice: null })}
+                    className="block rounded-2xl bg-[#FFEEF0] px-4 py-3 text-sm font-semibold text-[#FF4742] transition"
+                  >
+                    Any Price
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ minPrice: '0', maxPrice: '500000' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Under 500k
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ minPrice: '500000', maxPrice: '2000000' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    500k - 2 million
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ minPrice: '2000000', maxPrice: '10000000' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    2 - 10 million
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={buildHref({ minPrice: '10000000', maxPrice: '1000000000' })}
+                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                  >
+                    Over 10 million
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </aside>
+
+        <section className="flex-1">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-gray-500">
+              {total} products
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {products.map((product: any) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
