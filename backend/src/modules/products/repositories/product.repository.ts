@@ -22,12 +22,12 @@ export class ProductRepository {
     if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: Number(query.maxPrice) } });
 
     if (query.search && query.search.trim() !== '') {
-      const searchStr = query.search.trim().split(/\s+/).join(' | ');
+      const searchStr = query.search.trim();
       whereConditions.push({
         OR: [
-          { name: { search: searchStr } as any },
-          { description: { search: searchStr } as any }
-        ]
+          { name: { contains: searchStr, mode: 'insensitive' } },
+          { description: { contains: searchStr, mode: 'insensitive' } },
+        ],
       });
     }
 

@@ -6,7 +6,21 @@ import { QueryProductDto } from './dtos/query-product.dto';
 export class ProductsService {
   constructor(private readonly productRepository: ProductRepository) {}
 
+  private normalizeSearchKeyword(keyword: string): string {
+    return keyword
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .trim();
+  }
+
   async findPublicProducts(query: QueryProductDto) {
-    return this.productRepository.findPublicProducts(query);
+    const normalizedQuery = { ...query };
+
+    if (typeof query.search === 'string' && query.search.trim()) {
+      normalizedQuery.search = this.normalizeSearchKeyword(query.search);
+    }
+
+    return this.productRepository.findPublicProducts(normalizedQuery);
   }
 }
