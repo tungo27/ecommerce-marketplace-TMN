@@ -40,9 +40,7 @@ const preservedInputs = (searchParams: SearchParams = {}) =>
     .filter(([key]) => key !== 'search' && key !== 'page' && key !== undefined)
     .flatMap(([key, value]) => {
       if (typeof value === 'string') {
-        return (
-          <input key={key} type="hidden" name={key} value={value} />
-        );
+        return <input key={key} type="hidden" name={key} value={value} />;
       }
 
       if (Array.isArray(value)) {
@@ -68,6 +66,7 @@ export default function PublicLayout({
 }) {
   const currentSearch =
     typeof searchParams.search === 'string' ? searchParams.search : '';
+  const searchAction = buildHref(searchParams, { search: null });
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -84,7 +83,7 @@ export default function PublicLayout({
                 </Link>
 
                 <div className="flex-1">
-                  <form method="get" action="/" className="relative">
+                  <form method="get" action={searchAction} className="relative">
                     <input
                       name="search"
                       defaultValue={currentSearch}

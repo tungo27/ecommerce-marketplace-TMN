@@ -48,20 +48,30 @@ export default async function MarketplacePage({
   const products = data.products || [];
   const total = data.meta?.total || 0;
 
-  const buildHref = (overrides: Record<string, string | undefined>) => {
+  const currentCategory = getFirstParam(resolvedParams.category);
+  const currentMinPrice = getFirstParam(resolvedParams.minPrice);
+  const currentMaxPrice = getFirstParam(resolvedParams.maxPrice);
+
+  const buildHref = (overrides: Record<string, string | null | undefined> = {}) => {
     const urlParams = new URLSearchParams();
 
     Object.entries(resolvedParams || {}).forEach(([key, value]) => {
-      if (value === undefined) return;
+      if (value === undefined || value === null) return;
       if (Array.isArray(value)) {
-        value.forEach((item) => urlParams.append(key, item));
+        value.forEach((item) => {
+          if (typeof item === 'string') {
+            urlParams.append(key, item);
+          }
+        });
         return;
       }
-      urlParams.set(key, value);
+      if (typeof value === 'string') {
+        urlParams.set(key, value);
+      }
     });
 
     Object.entries(overrides).forEach(([key, value]) => {
-      if (value === undefined) urlParams.delete(key);
+      if (value === null || value === undefined) urlParams.delete(key);
       else urlParams.set(key, value);
     });
 
@@ -110,7 +120,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ category: null })}
-                    className="block rounded-2xl px-4 py-3 text-sm font-semibold text-gray-800 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory ? 'text-gray-600' : 'bg-[#FFF1EE] text-[#FF4742] font-bold'}`}
                   >
                     All
                   </a>
@@ -118,15 +128,15 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ category: 'Electronics' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory === 'Electronics' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600'}`}
                   >
                     Electronics
                   </a>
                 </li>
                 <li>
                   <a
-                    href={buildHref({ category: 'Fashion' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    href={buildHref({ category: 'Fashion' })} 
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory === 'Fashion' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600'}`}
                   >
                     Fashion
                   </a>
@@ -134,7 +144,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ category: 'Home_Living' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory === 'Home_Living' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600'}`}
                   >
                     Home & Living
                   </a>
@@ -142,7 +152,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ category: 'Cosmetics' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory === 'Cosmetics' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600'}`}
                   >
                     Cosmetics
                   </a>
@@ -150,7 +160,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ category: 'Food' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition hover:text-[#FF4742] ${currentCategory === 'Food' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600'}`}
                   >
                     Food
                   </a>
@@ -166,7 +176,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ minPrice: null, maxPrice: null })}
-                    className="block rounded-2xl bg-[#FFEEF0] px-4 py-3 text-sm font-semibold text-[#FF4742] transition"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${currentMinPrice === undefined && currentMaxPrice === undefined ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600 hover:text-[#FF4742]'}`}
                   >
                     Any Price
                   </a>
@@ -174,7 +184,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ minPrice: '0', maxPrice: '500000' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${currentMinPrice === '0' && currentMaxPrice === '500000' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600 hover:text-[#FF4742]'}`}
                   >
                     Under 500k
                   </a>
@@ -182,7 +192,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ minPrice: '500000', maxPrice: '2000000' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${currentMinPrice === '500000' && currentMaxPrice === '2000000' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600 hover:text-[#FF4742]'}`}
                   >
                     500k - 2 million
                   </a>
@@ -190,7 +200,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ minPrice: '2000000', maxPrice: '10000000' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${currentMinPrice === '2000000' && currentMaxPrice === '10000000' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600 hover:text-[#FF4742]'}`}
                   >
                     2 - 10 million
                   </a>
@@ -198,7 +208,7 @@ export default async function MarketplacePage({
                 <li>
                   <a
                     href={buildHref({ minPrice: '10000000', maxPrice: '1000000000' })}
-                    className="block rounded-2xl px-4 py-3 text-sm text-gray-600 transition hover:text-[#FF4742]"
+                    className={`block rounded-2xl px-4 py-3 text-sm transition ${currentMinPrice === '10000000' && currentMaxPrice === '1000000000' ? 'bg-[#FFF1EE] text-[#FF4742] font-bold' : 'text-gray-600 hover:text-[#FF4742]'}`}
                   >
                     Over 10 million
                   </a>

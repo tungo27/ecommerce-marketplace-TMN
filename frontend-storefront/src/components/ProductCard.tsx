@@ -3,7 +3,8 @@ interface ProductProps {
 }
 
 export default function ProductCard({ product }: ProductProps) {
-  const originalPrice = (Number(product.price) * 1.15).toFixed(0);
+  const price = Number(product.price) || 0;
+  const originalPrice = price * 1.15;
   const discountPercent = 15;
   const ratingCount = product.ratingCount ?? 24;
   const ratingStars = '★★★★★';
@@ -39,11 +40,11 @@ export default function ProductCard({ product }: ProductProps) {
 
           <div className="space-y-3">
             <div className="text-lg font-bold text-[#FF4742]">
-              {Number(product.price).toLocaleString('en-US')} ₫
+              {price.toLocaleString('vi-VN')} ₫
             </div>
             <div className="flex items-center justify-between text-xs text-gray-500">
               <span className="line-through">
-                {Number(originalPrice).toLocaleString('en-US')} ₫
+                {originalPrice.toLocaleString('vi-VN')} ₫
               </span>
               <span>{product.stock > 0 ? `Items: ${product.stock}` : 'Out of stock'}</span>
             </div>
