@@ -83,8 +83,9 @@ export class AuthService {
     };
   }
   async validateGoogleUser(profile: any, state?: string): Promise<{ accessToken: string }> {
-    const { id, emails, displayName } = profile;
+    const { id, emails, displayName, photos } = profile;
     const email = emails[0].value.toLowerCase();
+    const picture = photos && photos.length > 0 ? photos[0].value : undefined;
 
     let user = await this.prisma.user.findUnique({
       where: { email },
@@ -114,7 +115,7 @@ export class AuthService {
       });
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: user.role, picture };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };

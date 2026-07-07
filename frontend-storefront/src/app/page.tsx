@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import Header from '@/components/Header';
 
 type SearchParams = {
   [key: string]: string | string[] | undefined;
@@ -110,60 +111,42 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
-          <Link href="/" className="shrink-0 text-xl font-extrabold text-primary">
-            E-commerce MVP
-          </Link>
-
-          <form method="get" action={searchAction} className="relative flex-1">
-            <input
-              name="search"
-              defaultValue={currentSearch}
-              type="search"
-              placeholder="Search products"
-              className="h-10 w-full rounded-md border border-gray-300 bg-white px-4 pr-24 text-sm text-gray-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
-            />
-            <input type="hidden" name="category" value={currentCategory || ''} />
-            <input type="hidden" name="minPrice" value={currentMinPrice || ''} />
-            <input type="hidden" name="maxPrice" value={currentMaxPrice || ''} />
-            <button
-              type="submit"
-              className="absolute right-1 top-1/2 h-8 -translate-y-1/2 rounded-md bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover"
-            >
-              Search
-            </button>
-          </form>
-
-          <nav className="flex shrink-0 items-center gap-2 text-sm font-semibold">
-            <Link
-              href="/login"
-              className="rounded-md px-3 py-2 text-gray-700 transition hover:bg-gray-100 hover:text-primary"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-md bg-primary px-4 py-2 text-white transition hover:bg-primary-hover"
-            >
-              Sign Up
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header 
+        searchAction={searchAction}
+        currentSearch={currentSearch}
+        currentCategory={currentCategory}
+        currentMinPrice={currentMinPrice}
+        currentMaxPrice={currentMaxPrice}
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        <section className="rounded-md border border-gray-200 bg-white p-8 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Customer Storefront
-          </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-normal text-gray-950 sm:text-5xl">
-            Find products for every everyday workflow.
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
-            Browse public products, filter by category or price, and sign in only
-            when you are ready to manage your account.
-          </p>
+        <section className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#FF654C] via-[#FF4B39] to-[#FF2A24] px-6 py-12 text-white shadow-lg">
+          <div className="absolute inset-y-0 left-0 w-72 opacity-30 blur-3xl">
+            <div className="h-full w-full rounded-full bg-white/20" />
+          </div>
+          <div className="absolute inset-y-0 right-0 w-72 opacity-20 blur-3xl">
+            <div className="h-full w-full rounded-full bg-white/20" />
+          </div>
+          <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-6 md:flex-row">
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
+                Welcome to
+              </p>
+              <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-tight sm:text-5xl">
+                E-commerce MVP
+              </h1>
+              <p className="mt-4 max-w-2xl text-base text-white/90 sm:text-lg">
+                Find products for every everyday workflow. Browse public products, filter by category or price, and sign in only when you are ready to manage your account.
+              </p>
+            </div>
+            <div className="flex-1 w-full max-w-sm">
+              <img 
+                src="/hero-image.png" 
+                alt="Shopping Illustration" 
+                className="w-full h-auto object-cover rounded-lg drop-shadow-2xl hover:-translate-y-2 transition-transform duration-500"
+              />
+            </div>
+          </div>
         </section>
 
         <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -185,8 +168,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         })}
                         className={`rounded-md px-3 py-2 text-sm transition ${
                           isActive
-                            ? 'bg-primary-light font-bold text-primary'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                            ? 'bg-[#FFF1EE] font-bold text-primary'
+                            : 'text-[#475569] hover:bg-gray-50 hover:text-primary'
                         }`}
                       >
                         {category.label}
@@ -215,8 +198,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         })}
                         className={`rounded-md px-3 py-2 text-sm transition ${
                           isActive
-                            ? 'bg-primary-light font-bold text-primary'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                            ? 'bg-[#FFEEF0] border border-[#FFCBC7] font-bold text-primary'
+                            : 'text-[#475569] border border-transparent hover:bg-gray-50 hover:text-primary'
                         }`}
                       >
                         {range.label}
