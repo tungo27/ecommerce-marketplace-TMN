@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 const PRIVATE_ROUTES = ['/profile', '/orders', '/checkout', '/account'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the current path matches any private route
