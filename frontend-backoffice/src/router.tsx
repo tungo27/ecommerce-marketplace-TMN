@@ -5,6 +5,7 @@ import { SellerDashboard } from './pages/seller/SellerDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { RoleGuard } from './components/RoleGuard';
+import { OAuthCallback } from './pages/OAuthCallback';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
   {
     path: '/admin/login',
     element: <AdminLogin />,
+  },
+  {
+    path: '/oauth-callback',
+    element: <OAuthCallback />,
   },
 
   // Protected: SELLER or ADMIN can access seller dashboard

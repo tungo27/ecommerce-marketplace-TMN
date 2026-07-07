@@ -59,6 +59,10 @@ export class AuthService {
       throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
 
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google.');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
@@ -77,5 +81,42 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+  async validateGoogleUser(profile: any, state?: string): Promise<{ accessToken: string }> {
+    const { id, emails, displayName } = profile;
+    const email = emails[0].value.toLowerCase();
+
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (user) {
+      if (!user.googleId) {
+        user = await this.prisma.user.update({
+          where: { email },
+          data: { googleId: id },
+        });
+      }
+    } else {
+      let role = 'CUSTOMER';
+      if (state === 'seller') role = 'SELLER';
+      if (state === 'admin') role = 'ADMIN';
+
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          name: displayName,
+          googleId: id,
+          role: role as any,
+          isActive: true,
+          // passwordHash is now optional, so we can omit it for OAuth users
+        },
+      });
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const accessToken = await this.jwtService.signAsync(payload);
+
+    return { accessToken };
   }
 }

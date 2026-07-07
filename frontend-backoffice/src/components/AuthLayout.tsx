@@ -18,7 +18,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
     <Box 
       sx={{ 
         backgroundColor, 
-        backgroundImage: 'url("https://res.cloudinary.com/gnlx1ljp/image/upload/v1783389563/n%E1%BB%81n_x%C3%A1m_dtvees.png")',
+        backgroundImage: 'url("https://res.cloudinary.com/gnlx1ljp/image/upload/v1783390941/n%E1%BB%81n_x%C3%A1m_scjfgt.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
