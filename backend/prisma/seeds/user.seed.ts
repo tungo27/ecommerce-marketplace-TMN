@@ -7,6 +7,7 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
   const passwordHash = await bcrypt.hash('Password123@', 10);
   const usersData = [
     {
+      id: 'U01',
       name: 'Nguyen Van Admin',
       email: 'admin@marketplace.com',
       passwordHash,
@@ -14,6 +15,7 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
       isActive: true,
     },
     {
+      id: 'U02',
       name: 'Tran Thi Seller',
       email: 'seller@marketplace.com',
       passwordHash,
@@ -21,6 +23,7 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
       isActive: true,
     },
     {
+      id: 'U03',
       name: 'Le Van Customer',
       email: 'customer@marketplace.com',
       passwordHash,

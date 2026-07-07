@@ -8,20 +8,19 @@ export class ProductRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findPublicProducts(query: QueryProductDto) {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 12;
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 12);
     const skip = (page - 1) * limit;
 
     const whereConditions: Prisma.ProductWhereInput[] = [
       { status: ProductStatus.Published },
-      { stock: { gt: 0 } }
+      { stock: { gt: 0 } },
     ];
 
-    if (query.category) whereConditions.push({ category: query.category });
-    if (query.minPrice !== undefined) whereConditions.push({ price: { gte: query.minPrice } });
-    if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: query.maxPrice } });
-    
-    // Xử lý Full-Text Search an toàn với TypeScript
+    if (query.category) whereConditions.push({ category: query.category as any });
+    if (query.minPrice !== undefined) whereConditions.push({ price: { gte: Number(query.minPrice) } });
+    if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: Number(query.maxPrice) } });
+
     if (query.search && query.search.trim() !== '') {
       const searchStr = query.search.trim().split(/\s+/).join(' | ');
       whereConditions.push({
