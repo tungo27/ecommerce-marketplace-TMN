@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface AuthFormProps {
   title: string;
@@ -10,14 +11,21 @@ interface AuthFormProps {
 
 export const AuthForm: React.FC<AuthFormProps> = ({
   title,
-  
   onSubmit,
   isLoading = false,
   error,
   children,
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div 
+      className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: 'url("https://res.cloudinary.com/gnlx1ljp/image/upload/v1783390934/ChatGPT_Image_Jul_7_2026_08_55_23_AM_dvlhkm.png")' }}
+    >
+      <Link href="/" className="mb-8 hover:opacity-90 transition-opacity">
+        <h1 className="text-4xl font-extrabold text-primary tracking-tight drop-shadow-md">
+          E-commerce MVP
+        </h1>
+      </Link>
       <div className="w-full max-w-md">
         <div className="bg-white rounded-md shadow-sm border border-gray-200 p-8">
           <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8 tracking-tight">
