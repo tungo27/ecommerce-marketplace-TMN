@@ -217,6 +217,7 @@ export const EditProduct: React.FC = () => {
               <Box>
                 <Stack spacing={2.5}>
                   <TextField
+                    required
                     label="Product Name"
                     fullWidth
                     value={name}
@@ -225,6 +226,7 @@ export const EditProduct: React.FC = () => {
                   />
 
                   <TextField
+                    required
                     label="Description"
                     fullWidth
                     multiline
@@ -237,6 +239,7 @@ export const EditProduct: React.FC = () => {
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
                     <Box>
                       <TextField
+                        required
                         label="Price"
                         fullWidth
                         type="number"
@@ -247,6 +250,7 @@ export const EditProduct: React.FC = () => {
                     </Box>
                     <Box>
                       <TextField
+                        required
                         label="Stock"
                         fullWidth
                         type="number"
@@ -258,7 +262,7 @@ export const EditProduct: React.FC = () => {
                   </Box>
 
                   <FormControl fullWidth size="small">
-                    <InputLabel id="edit-category-label">Category</InputLabel>
+                    <InputLabel id="edit-category-label" required>Category</InputLabel>
                     <Select
                       labelId="edit-category-label"
                       value={category}
@@ -279,7 +283,7 @@ export const EditProduct: React.FC = () => {
                 <Card variant="outlined" sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 700 }}>
-                      Product Images
+                      Product Images <span style={{ color: '#d32f2f' }}>*</span>
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       The first image is always the main thumbnail. You can remove any image and add more until the total reaches 5.

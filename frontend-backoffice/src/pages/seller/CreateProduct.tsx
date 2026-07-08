@@ -222,6 +222,7 @@ export const CreateProduct: React.FC = () => {
               <Box>
                 <Stack spacing={2.5}>
                   <TextField
+                    required
                     label="Product Name"
                     fullWidth
                     value={name}
@@ -234,6 +235,7 @@ export const CreateProduct: React.FC = () => {
                   />
 
                   <TextField
+                    required
                     label="Description"
                     fullWidth
                     multiline
@@ -250,6 +252,7 @@ export const CreateProduct: React.FC = () => {
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
                     <Box>
                       <TextField
+                        required
                         label="Price"
                         fullWidth
                         type="number"
@@ -264,6 +267,7 @@ export const CreateProduct: React.FC = () => {
                     </Box>
                     <Box>
                       <TextField
+                        required
                         label="Stock"
                         fullWidth
                         type="number"
@@ -279,7 +283,7 @@ export const CreateProduct: React.FC = () => {
                   </Box>
 
                   <FormControl fullWidth error={Boolean(errors.category)}>
-                    <InputLabel id="category-select-label">Category</InputLabel>
+                    <InputLabel id="category-select-label" required>Category</InputLabel>
                     <Select
                       labelId="category-select-label"
                       value={category}
@@ -304,7 +308,7 @@ export const CreateProduct: React.FC = () => {
                 <Card variant="outlined" sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 700 }}>
-                      Product Images
+                      Product Images <span style={{ color: '#d32f2f' }}>*</span>
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       Upload up to 5 images. Supported formats: JPG, PNG, WEBP. Max size: 5MB each.
