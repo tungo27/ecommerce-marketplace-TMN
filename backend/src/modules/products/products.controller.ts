@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/guards/roles.decorator';
 import { CreateProductDto } from './dtos/create-product.dto';
+import { UpdateProductDto } from './dtos/update-product.dto';
 import { ProductsService } from './products.service';
 
 interface MulterFile {
@@ -67,6 +68,39 @@ export class ProductsController {
       throw new NotFoundException('Product not found');
     }
     return product;
+  }
+
+  @Put('seller/products/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
+  async updateSellerProduct(
+    @Req() req: { user: { id: string } },
+    @Param('id') id: string,
+    @Body() body: UpdateProductDto,
+  ) {
+    const dto = plainToInstance(UpdateProductDto, body, { enableImplicitConversion: true });
+    const validationErrors = await validate(dto, { skipMissingProperties: true });
+
+    if (validationErrors.length > 0) {
+      const constraints = validationErrors.flatMap((error) => Object.values(error.constraints ?? {}));
+      throw new BadRequestException(constraints);
+    }
+
+    return this.productsService.updateSellerProduct(req.user.id, id, dto);
+  }
+
+  @Patch('seller/products/:id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SELLER')
+  async patchSellerProductStatus(
+    @Req() req: { user: { id: string } },
+    @Param('id') id: string,
+    @Body('status') status: string,
+  ) {
+    if (!['Draft', 'Hidden'].includes(status)) {
+      throw new BadRequestException('Status must be Draft or Hidden');
+    }
+    return this.productsService.patchSellerProductStatus(req.user.id, id, status as 'Draft' | 'Hidden');
   }
 
   @Post('seller/products')
