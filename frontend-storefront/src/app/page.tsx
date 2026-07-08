@@ -82,8 +82,12 @@ async function fetchProducts(resolvedParams: SearchParams) {
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
 
-    const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
     const response = await fetch(`${apiBaseUrl}/products?${params.toString()}`, {
       cache: 'no-store',
     });
