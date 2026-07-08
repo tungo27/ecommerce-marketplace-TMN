@@ -55,8 +55,8 @@ function OAuthCallbackContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Đang xác thực...</h2>
-        <p className="text-gray-500">Vui lòng chờ trong giây lát.</p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Authenticating...</h2>
+        <p className="text-gray-500">Please wait a moment.</p>
         <div className="mt-4 animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
       </div>
     </div>

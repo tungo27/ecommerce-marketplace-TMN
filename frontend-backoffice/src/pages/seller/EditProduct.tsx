@@ -310,7 +310,7 @@ export const EditProduct: React.FC = () => {
                               <img src={item.url} alt={`Product image ${index + 1}`} style={{ width: '100%', height: 110, objectFit: 'cover' }} />
                               {index === 0 ? (
                                 <Chip
-                                  label="Ảnh bìa"
+                                  label="Cover"
                                   size="small"
                                   sx={{ position: 'absolute', top: 6, left: 6, bgcolor: '#FF4742', color: 'white', fontWeight: 700 }}
                                 />

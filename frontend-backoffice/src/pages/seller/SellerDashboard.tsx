@@ -290,7 +290,7 @@ export const SellerDashboard: React.FC = () => {
                       </Box>
                       {product.isRejected && (
                         <Typography variant="caption" sx={{ color: '#DC2626', display: 'block', mt: 1, fontWeight: 500 }}>
-                          Bị từ chối bởi Admin
+                          Rejected by Admin
                         </Typography>
                       )}
                     </TableCell>

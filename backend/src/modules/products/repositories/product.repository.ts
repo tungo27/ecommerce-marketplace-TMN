@@ -36,7 +36,7 @@ export class ProductRepository {
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        include: { seller: { select: { name: true } } }, // Lấy tên Shop (TechZone)
+        include: { seller: { select: { name: true } } }, // Fetch Shop name (TechZone)
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },

@@ -20,7 +20,7 @@ export const ProductModeration: React.FC = () => {
       setProducts(res.data.data);
     } catch (err: any) {
       setError('Failed to fetch pending products');
-      setToast({ open: true, message: err.response?.data?.message || 'Lỗi khi tải danh sách sản phẩm', severity: 'error' });
+      setToast({ open: true, message: err.response?.data?.message || 'Failed to load product list', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -34,10 +34,10 @@ export const ProductModeration: React.FC = () => {
     try {
       setActionLoading(id);
       await adminProductApi.reviewProduct(id, action);
-      setToast({ open: true, message: `Sản phẩm đã được ${action === 'APPROVE' ? 'duyệt' : 'từ chối'}`, severity: 'success' });
+      setToast({ open: true, message: `Product has been ${action === 'APPROVE' ? 'approved' : 'rejected'}`, severity: 'success' });
       fetchProducts();
     } catch (err: any) {
-      setToast({ open: true, message: err.response?.data?.message || 'Có lỗi xảy ra', severity: 'error' });
+      setToast({ open: true, message: err.response?.data?.message || 'An error occurred', severity: 'error' });
     } finally {
       setActionLoading(null);
     }
@@ -49,10 +49,10 @@ export const ProductModeration: React.FC = () => {
     <Box>
       <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, borderRadius: 3, border: '1px solid #E5E7EB', bgcolor: 'white', mb: 3 }}>
         <Typography variant="h5" sx={{ fontWeight: 800, color: '#111827' }}>
-          Danh sách chờ duyệt
+          Moderation Queue
         </Typography>
         <Typography variant="body2" sx={{ color: '#6B7280', mt: 1 }}>
-          Xem xét và quyết định trạng thái hiển thị của các sản phẩm do người bán đăng tải.
+          Review and determine the visibility status of products uploaded by sellers.
         </Typography>
       </Paper>
 
@@ -67,18 +67,18 @@ export const ProductModeration: React.FC = () => {
           <Table sx={{ minWidth: 650 }}>
             <TableHead sx={{ bgcolor: '#F8FAFC' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Hình ảnh</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Tên Sản phẩm</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Giá</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Người Bán</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }} align="center">Hành động</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Image</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Product Name</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Price</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }}>Seller</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: '#6B7280' }} align="center">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {products.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ py: 8, color: '#6B7280' }}>
-                    Hiện tại không có sản phẩm nào chờ duyệt.
+                    There are no products pending review at the moment.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -108,7 +108,7 @@ export const ProductModeration: React.FC = () => {
                             borderRadius: 2
                           }}
                         >
-                          Duyệt
+                          Approve
                         </Button>
                         <Button 
                           variant="outlined" 
@@ -124,7 +124,7 @@ export const ProductModeration: React.FC = () => {
                             borderRadius: 2
                           }}
                         >
-                          Từ chối
+                          Reject
                         </Button>
                       </Box>
                     </TableCell>

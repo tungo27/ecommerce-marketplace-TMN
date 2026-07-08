@@ -61,7 +61,7 @@ export const AdminDashboard: React.FC = () => {
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                 <DashboardIcon />
               </ListItemIcon>
-              <ListItemText primary="Tổng quan" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
+              <ListItemText primary="Overview" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -77,7 +77,7 @@ export const AdminDashboard: React.FC = () => {
               <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
                 <FactCheckIcon />
               </ListItemIcon>
-              <ListItemText primary="Duyệt sản phẩm" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
+              <ListItemText primary="Product Moderation" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -96,7 +96,7 @@ export const AdminDashboard: React.FC = () => {
               fontWeight: 500,
             }}
           >
-            Đăng xuất
+            Logout
           </Button>
         </Box>
       </Drawer>
@@ -107,11 +107,11 @@ export const AdminDashboard: React.FC = () => {
         <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #E5E7EB', color: '#111827' }}>
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {activeTab === 'overview' ? 'Dashboard Tổng quan' : 'Quản lý duyệt sản phẩm'}
+              {activeTab === 'overview' ? 'Dashboard Overview' : 'Product Moderation Management'}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Xin chào, {user?.name || 'Admin'}
+                Hello, {user?.name || 'Admin'}
               </Typography>
               <Avatar sx={{ bgcolor: '#2563EB', width: 36, height: 36, fontWeight: 600 }}>
                 {getInitials(user?.name)}
@@ -128,10 +128,10 @@ export const AdminDashboard: React.FC = () => {
                 <DashboardIcon sx={{ fontSize: 40 }} />
               </Avatar>
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                Hệ thống Quản trị MVP
+                MVP Admin System
               </Typography>
               <Typography variant="body1" sx={{ color: '#6B7280', mb: 4, maxWidth: 500, mx: 'auto' }}>
-                Chào mừng bạn đến với trang quản trị. Vui lòng chọn tính năng bên thanh điều hướng để bắt đầu công việc.
+                Welcome to the admin panel. Please select a feature from the navigation bar to get started.
               </Typography>
               <Button 
                 variant="contained" 
@@ -139,7 +139,7 @@ export const AdminDashboard: React.FC = () => {
                 onClick={() => setActiveTab('moderation')}
                 sx={{ bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' }, textTransform: 'none', fontWeight: 600, px: 4, py: 1.5, borderRadius: 2 }}
               >
-                Đi tới Duyệt sản phẩm
+                Go to Product Moderation
               </Button>
             </Paper>
           )}
