@@ -18,6 +18,12 @@ export const AdminLogin: React.FC = () => {
     e.preventDefault();
     const success = await login(email, password);
     if (success) {
+      const user = useAuthStore.getState().user;
+      if (user && user.role !== 'ADMIN') {
+        useAuthStore.getState().logout();
+        useAuthStore.getState().setError('Your account does not have permission to access the admin portal.');
+        return;
+      }
       navigate('/admin/dashboard');
     }
   };

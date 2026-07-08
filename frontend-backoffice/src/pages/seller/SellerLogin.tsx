@@ -18,6 +18,12 @@ export const SellerLogin: React.FC = () => {
     e.preventDefault();
     const success = await login(email, password);
     if (success) {
+      const user = useAuthStore.getState().user;
+      if (user && user.role === 'CUSTOMER') {
+        useAuthStore.getState().logout();
+        useAuthStore.getState().setError('Your account does not have permission to access the seller portal.');
+        return;
+      }
       navigate('/seller/dashboard');
     }
   };

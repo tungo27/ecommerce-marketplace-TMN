@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload) {
     if (!payload.sub || !payload.role) {
-      throw new UnauthorizedException('Token không hợp lệ');
+      throw new UnauthorizedException('Invalid token');
     }
 
     // This returned object becomes request.user
