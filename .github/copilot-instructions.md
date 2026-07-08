@@ -44,3 +44,32 @@ Dá»± Ã¡n Ã¡p dá»¥ng mÃ´ hÃ¬nh Modular Monolith, chia lÃ m 3 phÃ¢n há»‡ Ä‘á»™c lá
 - **Testing & Cleanup**: Thá»±c hiá»‡n Unit Test Ä‘á»ƒ Ä‘áº£m báº£o cháº¥t lÆ°á»£ng code. Tuy nhiÃªn, sau khi test xong vÃ  pass thÃ nh cÃ´ng, **Báº®T BUá»˜C pháº£i xÃ³a toÃ n bá»™ cÃ¡c file dÃ¹ng Ä‘á»ƒ test** (nhÆ° cÃ¡c file `.spec.ts` trong backend, hoáº·c cÃ¡c trang test táº¡m trÃªn frontend) Ä‘á»ƒ trÃ¡nh lÃ m rÃ¡c source code.
 # 6. Xá»­ lÃ½ File & HÃ¬nh áº£nh
 - ToÃ n bá»™ hÃ¬nh áº£nh sáº£n pháº©m hoáº·c avatar pháº£i Ä‘Æ°á»£c upload lÃªn Cloudinary thÃ´ng qua `UploadModule` á»Ÿ backend. Database chá»‰ lÆ°u láº¡i chuá»—i URL tráº£ vá» tá»« Cloudinary, tuyá»‡t Ä‘á»‘i khÃ´ng lÆ°u file váº­t lÃ½ trong source code.
+# 7. HU?NG D?N CHI TI?T C?U TRÚC THU M?C TOÀN H? TH?NG
+## 7.1. T?ng quan Root (Monorepo)
+- `backend/`: Phân h? API Server (NestJS)
+- `frontend-storefront/`: Phân h? C?a hàng công khai (Next.js App Router)
+- `frontend-backoffice/`: Phân h? Qu?n tr? Seller & Admin (React + Vite)
+- `docker-compose.yml`: Ği?u ph?i kh?i ch?y toàn b? Tech Stack (App + DB + Cache)
+- `package.json`: C?u hình Node.js Workspaces và l?nh Concurrently
+
+## 7.2. Phân h? Backend (NestJS + Prisma)
+- `prisma/schema.prisma`: Ğ?nh nghia Data Model và Enum Roles (ADMIN, SELLER, CUSTOMER).
+- `src/common/decorators/`: Ch?a `@Roles()` và `@GetUser()`.
+- `src/common/guards/`: Ch?a `jwt-auth.guard.ts` và `roles.guard.ts` (Ch?n 403 HTTP).
+- `src/common/filters/`: `http-exception.filter.ts` (B?t l?i t?p trung).
+- `src/modules/`: Ki?n trúc Modular Monolith (auth, products, orders, payment, reviews). 
+  + `orders/` ch?a logic Optimistic Locking và Waitlist.
+  + `products/` qu?n lı 4 tr?ng thái vòng d?i và Full-Text Search.
+
+## 7.3. Phân h? Frontend Storefront (Next.js)
+- `src/app/(auth)/`: Route Ğang nh?p/Ğang kı (Không dùng chung layout).
+- `src/app/(public)/`: Route công khai (Marketplace, Chi ti?t SP dùng SSR).
+- `src/app/(protected)/`: Route yêu c?u CUSTOMER (`/cart`, `/checkout`, `/orders`).
+- `src/store/`: Zustand qu?n lı state (`useCartStore.ts` d?ng b? LocalStorage <-> Redis).
+- `src/proxy.ts`: Next.js Edge Middleware ch?n truy c?p trái phép b?ng JWT Cookie.
+
+## 7.4. Phân h? Frontend Backoffice (React + Vite)
+- `src/layouts/DashboardLayout.tsx`: Khung chu?n UI (Sidebar, Header).
+- `src/pages/seller/`: Các trang d?c quy?n SELLER (`Dashboard`, `ProductsPage`, `OrdersPage`).
+- `src/pages/admin/`: Các trang d?c quy?n ADMIN (`ProductModeration`, `UserManagement`).
+- `src/services/api.ts`: C?u hình Axios Instance v?i Request/Response Interceptor (dính kèm Bearer Token và x? lı 401).

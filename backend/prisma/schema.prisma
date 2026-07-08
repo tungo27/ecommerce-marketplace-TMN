@@ -54,6 +54,7 @@ model User {
   orders       Order[]
   reviews      Review[]
   waitlists    Waitlist[]
+  AuditLog     AuditLog[]
 }
 
 model Product {
@@ -74,6 +75,7 @@ model Product {
   orderItems    OrderItem[]
   reviews       Review[]
   waitlists     Waitlist[]
+  AuditLog      AuditLog[]
 }
 
 model Order {
@@ -104,7 +106,7 @@ model Transaction {
   order       Order    @relation(fields: [orderId], references: [id])
   accountId   String
   amount      Decimal  @db.Decimal(10, 2)
-  type        String   // "DEBIT" or "CREDIT"
+  type        String // "DEBIT" or "CREDIT"
   description String
   createdAt   DateTime @default(now())
 }
@@ -129,3 +131,12 @@ model Waitlist {
   createdAt DateTime @default(now())
 }
 
+model AuditLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  action    String
+  createdAt DateTime @default(now())
+}

@@ -62,3 +62,33 @@ export const authApi = {
   login: (email: string, password: string) => 
     apiClient.post<LoginResponse>('/auth/login', { email, password }),
 };
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  images: string[];
+  status: string;
+  seller: {
+    name: string;
+    email: string;
+  };
+}
+
+export interface PaginatedProducts {
+  data: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const adminProductApi = {
+  getPendingProducts: (page: number = 1, limit: number = 10) => 
+    apiClient.get<PaginatedProducts>('/admin/products/pending', { params: { page, limit } }),
+  reviewProduct: (id: string, action: 'APPROVE' | 'REJECT') =>
+    apiClient.patch(`/admin/products/${id}/review`, { action }),
+};

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Alert, Button } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { AuthLayout } from '../../components/AuthLayout';
 import { AuthForm } from '../../components/AuthForm';
 import { InputField } from '../../components/InputField';

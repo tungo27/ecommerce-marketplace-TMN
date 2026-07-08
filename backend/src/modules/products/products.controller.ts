@@ -104,4 +104,33 @@ export class ProductsController {
 
     return this.productsService.createProduct(req.user.id, dto, files);
   }
+
+  @Get('admin/products/pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getPendingProducts(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.productsService.getPendingProducts(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+    );
+  }
+
+  @Patch('admin/products/:id/review')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async reviewProduct(
+    @Req() req: { user: { id: string } },
+    @Param('id') id: string,
+    @Body('action') action: 'APPROVE' | 'REJECT',
+  ) {
+    if (action !== 'APPROVE' && action !== 'REJECT') {
+      throw new BadRequestException('Action must be APPROVE or REJECT');
+    }
+    return this.productsService.reviewProduct(req.user.id, id, action);
+  }
 }

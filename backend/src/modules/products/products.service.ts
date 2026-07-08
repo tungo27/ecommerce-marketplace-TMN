@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UploadService } from '../../upload/upload.service';
@@ -92,5 +92,50 @@ export class ProductsService {
         version: 1,
       },
     });
+  }
+
+  async getPendingProducts(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prismaService.product.findMany({
+        where: { status: ProductStatus.Pending },
+        include: { seller: { select: { name: true, email: true } } },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prismaService.product.count({
+        where: { status: ProductStatus.Pending },
+      }),
+    ]);
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async reviewProduct(adminId: string, productId: string, action: 'APPROVE' | 'REJECT') {
+    const product = await this.prismaService.product.findUnique({
+      where: { id: productId },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+    if (product.status !== ProductStatus.Pending) {
+      throw new BadRequestException('Product is not in Pending status');
+    }
+
+    const newStatus = action === 'APPROVE' ? ProductStatus.Published : ProductStatus.Hidden;
+
+    await this.prismaService.$transaction([
+      this.prismaService.product.update({
+        where: { id: productId },
+        data: { status: newStatus },
+      }),
+      this.prismaService.auditLog.create({
+        data: {
+          adminId,
+          productId,
+          action,
+        },
+      }),
+    ]);
+
+    return { message: 'Product status updated successfully' };
   }
 }
