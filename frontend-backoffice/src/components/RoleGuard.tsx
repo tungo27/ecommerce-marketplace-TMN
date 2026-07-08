@@ -68,15 +68,15 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
           variant="h6"
           sx={{ fontWeight: 600, color: '#374151' }}
         >
-          Bạn không có quyền truy cập
+          Access Denied
         </Typography>
 
         <Typography
           variant="body2"
           sx={{ color: '#6B7280', textAlign: 'center', maxWidth: 360 }}
         >
-          Tài khoản của bạn (vai trò: <strong>{user.role}</strong>) không có quyền
-          truy cập vào trang này. Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là lỗi.
+          Your account (role: <strong>{user.role}</strong>) does not have permission to
+          access this page. Please contact an administrator if you believe this is an error.
         </Typography>
 
         <Button
@@ -91,7 +91,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
             '&:hover': { borderColor: '#FF4742', color: '#FF4742', backgroundColor: 'transparent' },
           }}
         >
-          Quay lại trang trước
+          Go back
         </Button>
       </Box>
     );

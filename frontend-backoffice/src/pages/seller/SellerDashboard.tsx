@@ -17,7 +17,7 @@ export const SellerDashboard: React.FC = () => {
     <Box sx={{ p: 4, bgcolor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Paper sx={{ p: 6, width: '100%', maxWidth: 600, textAlign: 'center', borderRadius: 2 }}>
         <Typography variant="h4" sx={{ color: 'primary.main', mb: 2 }}>
-          ShopNexus Seller
+          E-commerce MVP Seller
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary', mb: 4 }}>
           Manage your products and orders with ease.

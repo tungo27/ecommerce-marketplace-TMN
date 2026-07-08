@@ -19,7 +19,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   return (
     <div 
       className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: 'url("https://res.cloudinary.com/gnlx1ljp/image/upload/v1783390934/ChatGPT_Image_Jul_7_2026_08_55_23_AM_dvlhkm.png")' }}
+      style={{ backgroundImage: 'url("https://res.cloudinary.com/gnlx1ljp/image/upload/v1783494956/ChatGPT_Image_Jul_7_2026_08_55_23_AM_bw4tte.png")' }}
     >
       <Link href="/" className="mb-8 hover:opacity-90 transition-opacity">
         <h1 className="text-4xl font-extrabold text-primary tracking-tight drop-shadow-md">

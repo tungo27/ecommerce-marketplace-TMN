@@ -32,6 +32,22 @@ export const OAuthCallback: React.FC = () => {
           name: payload.email.split('@')[0]
         };
         
+        const target = searchParams.get('target');
+        
+        if (target === 'admin' && payload.role !== 'ADMIN') {
+          localStorage.removeItem('accessToken');
+          useAuthStore.getState().setError('Your account does not have permission to access the admin portal.');
+          navigate('/admin/login');
+          return;
+        }
+        
+        if (target === 'seller' && payload.role === 'CUSTOMER') {
+          localStorage.removeItem('accessToken');
+          useAuthStore.getState().setError('Your account does not have permission to access the seller portal.');
+          navigate('/seller/login');
+          return;
+        }
+
         localStorage.setItem('user', JSON.stringify(user));
         setUser(user);
         
@@ -41,9 +57,7 @@ export const OAuthCallback: React.FC = () => {
         } else if (payload.role === 'SELLER') {
           navigate('/seller/dashboard');
         } else {
-          // If customer tries to login to backoffice, they don't have access. 
-          // Let the RoleGuard handle it or redirect to seller dashboard which will deny access.
-          navigate('/seller/dashboard');
+          navigate('/seller/login');
         }
       } catch (e) {
         console.error('Failed to parse JWT token', e);

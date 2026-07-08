@@ -44,6 +44,6 @@ export class AuthController {
       redirectUrl = process.env.BACKOFFICE_URL || 'http://localhost:3001';
     }
     
-    return res.redirect(`${redirectUrl}/oauth-callback?token=${token}`);
+    return res.redirect(`${redirectUrl}/oauth-callback?token=${token}&target=${state}`);
   }
 }
