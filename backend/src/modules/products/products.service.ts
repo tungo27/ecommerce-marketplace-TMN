@@ -3,6 +3,7 @@ import { ProductStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UploadService } from '../../upload/upload.service';
 import { CreateProductDto } from './dtos/create-product.dto';
+import { UpdateProductDto } from './dtos/update-product.dto';
 import { QueryProductDto } from './dtos/query-product.dto';
 import { ProductRepository } from './repositories/product.repository';
 
@@ -51,6 +52,51 @@ export class ProductsService {
         id: productId,
         sellerId,
       },
+    });
+  }
+
+async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProductDto) {
+    const product = await this.prismaService.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (product.sellerId !== sellerId) {
+      throw new ForbiddenException('You do not have permission to update this product');
+    }
+
+    const currentPrice = Number(product.price);
+    const coreFieldsChanged =
+      (dto.name !== undefined && dto.name.trim() !== product.name) ||
+      (dto.price !== undefined && dto.price !== currentPrice) ||
+      (dto.category !== undefined && dto.category !== product.category);
+
+    const updateData: any = {
+      description: dto.description !== undefined ? dto.description.trim() : product.description,
+      stock: dto.stock !== undefined ? dto.stock : product.stock,
+    };
+
+    if (dto.name !== undefined) {
+      updateData.name = dto.name.trim();
+    }
+    if (dto.price !== undefined) {
+      updateData.price = dto.price;
+    }
+    if (dto.category !== undefined) {
+      updateData.category = dto.category;
+    }
+
+    if (coreFieldsChanged) {
+      updateData.status = ProductStatus.Pending;
+      updateData.version = product.version + 1;
+    }
+
+    return this.prismaService.product.update({
+      where: { id: productId },
+      data: updateData,
     });
   }
 
