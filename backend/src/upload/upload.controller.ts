@@ -8,9 +8,11 @@ import {
   FileTypeValidator,
   HttpCode,
   HttpStatus,
+  Body,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadService } from './upload.service';
+import { UploadService, CloudinarySubFolder } from './upload.service';
 import { ApiTags, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Upload')
@@ -31,6 +33,10 @@ export class UploadController {
           format: 'binary',
           description: 'Image file to upload',
         },
+        folder: {
+          type: 'string',
+          description: 'Target sub-folder for the upload. Allowed values: "Banner", "Seller Upload", "Default Product". Defaults to "Seller Upload".',
+        },
       },
     },
   })
@@ -47,8 +53,13 @@ export class UploadController {
       }),
     )
     file: Express.Multer.File,
+    @Body('folder') subFolder?: string,
   ) {
-    const url = await this.uploadService.uploadImage(file);
+    if (subFolder && !['Banner', 'Seller Upload', 'Default Product'].includes(subFolder)) {
+      throw new BadRequestException('Invalid folder. Allowed values: "Banner", "Seller Upload", "Default Product"');
+    }
+
+    const url = await this.uploadService.uploadImage(file, subFolder as CloudinarySubFolder);
     return {
       message: 'File uploaded successfully',
       secure_url: url,
