@@ -6,6 +6,8 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { RoleGuard } from './components/RoleGuard';
 import { OAuthCallback } from './pages/OAuthCallback';
+import { CreateProduct } from './pages/seller/CreateProduct';
+import { ProductList } from './pages/seller/ProductList';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -33,6 +35,14 @@ export const router = createBrowserRouter([
       {
         path: '/seller/dashboard',
         element: <SellerDashboard />,
+      },
+      {
+        path: '/seller/products/new',
+        element: <CreateProduct />,
+      },
+      {
+        path: '/seller/products',
+        element: <ProductList />,
       },
     ],
   },
