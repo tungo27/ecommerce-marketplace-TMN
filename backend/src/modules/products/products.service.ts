@@ -40,9 +40,24 @@ export class ProductsService {
       whereConditions.status = status;
     }
 
-    return this.prismaService.product.findMany({
+    const products = await this.prismaService.product.findMany({
       where: whereConditions,
       orderBy: { updatedAt: 'desc' },
+      include: {
+        AuditLog: {
+          where: { action: 'REJECT' },
+          take: 1,
+        },
+      },
+    });
+
+    return products.map(product => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { AuditLog, ...rest } = product;
+      return {
+        ...rest,
+        isRejected: product.status === 'Hidden' && AuditLog.length > 0,
+      };
     });
   }
 
@@ -58,6 +73,12 @@ export class ProductsService {
 async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProductDto) {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
+      include: {
+        AuditLog: {
+          where: { action: 'REJECT' },
+          take: 1,
+        },
+      },
     });
 
     if (!product) {
@@ -66,6 +87,10 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
 
     if (product.sellerId !== sellerId) {
       throw new ForbiddenException('You do not have permission to update this product');
+    }
+
+    if (product.status === 'Hidden' && product.AuditLog.length > 0) {
+      throw new ForbiddenException('This product has been rejected by an admin and cannot be edited');
     }
 
     const currentPrice = Number(product.price);
@@ -103,6 +128,12 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
   async patchSellerProductStatus(sellerId: string, productId: string, status: 'Draft' | 'Hidden') {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
+      include: {
+        AuditLog: {
+          where: { action: 'REJECT' },
+          take: 1,
+        },
+      },
     });
 
     if (!product) {
@@ -111,6 +142,10 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
 
     if (product.sellerId !== sellerId) {
       throw new ForbiddenException('You do not have permission to change this product status');
+    }
+
+    if (product.status === 'Hidden' && product.AuditLog.length > 0) {
+      throw new ForbiddenException('This product has been rejected by an admin and cannot be modified');
     }
 
     return this.prismaService.product.update({

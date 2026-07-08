@@ -26,6 +26,7 @@ interface SellerProduct {
   stock: number;
   status: string;
   images: string[];
+  isRejected?: boolean;
 }
 
 const badgeColors: Record<string, { background: string; color: string }> = {
@@ -272,6 +273,7 @@ export const SellerDashboard: React.FC = () => {
                       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
                         <Button
                           variant="outlined"
+                          disabled={product.isRejected}
                           sx={{ borderColor: '#E5E7EB', color: '#111827', textTransform: 'none' }}
                           onClick={() => navigate(`/seller/products/${product.id}/edit`)}
                         >
@@ -279,12 +281,18 @@ export const SellerDashboard: React.FC = () => {
                         </Button>
                         <Button
                           variant="outlined"
+                          disabled={product.isRejected}
                           sx={{ borderColor: '#E5E7EB', color: '#111827', textTransform: 'none' }}
                           onClick={() => handleStatusToggle(product)}
                         >
                           {product.status === 'Hidden' ? 'Unhide' : 'Hide'}
                         </Button>
                       </Box>
+                      {product.isRejected && (
+                        <Typography variant="caption" sx={{ color: '#DC2626', display: 'block', mt: 1, fontWeight: 500 }}>
+                          Bị từ chối bởi Admin
+                        </Typography>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
