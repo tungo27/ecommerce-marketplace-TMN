@@ -5,7 +5,9 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -15,6 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../utils/api';
 
@@ -107,15 +110,34 @@ export const CreateProduct: React.FC = () => {
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
-    const nextFiles = [...images, ...selectedFiles].slice(0, 5);
-    const nextPreviewUrls = nextFiles.map((file) => URL.createObjectURL(file));
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    if (images.length + selectedFiles.length > 5) {
+      setErrors((current) => ({ ...current, images: 'You can upload up to 5 images.' }));
+      event.target.value = '';
+      return;
+    }
+
+    const nextFiles = [...images, ...selectedFiles];
+    const existingPreviewUrls = previewUrls.slice(0, images.length);
+    const newPreviewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    const nextPreviewUrls = [...existingPreviewUrls, ...newPreviewUrls];
 
     setImages(nextFiles);
     setPreviewUrls(nextPreviewUrls);
     setErrors((current) => ({ ...current, images: undefined }));
+    event.target.value = '';
   };
 
   const removeImage = (index: number) => {
+    const removedPreviewUrl = previewUrls[index];
+    if (removedPreviewUrl) {
+      URL.revokeObjectURL(removedPreviewUrl);
+    }
+
     const nextFiles = images.filter((_, fileIndex) => fileIndex !== index);
     const nextPreviews = previewUrls.filter((_, fileIndex) => fileIndex !== index);
 
@@ -292,9 +314,10 @@ export const CreateProduct: React.FC = () => {
                       variant="outlined"
                       component="label"
                       fullWidth
-                      sx={{ mb: 2, borderColor: '#FF4742', color: '#FF4742' }}
+                      sx={{ mb: 2, borderColor: '#FF4742', color: '#FF4742', py: 1.2 }}
                     >
-                      📷 Choose Images
+                      <PhotoCameraOutlinedIcon sx={{ mr: 1 }} />
+                      Choose Images
                       <input hidden accept="image/jpeg,image/jpg,image/png,image/webp" multiple type="file" onChange={handleImageSelect} />
                     </Button>
 
@@ -310,15 +333,22 @@ export const CreateProduct: React.FC = () => {
                           <Box key={`${previewUrl}-${index}`}>
                             <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
                               <img src={previewUrl} alt={`Preview ${index + 1}`} style={{ width: '100%', height: 110, objectFit: 'cover' }} />
-                              <Button
+                              {index === 0 ? (
+                                <Chip
+                                  label="Ảnh bìa"
+                                  size="small"
+                                  sx={{ position: 'absolute', top: 6, left: 6, bgcolor: '#FF4742', color: 'white', fontWeight: 700 }}
+                                />
+                              ) : null}
+                              <IconButton
                                 size="small"
-                                color="error"
-                                variant="contained"
                                 onClick={() => removeImage(index)}
-                                sx={{ position: 'absolute', top: 6, right: 6, minWidth: 0, px: 1, py: 0.5 }}
+                                sx={{ position: 'absolute', top: 6, right: 6, bgcolor: 'rgba(255,255,255,0.9)', '&:hover': { bgcolor: 'white' } }}
                               >
-                                🗑
-                              </Button>
+                                <span aria-label="remove" style={{ fontSize: '0.95rem', lineHeight: 1 }}>
+                                  ×
+                                </span>
+                              </IconButton>
                             </Box>
                           </Box>
                         ))}

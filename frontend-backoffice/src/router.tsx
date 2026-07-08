@@ -8,6 +8,7 @@ import { RoleGuard } from './components/RoleGuard';
 import { OAuthCallback } from './pages/OAuthCallback';
 import { CreateProduct } from './pages/seller/CreateProduct';
 import { ProductList } from './pages/seller/ProductList';
+import { EditProduct } from './pages/seller/EditProduct';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
       {
         path: '/seller/products',
         element: <ProductList />,
+      },
+      {
+        path: '/seller/products/:id/edit',
+        element: <EditProduct />,
       },
     ],
   },
