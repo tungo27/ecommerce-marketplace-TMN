@@ -2,15 +2,19 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 import { useRouter } from 'next/navigation';
 
 export default function Header({ searchAction, currentSearch, currentCategory, currentMinPrice, currentMaxPrice }: any) {
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     setIsMounted(true);
@@ -23,7 +27,16 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Tải giỏ hàng khi component mount và trạng thái auth đã xác định
+  useEffect(() => {
+    if (isMounted) {
+      useCart.getState().loadCart(isAuthenticated);
+    }
+  }, [isMounted, isAuthenticated]);
+
   const handleLogout = () => {
+    // Xóa cart state khi logout (không cần gọi API vì Redis vẫn giữ)
+    useCart.setState({ items: [], totalCartPrice: 0, totalItems: 0 });
     logout();
     setDropdownOpen(false);
     router.push('/login');
@@ -78,6 +91,37 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
 
         {/* Navigation / Icons (Desktop right side, Mobile hidden inside Hamburger) */}
         <nav className="hidden lg:flex shrink-0 items-center gap-4 text-sm font-semibold relative">
+          {/* Cart Icon với Badge */}
+          <Link
+            href="/cart"
+            id="cart-icon-btn"
+            aria-label={`Giỏ hàng ${isMounted && totalItems > 0 ? `(${totalItems} sản phẩm)` : ''}`}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-[#E63E39]"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+              />
+            </svg>
+            {/* Badge hiển thị số lượng */}
+            {isMounted && totalItems > 0 && (
+              <span
+                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-extrabold text-[#FF4742] shadow ring-2 ring-[#FF4742] transition-all duration-300"
+                aria-hidden="true"
+              >
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
+          </Link>
+
           {!isMounted || !user ? (
             <>
               <Link
@@ -113,10 +157,28 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                     Logged in as <br />
                     <strong className="text-gray-800 block break-all">{user.email}</strong>
                   </div>
+                  <Link
+                    href="/cart"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    Shopping cart
+                    {totalItems > 0 && (
+                      <span className="ml-auto rounded-full bg-[#FF4742] px-2 py-0.5 text-[10px] font-bold text-white">
+                        {totalItems}
+                      </span>
+                    )}
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
                   >
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
                     Logout
                   </button>
                 </div>

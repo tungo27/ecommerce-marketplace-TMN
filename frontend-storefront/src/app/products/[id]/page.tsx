@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import Link from 'next/link';
+import ProductDetailActions from '@/components/ProductDetailActions';
 
 async function fetchProduct(id: string) {
   try {
@@ -183,26 +184,8 @@ export default async function ProductDetailPage({
                 </div>
               </div>
 
-              {/* Mobile Sticky Add to Cart & Desktop Normal Add to Cart */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-4 bg-white px-4 py-3 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] lg:static lg:mt-10 lg:flex-row lg:bg-transparent lg:p-0 lg:shadow-none border-t border-gray-200 lg:border-none">
-                <div className="flex h-12 w-28 lg:h-14 lg:w-36 shrink-0 items-center rounded-md border border-gray-200 bg-gray-50">
-                  <button className="flex h-full flex-1 items-center justify-center text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none rounded-l-md">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
-                  </button>
-                  <span className="w-10 lg:w-12 text-center font-semibold text-sm lg:text-base text-gray-900">1</span>
-                  <button className="flex h-full flex-1 items-center justify-center text-gray-500 transition hover:bg-gray-200 hover:text-gray-900 focus:outline-none rounded-r-md">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                  </button>
-                </div>
-                
-                <button 
-                  disabled={product.stock <= 0}
-                  className="flex h-12 lg:h-14 flex-1 items-center justify-center rounded-md bg-primary px-4 lg:px-8 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-primary/30 transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100"
-                >
-                  {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
-                </button>
-              </div>
-
+              <ProductDetailActions product={product} />
+              
               {/* Trust badges */}
               <div className="mt-8 grid grid-cols-2 gap-3 lg:gap-4 border-t border-gray-100 pt-6 sm:grid-cols-4">
                 <div className="flex flex-col items-center justify-center text-center gap-2">

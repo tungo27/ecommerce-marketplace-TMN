@@ -1,4 +1,9 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 
 type ProductCardProps = {
   product: {
@@ -14,6 +19,27 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const isAuthenticated = !!user;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await addToCart(
+      {
+        productId: product.id,
+        name: product.name,
+        price: Number(product.price),
+        images: product.images || [],
+        stock: product.stock,
+      },
+      1,
+      isAuthenticated
+    );
+    router.push('/cart');
+  };
+
   const price = Number(product.price) || 0;
   const originalPrice = price * 1.15;
   const imageUrl =
@@ -61,7 +87,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
             <span>{product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</span>
           </div>
-          <button className="mt-4 w-full rounded-md bg-primary py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-primary-hover">
+          <button 
+            onClick={handleAddToCart}
+            disabled={product.stock <= 0}
+            className="mt-4 w-full rounded-md bg-primary py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
             Add to cart
           </button>
         </div>
