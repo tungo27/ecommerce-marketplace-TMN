@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 export default function Header({ searchAction, currentSearch, currentCategory, currentMinPrice, currentMaxPrice }: any) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -30,12 +31,33 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
 
   return (
     <header className="sticky top-0 z-50 border-b-4 border-[#F05545] bg-[#FF4742] shadow-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
-        <Link href="/" className="shrink-0 text-xl font-extrabold text-white">
-          E-commerce MVP
-        </Link>
+      {/* Mobile: flex-wrap to break search into next line. Desktop: h-16, flex-nowrap */}
+      <div className="mx-auto flex flex-wrap lg:flex-nowrap lg:h-16 max-w-7xl items-center justify-between lg:justify-start gap-4 px-4 py-3 lg:py-0">
+        
+        {/* Logo and Hamburger (Mobile Dòng 1) */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button 
+            className="lg:hidden flex flex-col justify-center gap-1 p-1"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span className="block w-5 h-0.5 bg-white"></span>
+            <span className="block w-5 h-0.5 bg-white"></span>
+            <span className="block w-5 h-0.5 bg-white"></span>
+          </button>
+          <Link href="/" className="shrink-0 text-xl font-extrabold text-white">
+            E-commerce MVP
+          </Link>
+        </div>
 
-        <form method="get" action={searchAction} className="relative flex-1">
+        {/* Mobile Cart Icon (Mobile Dòng 1, Góc phải) */}
+        <div className="lg:hidden flex items-center shrink-0">
+           <Link href="/cart" className="text-white">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+           </Link>
+        </div>
+
+        {/* Search Bar (Mobile Dòng 2: w-full order-last. Desktop: order-none flex-1) */}
+        <form method="get" action={searchAction} className="relative w-full lg:w-auto lg:flex-1 order-last lg:order-none">
           <input
             name="search"
             defaultValue={currentSearch}
@@ -54,7 +76,8 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
           </button>
         </form>
 
-        <nav className="flex shrink-0 items-center gap-4 text-sm font-semibold relative">
+        {/* Navigation / Icons (Desktop right side, Mobile hidden inside Hamburger) */}
+        <nav className="hidden lg:flex shrink-0 items-center gap-4 text-sm font-semibold relative">
           {!isMounted || !user ? (
             <>
               <Link
@@ -72,13 +95,13 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
             </>
           ) : (
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 rounded-full px-2 py-1 text-white transition hover:bg-[#E63E39]"
               >
-                <img 
-                  src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`} 
-                  alt="Avatar" 
+                <img
+                  src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                  alt="Avatar"
                   className="w-8 h-8 rounded-full object-cover border border-white"
                 />
                 <span className="font-semibold">{user.name}</span>
@@ -87,7 +110,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md bg-white py-1 shadow-lg border border-gray-200">
                   <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 mb-1">
-                    Logged in as <br/>
+                    Logged in as <br />
                     <strong className="text-gray-800 block break-all">{user.email}</strong>
                   </div>
                   <button
@@ -101,6 +124,60 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
             </div>
           )}
         </nav>
+      </div>
+
+      {/* Mobile Menu Overlay & Drawer */}
+      <div className={`lg:hidden fixed inset-0 z-[100] transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+        {/* Overlay backdrop */}
+        <div 
+          className="absolute inset-0 bg-black/50" 
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+        
+        {/* Drawer sliding in from left */}
+        <div 
+          className={`absolute top-0 left-0 bottom-0 flex w-4/5 max-w-sm flex-col bg-white shadow-xl transition-transform duration-300 ease-out transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          {/* Header of Drawer */}
+          <div className="bg-[#FF4742] px-4 py-4 flex items-center justify-between text-white border-b-4 border-[#F05545]">
+            <span className="font-extrabold text-lg">Menu</span>
+            <button onClick={() => setMobileMenuOpen(false)} className="p-1 focus:outline-none">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          {/* Drawer Links */}
+          <div className="px-4 py-6 flex-1 overflow-y-auto bg-gray-50">
+             {!isMounted || !user ? (
+               <div className="flex flex-col gap-3">
+                 <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center rounded-md bg-[#FF4742] px-4 py-2 font-bold text-white shadow-sm transition hover:bg-[#E63E39]">Sign In</Link>
+                 <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center rounded-md bg-white border border-gray-300 px-4 py-2 font-bold text-gray-700 shadow-sm transition hover:bg-gray-50">Sign Up</Link>
+               </div>
+             ) : (
+               <>
+                 <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+                   <img
+                     src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                     alt="Avatar"
+                     className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                   />
+                   <div className="flex-1 min-w-0">
+                     <div className="font-bold text-gray-900 truncate">{user.name}</div>
+                     <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                   </div>
+                 </div>
+                 <div className="space-y-1">
+                   <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">Home</Link>
+                   <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">My Orders</Link>
+                   <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">Account Settings</Link>
+                 </div>
+                 <div className="mt-8 pt-6 border-t border-gray-200">
+                   <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full block px-3 py-3 text-sm font-semibold text-red-600 rounded-md hover:bg-red-50 text-left">Logout</button>
+                 </div>
+               </>
+             )}
+          </div>
+        </div>
       </div>
     </header>
   );

@@ -52,6 +52,11 @@ export class ProductsController {
     return this.productsService.findPublicProducts(query);
   }
 
+  @Get('products/:id')
+  async findPublicProductById(@Param('id') id: string) {
+    return this.productsService.findPublicProductById(id);
+  }
+
   @Get('seller/products')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')

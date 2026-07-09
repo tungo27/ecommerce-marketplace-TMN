@@ -1,5 +1,8 @@
+import Link from 'next/link';
+
 type ProductCardProps = {
   product: {
+    id: string;
     name: string;
     price: string | number;
     stock: number;
@@ -18,26 +21,26 @@ export default function ProductCard({ product }: ProductCardProps) {
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+    <article className="flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md group">
+      <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-gray-100 block">
         <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white">
           -15%
         </div>
         <img
           src={imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-300 hover:scale-105"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col p-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
           {product.seller?.name || 'Official Store'}
         </p>
-        <h3 className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-gray-900">
+        <Link href={`/products/${product.id}`} className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-gray-900 hover:text-primary transition-colors">
           {product.name}
-        </h3>
-        
+        </Link>
+
         <div className="mt-1 flex items-center text-[#F59E0B]">
           {/* 5 Rating stars */}
           {[1, 2, 3, 4, 5].map((star) => (

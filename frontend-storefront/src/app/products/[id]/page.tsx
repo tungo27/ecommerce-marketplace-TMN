@@ -1,0 +1,239 @@
+import Header from '@/components/Header';
+import Link from 'next/link';
+
+async function fetchProduct(id: string) {
+  try {
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+    const response = await fetch(`${apiBaseUrl}/products/${id}`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const product = await fetchProduct(id);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header />
+        <main className="flex-1 flex flex-col items-center justify-center p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          <p className="text-gray-500 mb-6">The product you are looking for does not exist or has been removed.</p>
+          <Link href="/" className="rounded-md bg-primary px-6 py-2 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-primary-hover">
+            Back to Home
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+  const price = Number(product.price) || 0;
+  const originalPrice = price * 1.15; // Simulated original price
+  const imageUrl =
+    product.images?.[0] ||
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
+
+  return (
+    <div className="min-h-screen bg-white lg:bg-gray-50 text-gray-900 pb-20 lg:pb-0">
+      <Header />
+
+      <main className="mx-auto max-w-7xl lg:px-4 lg:py-8">
+        {/* Breadcrumbs - scrollable on mobile */}
+        <nav className="mb-2 lg:mb-6 text-sm text-gray-500 overflow-x-auto p-4 lg:p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <ol className="flex items-center space-x-2 whitespace-nowrap">
+            <li>
+              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+            </li>
+            <li>/</li>
+            <li>
+              <Link href={`/?category=${product.category || 'All'}`} className="hover:text-primary transition-colors">
+                {product.category || 'Category'}
+              </Link>
+            </li>
+            <li>/</li>
+            <li className="text-gray-900 font-medium truncate max-w-[200px] md:max-w-xs" title={product.name}>
+              {product.name}
+            </li>
+          </ol>
+        </nav>
+
+        <div className="rounded-none lg:rounded-[1.25rem] bg-white p-0 lg:p-10 lg:shadow-sm">
+          
+          {/* Mobile Title & Rating (Amazon style: Title above image) */}
+          <div className="lg:hidden px-4 pt-2 pb-4">
+            <div className="mb-1">
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                {product.seller?.name || 'Official Store'}
+              </span>
+            </div>
+            <h1 className="text-xl font-bold leading-tight text-gray-900">
+              {product.name}
+            </h1>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center text-[#F59E0B]">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg key={star} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-xs font-medium text-gray-500 underline decoration-gray-300 underline-offset-4">120 Reviews</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-0 lg:gap-12">
+            
+            {/* Left: Image Gallery */}
+            <div className="flex flex-col gap-4">
+              <div className="relative aspect-square w-full overflow-hidden rounded-none lg:rounded-xl bg-gray-50 lg:bg-gray-100 border-b lg:border border-gray-100 lg:shadow-inner">
+                <div className="absolute left-4 top-4 z-10 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white shadow-md">
+                  -15% OFF
+                </div>
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal"
+                />
+              </div>
+              {product.images && product.images.length > 1 && (
+                <div className="flex gap-4 overflow-x-auto pb-2 px-4 lg:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {product.images.map((img: string, idx: number) => (
+                    <button key={idx} className={`relative h-20 w-20 lg:h-24 lg:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 ${idx === 0 ? 'border-primary' : 'border-transparent'} bg-gray-100 transition hover:border-primary/50`}>
+                      <img src={img} alt={`${product.name} ${idx + 1}`} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Product Info */}
+            <div className="flex flex-col p-4 lg:p-0">
+              
+              {/* Desktop Title & Rating */}
+              <div className="hidden lg:block">
+                <div className="mb-2">
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                    {product.seller?.name || 'Official Store'}
+                  </span>
+                </div>
+                
+                <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl lg:text-4xl">
+                  {product.name}
+                </h1>
+
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="flex items-center text-[#F59E0B]">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg key={star} className="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-gray-700">120 Reviews</span>
+                  <span className="text-gray-300">|</span>
+                  <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                    {product.stock > 0 ? 'In Stock' : 'Out of stock'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Mobile Stock Status (since it's moved from Title area on mobile) */}
+              <div className="lg:hidden mb-2">
+                <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                  {product.stock > 0 ? 'In Stock' : 'Out of stock'}
+                </span>
+              </div>
+
+              <div className="mt-2 lg:mt-6 flex flex-wrap items-end gap-3 lg:gap-4 border-b border-gray-100 pb-4 lg:pb-6">
+                <span className="text-3xl lg:text-4xl font-black tracking-tight text-primary">
+                  {price.toLocaleString('vi-VN')} ₫
+                </span>
+                <span className="mb-1 text-base lg:text-lg font-medium text-gray-400 line-through">
+                  {originalPrice.toLocaleString('vi-VN')} ₫
+                </span>
+              </div>
+
+              <div className="mt-4 lg:mt-6">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900 mb-2 lg:mb-3">
+                  Description
+                </h3>
+                <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                  {product.description || (
+                    <p>No description provided for this product.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile Sticky Add to Cart & Desktop Normal Add to Cart */}
+              <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-4 bg-white px-4 py-3 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] lg:static lg:mt-10 lg:flex-row lg:bg-transparent lg:p-0 lg:shadow-none border-t border-gray-200 lg:border-none">
+                <div className="flex h-12 w-28 lg:h-14 lg:w-auto items-center rounded-md border border-gray-200 bg-gray-50">
+                  <button className="flex h-full flex-1 items-center justify-center text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                  </button>
+                  <span className="w-10 text-center font-semibold text-sm lg:text-base">1</span>
+                  <button className="flex h-full flex-1 items-center justify-center text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  </button>
+                </div>
+                
+                <button 
+                  disabled={product.stock <= 0}
+                  className="flex h-12 lg:h-14 flex-1 items-center justify-center rounded-md bg-primary px-4 lg:px-8 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-primary/30 transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100"
+                >
+                  {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                </button>
+              </div>
+
+              {/* Trust badges */}
+              <div className="mt-8 grid grid-cols-2 gap-3 lg:gap-4 border-t border-gray-100 pt-6 sm:grid-cols-4">
+                <div className="flex flex-col items-center justify-center text-center gap-2">
+                  <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-orange-50 text-primary">
+                    <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                  </div>
+                  <span className="text-[10px] lg:text-xs font-medium text-gray-500">Free Shipping</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center gap-2">
+                  <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-orange-50 text-primary">
+                    <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                  </div>
+                  <span className="text-[10px] lg:text-xs font-medium text-gray-500">Secure Payment</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center gap-2">
+                  <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-orange-50 text-primary">
+                    <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                  </div>
+                  <span className="text-[10px] lg:text-xs font-medium text-gray-500">Authentic</span>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center gap-2">
+                  <div className="flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-orange-50 text-primary">
+                    <svg className="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  </div>
+                  <span className="text-[10px] lg:text-xs font-medium text-gray-500">30-Day Return</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

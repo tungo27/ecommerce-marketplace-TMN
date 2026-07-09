@@ -33,6 +33,26 @@ export class ProductsService {
     return this.productRepository.findPublicProducts(normalizedQuery);
   }
 
+  async findPublicProductById(id: string) {
+    const product = await this.prismaService.product.findFirst({
+      where: {
+        id,
+        status: 'Published',
+      },
+      include: {
+        seller: {
+          select: { name: true },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found or not published');
+    }
+
+    return product;
+  }
+
   async findSellerProducts(sellerId: string, status?: string) {
     const whereConditions: any = { sellerId };
 
