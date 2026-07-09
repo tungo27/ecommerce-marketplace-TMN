@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AuthForm } from './AuthForm';
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/utils/api';
+import { useCart } from '@/hooks/useCart';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -34,6 +35,9 @@ export const LoginForm: React.FC = () => {
       setUser(response.data.user);
       
       setLoading(false);
+
+      // Sync guest cart to user cart
+      await useCart.getState().syncGuestCartAfterLogin();
       
       // Redirect to home page
       router.push('/');
