@@ -3,7 +3,9 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dtos/create-order.dto';
@@ -116,5 +118,122 @@ export class OrdersService {
         throw error;
       }
     }
+  }
+
+  async getSellerOrders(sellerId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const orders = await this.prisma.order.findMany({
+      where: {
+        items: {
+          some: {
+            product: {
+              sellerId: sellerId,
+            },
+          },
+        },
+      },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        customer: {
+          select: { id: true, name: true, email: true },
+        },
+        items: {
+          where: {
+            product: {
+              sellerId: sellerId,
+            },
+          },
+          include: {
+            product: {
+              select: { id: true, name: true, price: true, images: true },
+            },
+          },
+        },
+      },
+    });
+
+    const total = await this.prisma.order.count({
+      where: {
+        items: {
+          some: {
+            product: {
+              sellerId: sellerId,
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      data: orders,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateOrderStatus(orderId: string, sellerId: string, newStatus: OrderStatus) {
+    // Lấy order và xác minh seller có quyền không (order có chứa sản phẩm của seller)
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        items: {
+          some: {
+            product: {
+              sellerId: sellerId,
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại hoặc bạn không có quyền truy cập');
+    }
+
+    // State machine tuyến tính
+    const statusOrder: OrderStatus[] = [
+      OrderStatus.PENDING,
+      OrderStatus.CONFIRMED,
+      OrderStatus.SHIPPED,
+      OrderStatus.DELIVERED,
+    ];
+
+    // Cho phép CANCELLED từ bất kỳ trạng thái nào trước DELIVERED, 
+    // Nhưng yêu cầu chỉ cho PENDING -> CONFIRMED -> SHIPPED -> DELIVERED
+    if (newStatus === OrderStatus.CANCELLED) {
+      if (order.status === OrderStatus.DELIVERED) {
+        throw new BadRequestException('Không thể hủy đơn hàng đã giao thành công');
+      }
+    } else {
+      const currentIndex = statusOrder.indexOf(order.status);
+      const newIndex = statusOrder.indexOf(newStatus);
+
+      // Nếu trạng thái cũ là CANCELLED thì không cho đổi đi đâu hết
+      if (order.status === OrderStatus.CANCELLED) {
+        throw new BadRequestException('Đơn hàng đã bị hủy, không thể thay đổi trạng thái');
+      }
+
+      // Bắt buộc chuyển đổi tuần tự (chỉ cho phép tiến 1 bước)
+      if (newIndex !== currentIndex + 1) {
+        throw new BadRequestException(
+          `Chuyển đổi trạng thái không hợp lệ. Trạng thái hiện tại là ${order.status}, không thể nhảy cóc sang ${newStatus}`
+        );
+      }
+    }
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: newStatus },
+    });
+
+    this.logger.log(`Order ${orderId} status updated to ${newStatus} by seller ${sellerId}`);
+    return updatedOrder;
   }
 }

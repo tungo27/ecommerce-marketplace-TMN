@@ -9,6 +9,8 @@ import { OAuthCallback } from './pages/OAuthCallback';
 import { CreateProduct } from './pages/seller/CreateProduct';
 import { ProductList } from './pages/seller/ProductList';
 import { EditProduct } from './pages/seller/EditProduct';
+import { OrdersPage } from './pages/seller/OrdersPage';
+import { SellerLayout } from './layouts/SellerLayout';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -34,21 +36,30 @@ export const router = createBrowserRouter([
     element: <RoleGuard allowedRoles={['SELLER', 'ADMIN']} redirectPath="/seller/login" />,
     children: [
       {
-        path: '/seller/dashboard',
-        element: <SellerDashboard />,
-      },
-      {
-        path: '/seller/products/new',
-        element: <CreateProduct />,
-      },
-      {
-        path: '/seller/products',
-        element: <ProductList />,
-      },
-      {
-        path: '/seller/products/:id/edit',
-        element: <EditProduct />,
-      },
+        element: <SellerLayout />,
+        children: [
+          {
+            path: '/seller/dashboard',
+            element: <SellerDashboard />,
+          },
+          {
+            path: '/seller/products/new',
+            element: <CreateProduct />,
+          },
+          {
+            path: '/seller/products',
+            element: <ProductList />,
+          },
+          {
+            path: '/seller/products/:id/edit',
+            element: <EditProduct />,
+          },
+          {
+            path: '/seller/orders',
+            element: <OrdersPage />,
+          },
+        ]
+      }
     ],
   },
 
