@@ -73,3 +73,9 @@ Dự án áp dụng mô hình Modular Monolith, chia làm 3 phân hệ độc l�
 - `src/pages/seller/`: C�c trang d?c quy?n SELLER (`Dashboard`, `ProductsPage`, `OrdersPage`).
 - `src/pages/admin/`: C�c trang d?c quy?n ADMIN (`ProductModeration`, `UserManagement`).
 - `src/services/api.ts`: C?u h�nh Axios Instance v?i Request/Response Interceptor (d�nh k�m Bearer Token v� x? l� 401).
+
+## 7.5. Order Checkout & Concurrency Handling (Quy Tắc Mới)
+- **Optimistic Locking**: Bắt buộc sử dụng field ersion trong model Product khi trừ kho (stock). Dùng updateMany với điều kiện ersion khớp để bắt lỗi (RACE CONDITION) và tự động **Retry (tối đa 3 lần)** trong OrdersService.
+- **Transaction**: Mọi thao tác checkout (Tạo Order, OrderItem, Transaction Log, trừ Stock) phải nằm trong cùng một $transaction Interactive của Prisma.
+- **Bảo mật**: DTO (ví dụ CreateOrderDto) không được nhận customerId từ body. Phải dùng AuthGuard để trích xuất eq.user.id nhằm chống Impersonation.
+- **Frontend Checkout**: Sau khi gọi POST /orders/checkout thành công, tự động xóa giỏ hàng (local state) và hiển thị Toast notification.
