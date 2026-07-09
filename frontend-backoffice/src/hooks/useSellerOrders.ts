@@ -18,6 +18,7 @@ export interface OrderItem {
   id: string;
   quantity: number;
   price: string | number;
+  
   product: Product;
 }
 

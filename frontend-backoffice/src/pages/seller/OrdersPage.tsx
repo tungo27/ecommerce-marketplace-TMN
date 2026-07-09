@@ -184,7 +184,7 @@ export const OrdersPage: React.FC = () => {
                             {actionLabel}
                           </Button>
                         )}
-                        {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                        {order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                           <Button
                             variant="outlined"
                             size="small"

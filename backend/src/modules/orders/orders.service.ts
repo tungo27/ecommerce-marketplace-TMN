@@ -205,11 +205,11 @@ export class OrdersService {
       OrderStatus.DELIVERED,
     ];
 
-    // Cho phép CANCELLED từ bất kỳ trạng thái nào trước DELIVERED, 
+    // Cho phép CANCELLED từ trạng thái PENDING, CONFIRMED
     // Nhưng yêu cầu chỉ cho PENDING -> CONFIRMED -> SHIPPED -> DELIVERED
     if (newStatus === OrderStatus.CANCELLED) {
-      if (order.status === OrderStatus.DELIVERED) {
-        throw new BadRequestException('Không thể hủy đơn hàng đã giao thành công');
+      if (order.status === OrderStatus.DELIVERED || order.status === OrderStatus.SHIPPED) {
+        throw new BadRequestException('Không thể hủy đơn hàng đang giao hoặc đã giao thành công');
       }
     } else {
       const currentIndex = statusOrder.indexOf(order.status);
