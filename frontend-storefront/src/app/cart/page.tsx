@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
+import { apiClient } from '@/utils/api';
 
 // Toast Component
 
@@ -227,8 +229,10 @@ export default function CartPage() {
   const { items, totalCartPrice, totalItems, isLoading, toast, removeItem, clearCart, hideToast } =
     useCart();
   const { user } = useAuth();
+  const router = useRouter();
   const isAuthenticated = Boolean(user);
   const hasLoaded = useRef(false);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
   // Tải giỏ hàng một lần khi component mount
   useEffect(() => {
@@ -249,6 +253,11 @@ export default function CartPage() {
     if (items.length === 0) return;
     clearCart(isAuthenticated);
   }, [clearCart, isAuthenticated, items.length]);
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) return;
+    router.push('/checkout');
+  };
 
   const imageUrl = (images: string[]) =>
     images?.[0] ||
@@ -548,10 +557,11 @@ export default function CartPage() {
                     ) : (
                       <button
                         id="checkout-btn"
-                        disabled={isLoading || items.length === 0}
+                        onClick={handleCheckout}
+                        disabled={isLoading || isCheckoutLoading || items.length === 0}
                         className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF4742] py-3.5 text-sm font-bold text-white transition hover:bg-[#E63E39] hover:shadow-lg hover:shadow-[#FF4742]/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {isLoading ? (
+                        {isCheckoutLoading ? (
                           <>
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
