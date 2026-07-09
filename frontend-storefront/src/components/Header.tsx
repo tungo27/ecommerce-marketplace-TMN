@@ -172,6 +172,16 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                       </span>
                     )}
                   </Link>
+                  <Link
+                    href="/orders/history"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    My orders
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
@@ -230,7 +240,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                  </div>
                  <div className="space-y-1">
                    <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">Home</Link>
-                   <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">My Orders</Link>
+                   <Link href="/orders/history" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">My Orders</Link>
                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-3 text-sm font-semibold text-gray-700 rounded-md hover:bg-gray-100">Account Settings</Link>
                  </div>
                  <div className="mt-8 pt-6 border-t border-gray-200">
