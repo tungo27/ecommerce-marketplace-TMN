@@ -17,6 +17,7 @@ import type { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { CartService, CartResponse } from './cart.service';
 import { UpdateCartDto } from './dtos/update-cart.dto';
+import { SyncCartDto } from './dtos/sync-cart.dto';
 
 /**
  * OptionalJwtGuard - Guard tùy chọn: cho phép request đi qua kể cả khi không có JWT.
@@ -190,7 +191,7 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'))
   async syncGuestCart(
-    @Body('items') items: Array<{ productId: string; quantity: number }>,
+    @Body() dto: SyncCartDto,
     @Req() req: Request,
   ): Promise<CartResponse> {
     const user = (req as any).user;
@@ -200,28 +201,12 @@ export class CartController {
       );
     }
 
-    if (!Array.isArray(items)) {
-      throw new BadRequestException(
-        'Dữ liệu đồng bộ không hợp lệ. Cần truyền mảng items.',
-      );
-    }
-
-    // Lọc các item hợp lệ (có productId và quantity > 0)
-    const validItems = items.filter(
-      (item) =>
-        item &&
-        typeof item.productId === 'string' &&
-        item.productId.trim() !== '' &&
-        typeof item.quantity === 'number' &&
-        item.quantity > 0,
-    );
-
-    if (validItems.length === 0) {
+    if (!dto.items || dto.items.length === 0) {
       // Không có item hợp lệ, chỉ trả về giỏ hàng hiện tại của user
       return this.cartService.getCart(user.id);
     }
 
-    return this.cartService.syncGuestCartToUser(user.id, validItems);
+    return this.cartService.syncGuestCartToUser(user.id, dto.items);
   }
 
   /**

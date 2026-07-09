@@ -12,9 +12,9 @@ import { IsString, IsInt, IsNotEmpty, Min } from 'class-validator';
 export class UpdateCartDto {
   @IsString({ message: 'productId must be a valid string.' })
   @IsNotEmpty({ message: 'productId must not be empty.' })
-  productId?: string;
+  productId!: string;
 
   @IsInt({ message: 'quantity must be a valid integer.' })
   @Min(1, { message: 'quantity must be a valid number greater than or equal to 1.' })
-  quantity?: number;
+  quantity!: number;
 }
