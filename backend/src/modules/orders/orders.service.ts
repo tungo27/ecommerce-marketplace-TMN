@@ -7,6 +7,8 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dtos/create-order.dto';
+import { GetOrdersDto } from './dtos/get-orders.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +18,70 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
   ) {}
+
+  async getMyOrders(userId: string, getOrdersDto: GetOrdersDto) {
+    const { page = 1, limit = 10, status } = getOrdersDto;
+    const skip = (page - 1) * limit;
+
+    const whereClause: Prisma.OrderWhereInput = {
+      userId,
+    };
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          createdAt: true,
+          totalAmount: true,
+          status: true,
+          items: {
+            select: {
+              quantity: true,
+              price: true,
+              product: {
+                select: {
+                  name: true,
+                  images: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.order.count({ where: whereClause }),
+    ]);
+
+    const formattedOrders = orders.map((order) => ({
+      orderId: order.id,
+      createdAt: order.createdAt,
+      totalPrice: order.totalAmount,
+      status: order.status,
+      items: order.items.map((item) => ({
+        productName: item.product.name,
+        thumbnailUrl: item.product.images[0] || null,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    }));
+
+    return {
+      items: formattedOrders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
 
   async createOrder(userId: string, createOrderDto: CreateOrderDto) {
     const MAX_RETRIES = 3;

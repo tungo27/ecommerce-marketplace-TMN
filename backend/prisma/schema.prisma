@@ -92,6 +92,7 @@ model Order {
   updatedAt       DateTime      @updatedAt
   items           OrderItem[]
   transactions    Transaction[]
+  @@index([userId, createdAt])
 }
 
 model OrderItem {
