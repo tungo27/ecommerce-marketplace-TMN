@@ -164,25 +164,49 @@ export const OrdersPage: React.FC = () => {
                       />
                     </TableCell>
                     <TableCell align="center">
-                      {nextStatus && (
-                        <Button
-                          variant="contained"
-                          disableElevation
-                          size="small"
-                          onClick={() => handleUpdateStatus(order.id, nextStatus)}
-                          sx={{
-                            bgcolor: '#FF4742',
-                            color: 'white',
-                            textTransform: 'none',
-                            fontWeight: 'bold',
-                            '&:hover': {
-                              bgcolor: '#E63E39',
-                            },
-                          }}
-                        >
-                          {actionLabel}
-                        </Button>
-                      )}
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1, justifyContent: 'center' }}>
+                        {nextStatus && (
+                          <Button
+                            variant="contained"
+                            disableElevation
+                            size="small"
+                            onClick={() => handleUpdateStatus(order.id, nextStatus)}
+                            sx={{
+                              bgcolor: '#FF4742',
+                              color: 'white',
+                              textTransform: 'none',
+                              fontWeight: 'bold',
+                              '&:hover': {
+                                bgcolor: '#E63E39',
+                              },
+                            }}
+                          >
+                            {actionLabel}
+                          </Button>
+                        )}
+                        {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                              if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                                handleUpdateStatus(order.id, 'CANCELLED');
+                              }
+                            }}
+                            sx={{
+                              borderColor: '#E5E7EB',
+                              color: '#111827',
+                              textTransform: 'none',
+                              '&:hover': {
+                                bgcolor: '#F9FAFB',
+                                borderColor: '#D1D5DB'
+                              },
+                            }}
+                          >
+                            Hủy
+                          </Button>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );
