@@ -17,9 +17,11 @@ export class ProductRepository {
       { stock: { gt: 0 } },
     ];
 
-    if (query.category) whereConditions.push({ category: query.category as any });
-    if (query.minPrice !== undefined) whereConditions.push({ price: { gte: Number(query.minPrice) } });
-    if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: Number(query.maxPrice) } });
+    if (query.category) whereConditions.push({ category: query.category });
+    if (query.minPrice !== undefined)
+      whereConditions.push({ price: { gte: Number(query.minPrice) } });
+    if (query.maxPrice !== undefined)
+      whereConditions.push({ price: { lte: Number(query.maxPrice) } });
 
     if (query.search && query.search.trim() !== '') {
       const searchStr = query.search.trim();
@@ -44,6 +46,14 @@ export class ProductRepository {
       this.prisma.product.count({ where }),
     ]);
 
-    return { products, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
+    return {
+      products,
+      meta: {
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        limit,
+      },
+    };
   }
 }

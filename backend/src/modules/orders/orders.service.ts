@@ -113,10 +113,14 @@ export class OrdersService {
           for (const item of cart.items) {
             const product = products.find((p) => p.id === item.productId);
             if (!product) {
-              throw new BadRequestException(`Sản phẩm ${item.name} không tồn tại`);
+              throw new BadRequestException(
+                `Sản phẩm ${item.name} không tồn tại`,
+              );
             }
             if (product.stock < item.quantity) {
-              throw new BadRequestException(`Sản phẩm ${product.name} không đủ số lượng trong kho`);
+              throw new BadRequestException(
+                `Sản phẩm ${product.name} không đủ số lượng trong kho`,
+              );
             }
           }
 
@@ -149,7 +153,7 @@ export class OrdersService {
               shippingAddress,
               phoneNumber,
               paymentMethod,
-              status: 'Pending',
+              status: OrderStatus.PENDING,
               items: {
                 create: cart.items.map((item) => ({
                   productId: item.productId,
@@ -166,16 +170,23 @@ export class OrdersService {
         // 5. Xóa giỏ hàng sau khi checkout thành công (ngoài scope transaction)
         await this.cartService.clearCart(userId);
 
-        this.logger.log(`Order ${result.id} created successfully for user ${userId}`);
+        this.logger.log(
+          `Order ${result.id} created successfully for user ${userId}`,
+        );
         return result;
       } catch (error) {
-        if (error instanceof Error && error.message === 'OPTIMISTIC_LOCK_CONFLICT') {
+        if (
+          error instanceof Error &&
+          error.message === 'OPTIMISTIC_LOCK_CONFLICT'
+        ) {
           attempt++;
-          this.logger.warn(`[Checkout] Xung đột dữ liệu. Đang thử lại lần ${attempt}/${MAX_RETRIES}`);
-          
+          this.logger.warn(
+            `[Checkout] Xung đột dữ liệu. Đang thử lại lần ${attempt}/${MAX_RETRIES}`,
+          );
+
           if (attempt >= MAX_RETRIES) {
             throw new ConflictException(
-              'Hệ thống đang có quá nhiều giao dịch. Vui lòng thử lại sau.'
+              'Hệ thống đang có quá nhiều giao dịch. Vui lòng thử lại sau.',
             );
           }
           continue;
@@ -186,7 +197,11 @@ export class OrdersService {
     }
   }
 
-  async getSellerOrders(sellerId: string, page: number = 1, limit: number = 10) {
+  async getSellerOrders(
+    sellerId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     const skip = (page - 1) * limit;
 
     const orders = await this.prisma.order.findMany({
@@ -244,7 +259,11 @@ export class OrdersService {
     };
   }
 
-  async updateOrderStatus(orderId: string, sellerId: string, newStatus: OrderStatus) {
+  async updateOrderStatus(
+    orderId: string,
+    sellerId: string,
+    newStatus: OrderStatus,
+  ) {
     // Lấy order và xác minh seller có quyền không (order có chứa sản phẩm của seller)
     const order = await this.prisma.order.findFirst({
       where: {
@@ -260,36 +279,45 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException('Đơn hàng không tồn tại hoặc bạn không có quyền truy cập');
+      throw new NotFoundException(
+        'Đơn hàng không tồn tại hoặc bạn không có quyền truy cập',
+      );
     }
 
     // State machine tuyến tính
     const statusOrder: OrderStatus[] = [
-      OrderStatus.Pending,
-      OrderStatus.Confirmed,
-      OrderStatus.Shipped,
-      OrderStatus.Delivered,
+      OrderStatus.PENDING,
+      OrderStatus.CONFIRMED,
+      OrderStatus.SHIPPED,
+      OrderStatus.DELIVERED,
     ];
 
     // Cho phép CANCELLED từ trạng thái PENDING, CONFIRMED
     // Nhưng yêu cầu chỉ cho PENDING -> CONFIRMED -> SHIPPED -> DELIVERED
-    if (newStatus === OrderStatus.Cancelled) {
-      if (order.status === OrderStatus.Delivered || order.status === OrderStatus.Shipped) {
-        throw new BadRequestException('Không thể hủy đơn hàng đang giao hoặc đã giao thành công');
+    if (newStatus === OrderStatus.CANCELLED) {
+      if (
+        order.status === OrderStatus.DELIVERED ||
+        order.status === OrderStatus.SHIPPED
+      ) {
+        throw new BadRequestException(
+          'Không thể hủy đơn hàng đang giao hoặc đã giao thành công',
+        );
       }
     } else {
       const currentIndex = statusOrder.indexOf(order.status);
       const newIndex = statusOrder.indexOf(newStatus);
 
       // Nếu trạng thái cũ là CANCELLED thì không cho đổi đi đâu hết
-      if (order.status === OrderStatus.Cancelled) {
-        throw new BadRequestException('Đơn hàng đã bị hủy, không thể thay đổi trạng thái');
+      if (order.status === OrderStatus.CANCELLED) {
+        throw new BadRequestException(
+          'Đơn hàng đã bị hủy, không thể thay đổi trạng thái',
+        );
       }
 
       // Bắt buộc chuyển đổi tuần tự (chỉ cho phép tiến 1 bước)
       if (newIndex !== currentIndex + 1) {
         throw new BadRequestException(
-          `Chuyển đổi trạng thái không hợp lệ. Trạng thái hiện tại là ${order.status}, không thể nhảy cóc sang ${newStatus}`
+          `Chuyển đổi trạng thái không hợp lệ. Trạng thái hiện tại là ${order.status}, không thể nhảy cóc sang ${newStatus}`,
         );
       }
     }
@@ -299,7 +327,9 @@ export class OrdersService {
       data: { status: newStatus },
     });
 
-    this.logger.log(`Order ${orderId} status updated to ${newStatus} by seller ${sellerId}`);
+    this.logger.log(
+      `Order ${orderId} status updated to ${newStatus} by seller ${sellerId}`,
+    );
     return updatedOrder;
   }
 }

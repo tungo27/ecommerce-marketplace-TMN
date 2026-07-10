@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
@@ -60,7 +64,9 @@ export class AuthService {
     }
 
     if (!user.passwordHash) {
-      throw new UnauthorizedException('This account was registered via Google. Please log in with Google.');
+      throw new UnauthorizedException(
+        'This account was registered via Google. Please log in with Google.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
@@ -69,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: user.role, name: user.name };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return {
@@ -82,7 +88,10 @@ export class AuthService {
       },
     };
   }
-  async validateGoogleUser(profile: any, state?: string): Promise<{ accessToken: string }> {
+  async validateGoogleUser(
+    profile: any,
+    state?: string,
+  ): Promise<{ accessToken: string }> {
     const { id, emails, displayName, photos } = profile;
     const email = emails[0].value.toLowerCase();
     const picture = photos && photos.length > 0 ? photos[0].value : undefined;
@@ -115,7 +124,13 @@ export class AuthService {
       });
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role, picture };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      picture,
+    };
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };

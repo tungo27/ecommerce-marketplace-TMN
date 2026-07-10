@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Header from '@/components/Header';
 
 const TABS = [
@@ -27,12 +26,6 @@ export default function OrderHistoryPage() {
       router.push('/login');
     }
   }, [user, router]);
-
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [activeTab, user]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -57,6 +50,14 @@ export default function OrderHistoryPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      // eslint-disable-next-line
+      fetchOrders();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, user]);
 
   const formatCurrency = (amount: string | number) => {
     return new Intl.NumberFormat('vi-VN', {

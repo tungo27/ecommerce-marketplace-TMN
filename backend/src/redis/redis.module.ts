@@ -71,9 +71,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
         });
 
         client.on('reconnecting', (delay: number) => {
-          console.log(
-            `[RedisModule] Đang thử reconnect sau ${delay}ms...`,
-          );
+          console.log(`[RedisModule] Đang thử reconnect sau ${delay}ms...`);
         });
 
         return client;

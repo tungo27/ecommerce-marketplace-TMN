@@ -14,7 +14,7 @@ const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
   phoneNumber: z.string().min(10, 'Số điện thoại không hợp lệ'),
   shippingAddress: z.string().min(10, 'Địa chỉ chi tiết quá ngắn'),
-  paymentMethod: z.enum(['COD', 'BANK_TRANSFER'], { required_error: 'Vui lòng chọn phương thức thanh toán' }),
+  paymentMethod: z.enum(['COD', 'BANK_TRANSFER'], { message: 'Vui lòng chọn phương thức thanh toán' }),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -41,7 +41,7 @@ export default function CheckoutPage() {
       });
       showToast('Đặt hàng thành công!', 'success');
       await clearCart(true); // reset UI cart
-      router.push('/orders'); // redirect to orders history
+      router.push('/orders/history'); // redirect to orders history
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Lỗi đặt hàng', 'error');
     } finally {

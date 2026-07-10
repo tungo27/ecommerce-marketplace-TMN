@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsString, IsInt, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class SyncCartItemDto {

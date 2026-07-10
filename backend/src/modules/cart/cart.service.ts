@@ -82,7 +82,12 @@ export class CartService {
   ): Promise<void> {
     const key = this.buildCartKey(userId);
     try {
-      await this.redis.set(key, JSON.stringify(items), 'EX', this.CART_TTL_SECONDS);
+      await this.redis.set(
+        key,
+        JSON.stringify(items),
+        'EX',
+        this.CART_TTL_SECONDS,
+      );
     } catch (error) {
       this.logger.error(`Lỗi ghi giỏ hàng vào Redis [key=${key}]:`, error);
       throw new BadRequestException(
@@ -105,7 +110,10 @@ export class CartService {
       0,
     );
 
-    const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const totalItems = items.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0,
+    );
 
     return {
       items: enrichedItems,
@@ -134,10 +142,8 @@ export class CartService {
     const { productId, quantity } = dto;
 
     // Bước 1: Validate quantity (class-validator đã check >= 1, nhưng double-check ở service)
-    if ((!quantity || quantity <= 0)) {
-      throw new BadRequestException(
-        'Số lượng sản phẩm phải lớn hơn 0.',
-      );
+    if (!quantity || quantity <= 0) {
+      throw new BadRequestException('Số lượng sản phẩm phải lớn hơn 0.');
     }
 
     // Bước 2: Truy vấn DB để lấy thông tin và tồn kho sản phẩm
@@ -329,10 +335,7 @@ export class CartService {
       await this.redis.del(key);
       this.logger.log(`Đã xóa toàn bộ giỏ hàng: userId=${userId}`);
     } catch (error) {
-      this.logger.error(
-        `Lỗi xóa giỏ hàng khỏi Redis [key=${key}]:`,
-        error,
-      );
+      this.logger.error(`Lỗi xóa giỏ hàng khỏi Redis [key=${key}]:`, error);
     }
   }
 

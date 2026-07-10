@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Avatar, IconButton } from '@mui/material';
+import { Box, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Avatar } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -77,8 +77,7 @@ export const SellerLayout: React.FC = () => {
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ fontWeight: isActive ? 700 : 500 }}
+                    primary={<Typography sx={{ fontWeight: isActive ? 700 : 500 }}>{item.text}</Typography>} 
                   />
                 </ListItemButton>
               </ListItem>
@@ -99,7 +98,7 @@ export const SellerLayout: React.FC = () => {
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LogoutIcon />
               </ListItemIcon>
-              <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 600 }} />
+              <ListItemText primary={<Typography sx={{ fontWeight: 600 }}>Logout</Typography>} />
             </ListItemButton>
           </ListItem>
         </Box>

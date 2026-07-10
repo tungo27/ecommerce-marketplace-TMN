@@ -15,6 +15,8 @@ export class UpdateCartDto {
   productId!: string;
 
   @IsInt({ message: 'quantity must be a valid integer.' })
-  @Min(1, { message: 'quantity must be a valid number greater than or equal to 1.' })
+  @Min(1, {
+    message: 'quantity must be a valid number greater than or equal to 1.',
+  })
   quantity!: number;
 }

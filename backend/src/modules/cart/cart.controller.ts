@@ -196,9 +196,7 @@ export class CartController {
   ): Promise<CartResponse> {
     const user = (req as any).user;
     if (!user) {
-      throw new UnauthorizedException(
-        'Bạn cần đăng nhập để đồng bộ giỏ hàng.',
-      );
+      throw new UnauthorizedException('Bạn cần đăng nhập để đồng bộ giỏ hàng.');
     }
 
     if (!dto.items || dto.items.length === 0) {

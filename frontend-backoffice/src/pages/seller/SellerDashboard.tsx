@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../utils/api';
-import { useAuthStore } from '../../stores/authStore';
+
 
 interface SellerProduct {
   id: string;
@@ -38,7 +38,7 @@ const badgeColors: Record<string, { background: string; color: string }> = {
 
 export const SellerDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+
   const [products, setProducts] = useState<SellerProduct[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -60,6 +60,7 @@ export const SellerDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchProducts(statusFilter);
   }, [statusFilter]);
 

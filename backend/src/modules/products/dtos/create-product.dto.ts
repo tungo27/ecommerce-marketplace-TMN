@@ -1,4 +1,12 @@
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { Category } from '@prisma/client';
 

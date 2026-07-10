@@ -27,6 +27,7 @@ export const ProductModeration: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchProducts();
   }, []);
 

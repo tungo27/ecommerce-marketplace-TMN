@@ -9,7 +9,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UploadModule } from './upload/upload.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UploadModule, ProductsModule, CartModule, OrdersModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UploadModule,
+    ProductsModule,
+    CartModule,
+    OrdersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

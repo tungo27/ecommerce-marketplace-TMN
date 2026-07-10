@@ -1,5 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -14,7 +23,9 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<RegisterResponseDto> {
+  async register(
+    @Body() registerDto: RegisterDto,
+  ): Promise<RegisterResponseDto> {
     return this.authService.register(registerDto);
   }
 
@@ -26,7 +37,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleOAuthGuard)
-  async googleAuth(@Req() req) {
+  async googleAuth() {
     // Guards redirects to Google
   }
 
@@ -35,15 +46,17 @@ export class AuthController {
   googleAuthRedirect(@Req() req, @Res() res: Response) {
     // req.user contains the token from GoogleStrategy
     const token = req.user.accessToken;
-    
+
     // Google passes back the state parameter
     const state = req.query.state as string;
-    
+
     let redirectUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     if (state === 'seller' || state === 'admin') {
       redirectUrl = process.env.BACKOFFICE_URL || 'http://localhost:3001';
     }
-    
-    return res.redirect(`${redirectUrl}/oauth-callback?token=${token}&target=${state}`);
+
+    return res.redirect(
+      `${redirectUrl}/oauth-callback?token=${token}&target=${state}`,
+    );
   }
 }

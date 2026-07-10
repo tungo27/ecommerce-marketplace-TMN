@@ -42,12 +42,43 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('products')
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 12)' })
-  @ApiQuery({ name: 'category', required: false, type: String, description: 'Category filter (Electronics, Fashion, Home_Living, Cosmetics, Food)' })
-  @ApiQuery({ name: 'minPrice', required: false, type: Number, description: 'Minimum price' })
-  @ApiQuery({ name: 'maxPrice', required: false, type: Number, description: 'Maximum price' })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search by product name or description' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 12)',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    type: String,
+    description:
+      'Category filter (Electronics, Fashion, Home_Living, Cosmetics, Food)',
+  })
+  @ApiQuery({
+    name: 'minPrice',
+    required: false,
+    type: Number,
+    description: 'Minimum price',
+  })
+  @ApiQuery({
+    name: 'maxPrice',
+    required: false,
+    type: Number,
+    description: 'Maximum price',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search by product name or description',
+  })
   async findPublicProducts(@Query() query: Record<string, any>) {
     return this.productsService.findPublicProducts(query);
   }
@@ -60,15 +91,24 @@ export class ProductsController {
   @Get('seller/products')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')
-  async findSellerProducts(@Req() req: { user: { id: string } }, @Query('status') status?: string) {
+  async findSellerProducts(
+    @Req() req: { user: { id: string } },
+    @Query('status') status?: string,
+  ) {
     return this.productsService.findSellerProducts(req.user.id, status);
   }
 
   @Get('seller/products/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')
-  async findSellerProductById(@Req() req: { user: { id: string } }, @Param('id') id: string) {
-    const product = await this.productsService.findSellerProductById(req.user.id, id);
+  async findSellerProductById(
+    @Req() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    const product = await this.productsService.findSellerProductById(
+      req.user.id,
+      id,
+    );
     if (!product) {
       throw new NotFoundException('Product not found');
     }
@@ -83,11 +123,17 @@ export class ProductsController {
     @Param('id') id: string,
     @Body() body: UpdateProductDto,
   ) {
-    const dto = plainToInstance(UpdateProductDto, body, { enableImplicitConversion: true });
-    const validationErrors = await validate(dto, { skipMissingProperties: true });
+    const dto = plainToInstance(UpdateProductDto, body, {
+      enableImplicitConversion: true,
+    });
+    const validationErrors = await validate(dto, {
+      skipMissingProperties: true,
+    });
 
     if (validationErrors.length > 0) {
-      const constraints = validationErrors.flatMap((error) => Object.values(error.constraints ?? {}));
+      const constraints = validationErrors.flatMap((error) =>
+        Object.values(error.constraints ?? {}),
+      );
       throw new BadRequestException(constraints);
     }
 
@@ -105,7 +151,11 @@ export class ProductsController {
     if (!['Draft', 'Hidden'].includes(status)) {
       throw new BadRequestException('Status must be Draft or Hidden');
     }
-    return this.productsService.patchSellerProductStatus(req.user.id, id, status as 'Draft' | 'Hidden');
+    return this.productsService.patchSellerProductStatus(
+      req.user.id,
+      id,
+      status as 'Draft' | 'Hidden',
+    );
   }
 
   @Post('seller/products')
@@ -117,11 +167,15 @@ export class ProductsController {
     @Body() body: CreateProductDto,
     @UploadedFiles() files: MulterFile[],
   ) {
-    const dto = plainToInstance(CreateProductDto, body, { enableImplicitConversion: true });
+    const dto = plainToInstance(CreateProductDto, body, {
+      enableImplicitConversion: true,
+    });
     const validationErrors = await validate(dto);
 
     if (validationErrors.length > 0) {
-      const constraints = validationErrors.flatMap((error) => Object.values(error.constraints ?? {}));
+      const constraints = validationErrors.flatMap((error) =>
+        Object.values(error.constraints ?? {}),
+      );
       throw new BadRequestException(constraints);
     }
 
@@ -129,12 +183,19 @@ export class ProductsController {
       throw new BadRequestException('At least one image is required');
     }
 
-    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ];
     const maxFileSize = 5 * 1024 * 1024;
 
     for (const file of files) {
       if (!allowedMimeTypes.includes(file.mimetype)) {
-        throw new BadRequestException('Only JPG, PNG, and WEBP image files are allowed');
+        throw new BadRequestException(
+          'Only JPG, PNG, and WEBP image files are allowed',
+        );
       }
       if (file.size > maxFileSize) {
         throw new BadRequestException('Each image must be smaller than 5MB');

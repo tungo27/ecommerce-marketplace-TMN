@@ -21,8 +21,14 @@ import { GoogleOAuthGuard } from './guards/google-oauth.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, GoogleStrategy, GoogleOAuthGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    GoogleStrategy,
+    GoogleOAuthGuard,
+  ],
   exports: [JwtAuthGuard, RolesGuard, JwtModule, GoogleOAuthGuard],
 })
 export class AuthModule {}
-

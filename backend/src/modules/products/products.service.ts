@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ProductStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UploadService } from '../../upload/upload.service';
@@ -71,8 +76,7 @@ export class ProductsService {
       },
     });
 
-    return products.map(product => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return products.map((product) => {
       const { AuditLog, ...rest } = product;
       return {
         ...rest,
@@ -90,7 +94,11 @@ export class ProductsService {
     });
   }
 
-async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProductDto) {
+  async updateSellerProduct(
+    sellerId: string,
+    productId: string,
+    dto: UpdateProductDto,
+  ) {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
       include: {
@@ -106,11 +114,15 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     }
 
     if (product.sellerId !== sellerId) {
-      throw new ForbiddenException('You do not have permission to update this product');
+      throw new ForbiddenException(
+        'You do not have permission to update this product',
+      );
     }
 
     if (product.status === 'Hidden' && product.AuditLog.length > 0) {
-      throw new ForbiddenException('This product has been rejected by an admin and cannot be edited');
+      throw new ForbiddenException(
+        'This product has been rejected by an admin and cannot be edited',
+      );
     }
 
     const currentPrice = Number(product.price);
@@ -120,7 +132,10 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
       (dto.category !== undefined && dto.category !== product.category);
 
     const updateData: any = {
-      description: dto.description !== undefined ? dto.description.trim() : product.description,
+      description:
+        dto.description !== undefined
+          ? dto.description.trim()
+          : product.description,
       stock: dto.stock !== undefined ? dto.stock : product.stock,
     };
 
@@ -145,7 +160,11 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     });
   }
 
-  async patchSellerProductStatus(sellerId: string, productId: string, status: 'Draft' | 'Hidden') {
+  async patchSellerProductStatus(
+    sellerId: string,
+    productId: string,
+    status: 'Draft' | 'Hidden',
+  ) {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
       include: {
@@ -161,11 +180,15 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     }
 
     if (product.sellerId !== sellerId) {
-      throw new ForbiddenException('You do not have permission to change this product status');
+      throw new ForbiddenException(
+        'You do not have permission to change this product status',
+      );
     }
 
     if (product.status === 'Hidden' && product.AuditLog.length > 0) {
-      throw new ForbiddenException('This product has been rejected by an admin and cannot be modified');
+      throw new ForbiddenException(
+        'This product has been rejected by an admin and cannot be modified',
+      );
     }
 
     return this.prismaService.product.update({
@@ -176,8 +199,14 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     });
   }
 
-  async createProduct(sellerId: string, dto: CreateProductDto, files: Express.Multer.File[]) {
-    const uploadedImageUrls = await Promise.all(files.map((file) => this.uploadService.uploadImage(file)));
+  async createProduct(
+    sellerId: string,
+    dto: CreateProductDto,
+    files: Express.Multer.File[],
+  ) {
+    const uploadedImageUrls = await Promise.all(
+      files.map((file) => this.uploadService.uploadImage(file)),
+    );
 
     return this.prismaService.product.create({
       data: {
@@ -212,7 +241,11 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
-  async reviewProduct(adminId: string, productId: string, action: 'APPROVE' | 'REJECT') {
+  async reviewProduct(
+    adminId: string,
+    productId: string,
+    action: 'APPROVE' | 'REJECT',
+  ) {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
     });
@@ -221,7 +254,8 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
       throw new BadRequestException('Product is not in Pending status');
     }
 
-    const newStatus = action === 'APPROVE' ? ProductStatus.Published : ProductStatus.Hidden;
+    const newStatus =
+      action === 'APPROVE' ? ProductStatus.Published : ProductStatus.Hidden;
 
     await this.prismaService.$transaction([
       this.prismaService.product.update({

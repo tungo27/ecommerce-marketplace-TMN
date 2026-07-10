@@ -34,7 +34,7 @@ function OAuthCallbackContent() {
           id: payload.sub,
           email: payload.email,
           role: payload.role,
-          name: payload.email.split('@')[0], // Fallback for name since JWT might not contain it
+          name: payload.name || payload.email.split('@')[0], // Fallback for name since JWT might not contain it
           picture: payload.picture
         };
         

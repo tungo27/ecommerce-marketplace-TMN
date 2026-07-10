@@ -17,6 +17,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
   const isAuthenticated = Boolean(user);
 
   useEffect(() => {
+    // eslint-disable-next-line
     setIsMounted(true);
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -144,9 +145,10 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                 className="flex items-center gap-2 rounded-full px-2 py-1 text-white transition hover:bg-[#E63E39]"
               >
                 <img
-                  src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                  src={(user as any).picture && (user as any).picture !== 'null' ? (user as any).picture : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
                   alt="Avatar"
                   className="w-8 h-8 rounded-full object-cover border border-white"
+                  referrerPolicy="no-referrer"
                 />
                 <span className="font-semibold">{user.name}</span>
               </button>
@@ -229,9 +231,10 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                <>
                  <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
                    <img
-                     src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                     src={(user as any).picture && (user as any).picture !== 'null' ? (user as any).picture : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
                      alt="Avatar"
                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                     referrerPolicy="no-referrer"
                    />
                    <div className="flex-1 min-w-0">
                      <div className="font-bold text-gray-900 truncate">{user.name}</div>

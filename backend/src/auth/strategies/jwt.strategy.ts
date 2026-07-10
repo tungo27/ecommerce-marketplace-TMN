@@ -6,6 +6,8 @@ interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  name?: string;
+  picture?: string;
   iat?: number;
   exp?: number;
 }
@@ -24,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload) {
+  validate(payload: JwtPayload) {
     if (!payload.sub || !payload.role) {
       throw new UnauthorizedException('Invalid token');
     }
@@ -34,6 +36,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
+      name: payload.name,
+      picture: payload.picture,
     };
   }
 }

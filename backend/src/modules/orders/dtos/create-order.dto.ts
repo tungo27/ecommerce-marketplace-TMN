@@ -10,6 +10,8 @@ export class CreateOrderDto {
   phoneNumber: string;
 
   @IsString()
-  @IsIn(['COD', 'BANK_TRANSFER'], { message: 'Phương thức thanh toán không hợp lệ' })
+  @IsIn(['COD', 'BANK_TRANSFER'], {
+    message: 'Phương thức thanh toán không hợp lệ',
+  })
   paymentMethod: string;
 }

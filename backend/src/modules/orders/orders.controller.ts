@@ -1,4 +1,15 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Query, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Get,
+  Query,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from '@prisma/client';
 import { OrdersService } from './orders.service';
@@ -15,10 +26,7 @@ export class OrdersController {
 
   @Get('my-orders')
   @UseGuards(AuthGuard('jwt'))
-  async getMyOrders(
-    @Query() getOrdersDto: GetOrdersDto,
-    @GetUser() user: any,
-  ) {
+  async getMyOrders(@Query() getOrdersDto: GetOrdersDto, @GetUser() user: any) {
     const orders = await this.ordersService.getMyOrders(user.id, getOrdersDto);
     return {
       message: 'Lấy lịch sử đơn hàng thành công',
@@ -30,12 +38,9 @@ export class OrdersController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('CUSTOMER')
-  async checkout(
-    @Body() createOrderDto: CreateOrderDto,
-    @GetUser() user: any,
-  ) {
+  async checkout(@Body() createOrderDto: CreateOrderDto, @GetUser() user: any) {
     const order = await this.ordersService.createOrder(user.id, createOrderDto);
-    
+
     return {
       message: 'Đặt hàng thành công',
       data: order,
@@ -52,7 +57,7 @@ export class OrdersController {
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    
+
     return this.ordersService.getSellerOrders(user.id, pageNum, limitNum);
   }
 
