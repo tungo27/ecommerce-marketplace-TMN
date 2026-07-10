@@ -41,7 +41,7 @@ export default function CheckoutPage() {
       });
       showToast('Đặt hàng thành công!', 'success');
       await clearCart(true); // reset UI cart
-      router.push('/orders'); // redirect to orders history
+      router.push('/orders/history'); // redirect to orders history
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Lỗi đặt hàng', 'error');
     } finally {

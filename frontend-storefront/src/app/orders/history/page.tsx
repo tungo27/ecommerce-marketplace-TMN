@@ -206,7 +206,19 @@ export default function OrderHistoryPage() {
                             <h4 className="line-clamp-2 pr-4">{item.productName}</h4>
                             <p className="ml-4 whitespace-nowrap text-[#FF4742]">{formatCurrency(item.price)}</p>
                           </div>
-                          <p className="text-sm text-gray-500 font-medium">Số lượng: {item.quantity}</p>
+                          <div className="flex justify-between items-end mt-2">
+                            <p className="text-sm text-gray-500 font-medium">Số lượng: {item.quantity}</p>
+                            {order.status === 'DELIVERED' && !item.hasReviewed && (
+                              <Link href={`/products/${item.productId}?review_order=${order.orderId}`}>
+                                <button className="px-4 py-2 bg-white text-[#FF4742] border border-[#FF4742] text-xs font-bold rounded-lg hover:bg-red-50 transition-colors focus:outline-none shadow-sm">
+                                  Đánh giá
+                                </button>
+                              </Link>
+                            )}
+                            {order.status === 'DELIVERED' && item.hasReviewed && (
+                              <span className="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium border border-green-200">Đã đánh giá</span>
+                            )}
+                          </div>
                         </div>
                       </li>
                     ))}

@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Link from 'next/link';
 import ProductDetailActions from '@/components/ProductDetailActions';
+import ProductReviewsSection from '@/components/ProductReviewsSection';
 
 async function fetchProduct(id: string) {
   try {
@@ -24,13 +25,39 @@ async function fetchProduct(id: string) {
   }
 }
 
+async function fetchProductReviews(id: string) {
+  try {
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+    const response = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return await response.json();
+  } catch {
+    return [];
+  }
+}
+
 export default async function ProductDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ review_order?: string }>;
 }) {
   const { id } = await params;
+  const { review_order } = await searchParams;
   const product = await fetchProduct(id);
+  const initialReviews = await fetchProductReviews(id);
 
   if (!product) {
     return (
@@ -92,12 +119,12 @@ export default async function ProductDetailPage({
             <div className="mt-2 flex items-center gap-2">
               <div className="flex items-center text-[#F59E0B]">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <svg key={star} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                  <svg key={star} className={`h-4 w-4 ${star <= Math.round(product.averageRating || 0) ? 'fill-current' : 'text-gray-300 fill-current'}`} viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
-              <span className="text-xs font-medium text-gray-500 underline decoration-gray-300 underline-offset-4">120 Reviews</span>
+              <span className="text-xs font-medium text-gray-500 underline decoration-gray-300 underline-offset-4">{initialReviews.length} Reviews</span>
             </div>
           </div>
 
@@ -144,12 +171,12 @@ export default async function ProductDetailPage({
                 <div className="mt-4 flex items-center gap-4">
                   <div className="flex items-center text-[#F59E0B]">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                      <svg key={star} className={`h-5 w-5 ${star <= Math.round(product.averageRating || 0) ? 'fill-current' : 'text-gray-300 fill-current'}`} viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
                   </div>
-                  <span className="text-sm font-medium text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-gray-700">120 Reviews</span>
+                  <span className="text-sm font-medium text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-gray-700">{initialReviews.length} Reviews</span>
                   <span className="text-gray-300">|</span>
                   <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                     {product.stock > 0 ? 'In Stock' : 'Out of stock'}
@@ -213,6 +240,14 @@ export default async function ProductDetailPage({
                   <span className="text-[10px] lg:text-xs font-medium text-gray-500">30-Day Return</span>
                 </div>
               </div>
+              
+              {/* Reviews Section */}
+              <ProductReviewsSection 
+                productId={product.id}
+                averageRating={product.averageRating || 0}
+                initialReviews={initialReviews}
+                reviewOrderFromUrl={review_order}
+              />
             </div>
           </div>
         </div>
