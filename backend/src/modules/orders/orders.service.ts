@@ -50,6 +50,7 @@ export class OrdersService {
             select: {
               quantity: true,
               price: true,
+              productId: true,
               product: {
                 select: {
                   name: true,
@@ -63,16 +64,38 @@ export class OrdersService {
       this.prisma.order.count({ where: whereClause }),
     ]);
 
+    const existingReviews = await this.prisma.review.findMany({
+      where: {
+        userId,
+        OR: orders.flatMap((order) =>
+          order.items.map((item) => ({
+            orderId: order.id,
+            productId: item.productId,
+          })),
+        ),
+      },
+      select: {
+        orderId: true,
+        productId: true,
+      },
+    });
+
+    const reviewedKeys = new Set(
+      existingReviews.map((review) => `${review.orderId}:${review.productId}`),
+    );
+
     const formattedOrders = orders.map((order) => ({
       orderId: order.id,
       createdAt: order.createdAt,
       totalPrice: order.totalAmount,
       status: order.status,
       items: order.items.map((item) => ({
+        productId: item.productId,
         productName: item.product.name,
         thumbnailUrl: item.product.images[0] || null,
         quantity: item.quantity,
         price: item.price,
+        hasReviewed: reviewedKeys.has(`${order.id}:${item.productId}`),
       })),
     }));
 
@@ -149,7 +172,7 @@ export class OrdersService {
               shippingAddress,
               phoneNumber,
               paymentMethod,
-              status: 'Pending',
+              status: 'PENDING',
               items: {
                 create: cart.items.map((item) => ({
                   productId: item.productId,
@@ -265,16 +288,16 @@ export class OrdersService {
 
     // State machine tuyến tính
     const statusOrder: OrderStatus[] = [
-      OrderStatus.Pending,
-      OrderStatus.Confirmed,
-      OrderStatus.Shipped,
-      OrderStatus.Delivered,
+      OrderStatus.PENDING,
+      OrderStatus.CONFIRMED,
+      OrderStatus.SHIPPED,
+      OrderStatus.DELIVERED,
     ];
 
     // Cho phép CANCELLED từ trạng thái PENDING, CONFIRMED
     // Nhưng yêu cầu chỉ cho PENDING -> CONFIRMED -> SHIPPED -> DELIVERED
-    if (newStatus === OrderStatus.Cancelled) {
-      if (order.status === OrderStatus.Delivered || order.status === OrderStatus.Shipped) {
+    if (newStatus === OrderStatus.CANCELLED) {
+      if (order.status === OrderStatus.DELIVERED || order.status === OrderStatus.SHIPPED) {
         throw new BadRequestException('Không thể hủy đơn hàng đang giao hoặc đã giao thành công');
       }
     } else {
@@ -282,7 +305,7 @@ export class OrdersService {
       const newIndex = statusOrder.indexOf(newStatus);
 
       // Nếu trạng thái cũ là CANCELLED thì không cho đổi đi đâu hết
-      if (order.status === OrderStatus.Cancelled) {
+      if (order.status === OrderStatus.CANCELLED) {
         throw new BadRequestException('Đơn hàng đã bị hủy, không thể thay đổi trạng thái');
       }
 

@@ -92,6 +92,7 @@ model Order {
   updatedAt       DateTime      @updatedAt
   items           OrderItem[]
   transactions    Transaction[]
+  reviews         Review[]
   @@index([userId, createdAt])
 }
 
@@ -124,7 +125,12 @@ model Review {
   product   Product  @relation(fields: [productId], references: [id])
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
+
+  @@unique([userId, productId, orderId])
+  @@index([productId])
 }
 
 model Waitlist {

@@ -36,7 +36,10 @@ export class ProductRepository {
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
         where,
-        include: { seller: { select: { name: true } } }, // Fetch Shop name (TechZone)
+        include: {
+          seller: { select: { name: true } },
+          _count: { select: { reviews: true } },
+        },
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -44,6 +47,11 @@ export class ProductRepository {
       this.prisma.product.count({ where }),
     ]);
 
-    return { products, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
+    const mappedProducts = products.map(({ _count, ...rest }) => ({
+      ...rest,
+      reviewCount: _count.reviews,
+    }));
+
+    return { products: mappedProducts, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
   }
 }
