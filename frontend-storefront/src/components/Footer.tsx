@@ -5,24 +5,24 @@ import Link from 'next/link';
 
 const FOOTER_LINKS = {
   policy: [
-    { label: 'Chính sách bảo hành', href: '/' },
-    { label: 'Chính sách đổi trả', href: '/' },
-    { label: 'Chính sách vận chuyển', href: '/' },
-    { label: 'Chính sách bảo mật', href: '/' },
-    { label: 'Điều khoản sử dụng', href: '/' },
+    { label: 'Warranty Policy', href: '/' },
+    { label: 'Return Policy', href: '/' },
+    { label: 'Shipping Policy', href: '/' },
+    { label: 'Privacy Policy', href: '/' },
+    { label: 'Terms of Service', href: '/' },
   ],
   about: [
-    { label: 'Về chúng tôi', href: '/' },
-    { label: 'Đội ngũ phát triển', href: '/' },
-    { label: 'Tuyển dụng', href: '/' },
-    { label: 'Blog & Tin tức', href: '/' },
-    { label: 'Đăng ký làm Seller', href: '/' },
+    { label: 'About Us', href: '/' },
+    { label: 'Development Team', href: '/' },
+    { label: 'Careers', href: '/' },
+    { label: 'Blog & News', href: '/' },
+    { label: 'Register as Seller', href: '/' },
   ],
   contact: [
-    { icon: '📍', text: '123 Nguyễn Huệ, Q.1, TP.HCM' },
-    { icon: '📞', text: '1800 0000 (Miễn phí)' },
-    { icon: '📧', text: 'support@marketplace.vn' },
-    { icon: '⏰', text: 'T2 – CN: 8:00 – 22:00' },
+    { icon: '📍', text: '123 Nguyen Hue, D.1, HCMC' },
+    { icon: '📞', text: '1800 0000 (Free)' },
+    { icon: '📧', text: 'support@marketplace.com' },
+    { icon: '⏰', text: 'Mon – Sun: 8:00 – 22:00' },
   ],
 };
 
@@ -80,12 +80,12 @@ export default function Footer() {
   return (
     <footer className="overflow-hidden rounded-2xl bg-gray-900 text-gray-300">
       {/* Top CTA band */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-6 text-center sm:px-10">
+      <div className="bg-primary px-6 py-6 text-center sm:px-10">
         <p className="text-sm font-bold uppercase tracking-widest text-white/80">
-          Tham gia cộng đồng mua sắm thông minh
+          Join our smart shopping community
         </p>
         <h3 className="mt-1 text-2xl font-black text-white sm:text-3xl">
-          Nhận Ưu Đãi Độc Quyền Mỗi Tuần!
+          Get Exclusive Weekly Offers!
         </h3>
       </div>
 
@@ -96,7 +96,7 @@ export default function Footer() {
           <div>
             <p className="text-xl font-extrabold text-white">🛍️ Marketplace</p>
             <p className="mt-2 text-sm text-gray-400 leading-relaxed">
-              Nền tảng thương mại điện tử uy tín, kết nối người mua và người bán trên toàn quốc.
+              A trusted e-commerce platform connecting buyers and sellers nationwide.
             </p>
           </div>
           {/* Social icons */}
@@ -106,7 +106,7 @@ export default function Footer() {
                 key={social.name}
                 href={social.href}
                 aria-label={social.name}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-gray-300 transition-all duration-200 hover:bg-orange-500 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-gray-300 transition-all duration-200 hover:bg-primary hover:text-white"
               >
                 {social.icon}
               </Link>
@@ -117,14 +117,14 @@ export default function Footer() {
         {/* Policy links */}
         <div>
           <h4 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">
-            Chính Sách
+            Policies
           </h4>
           <ul className="flex flex-col gap-2">
             {FOOTER_LINKS.policy.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="text-sm text-gray-400 transition-colors duration-200 hover:text-orange-400"
+                  className="text-sm text-gray-400 transition-colors duration-200 hover:text-primary"
                 >
                   {link.label}
                 </Link>
@@ -136,14 +136,14 @@ export default function Footer() {
         {/* About + Contact */}
         <div>
           <h4 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">
-            Về Chúng Tôi
+            About Us
           </h4>
           <ul className="flex flex-col gap-2 mb-6">
             {FOOTER_LINKS.about.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="text-sm text-gray-400 transition-colors duration-200 hover:text-orange-400"
+                  className="text-sm text-gray-400 transition-colors duration-200 hover:text-primary"
                 >
                   {link.label}
                 </Link>
@@ -151,7 +151,7 @@ export default function Footer() {
             ))}
           </ul>
           <h4 className="mb-3 text-sm font-bold uppercase tracking-widest text-white">
-            Liên Hệ
+            Contact
           </h4>
           <ul className="flex flex-col gap-2">
             {FOOTER_LINKS.contact.map((item) => (
@@ -166,15 +166,15 @@ export default function Footer() {
         {/* Newsletter */}
         <div>
           <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-white">
-            Đăng Ký Nhận Ưu Đãi
+            Subscribe for Offers
           </h4>
           <p className="mb-4 text-sm text-gray-400">
-            Nhập email để nhận mã giảm giá và thông báo sớm về Flash Sale.
+            Enter your email to receive discount codes and early Flash Sale alerts.
           </p>
           {subscribed ? (
             <div className="rounded-xl bg-green-900/40 px-4 py-4 text-center border border-green-700">
-              <p className="text-green-400 font-semibold text-sm">✅ Đăng ký thành công!</p>
-              <p className="mt-1 text-xs text-gray-400">Cảm ơn bạn đã theo dõi chúng tôi.</p>
+              <p className="text-green-400 font-semibold text-sm">✅ Subscribed successfully!</p>
+              <p className="mt-1 text-xs text-gray-400">Thank you for joining us.</p>
             </div>
           ) : (
             <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
@@ -185,13 +185,13 @@ export default function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="your@email.com"
-                className="w-full rounded-xl bg-gray-800 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-500 ring-1 ring-gray-700 transition-all focus:ring-orange-500"
+                className="w-full rounded-xl bg-gray-800 px-4 py-3 text-sm text-white outline-none placeholder:text-gray-500 ring-1 ring-gray-700 transition-all focus:ring-primary"
               />
               <button
                 type="submit"
-                className="w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-orange-600 active:scale-[0.98]"
+                className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
               >
-                Đăng Ký Ngay
+                Subscribe Now
               </button>
             </form>
           )}
@@ -216,10 +216,9 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="flex flex-col items-center justify-between gap-2 border-t border-gray-800 px-6 py-5 text-xs text-gray-500 sm:flex-row sm:px-10">
-        <p>© {new Date().getFullYear()} Marketplace TMN. Tất cả quyền được bảo lưu.</p>
-        <p>Được xây dựng bằng ❤️ với Next.js & NestJS</p>
+        <p suppressHydrationWarning>© {new Date().getFullYear()} Marketplace TMN. All rights reserved.</p>
+        <p>Built with ❤️ using Next.js & NestJS</p>
       </div>
     </footer>
   );

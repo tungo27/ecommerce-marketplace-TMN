@@ -18,64 +18,64 @@ interface ProductTemplate {
 
 const PRODUCT_TEMPLATES: ProductTemplate[] = [
   // Cosmetics (10)
-  { name: 'Mascara Dày Mi Chuyên Sâu', description: 'Mascara làm dày mi dài mi chống nước, không lem không trôi.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp', priceMin: 15, priceMax: 30 },
-  { name: 'Bảng Phấn Mắt Kèm Gương', description: 'Bảng màu mắt 12 ô thời thượng, có sẵn gương trang điểm tiện dụng.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp', priceMin: 25, priceMax: 50 },
-  { name: 'Phấn Phủ Dạng Bột Kiềm Dầu', description: 'Phấn phủ siêu mịn giúp kiềm dầu cả ngày, che phủ lỗ chân lông tốt.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp', priceMin: 20, priceMax: 40 },
-  { name: 'Son Thỏi Lì Đỏ Ruby', description: 'Son môi lì màu đỏ Ruby sang trọng, dưỡng ẩm không làm khô môi.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp', priceMin: 18, priceMax: 35 },
-  { name: 'Sơn Móng Tay Đỏ Thuần', description: 'Sơn móng tay màu đỏ thuần cổ điển, mau khô và lâu trôi, an toàn móng.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp', priceMin: 5, priceMax: 15 },
-  { name: 'Nước Hoa Unisex Basic', description: 'Nước hoa unisex với hương thơm dịu nhẹ, lưu hương lâu từ 8-12 tiếng.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp', priceMin: 100, priceMax: 200 },
-  { name: 'Nước Hoa Nữ Đen Bí Ẩn', description: 'Hương thơm quyến rũ, đậm chất quý phái dành cho các buổi tiệc đêm.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp', priceMin: 200, priceMax: 350 },
-  { name: 'Nước Hoa Nữ Hoa Cỏ Tươi Mát', description: 'Hương hoa nhài, hoa lan tỏa rạng rỡ, thích hợp cho mùa hè năng động.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dior-j\'adore/1.webp', priceMin: 180, priceMax: 300 },
-  { name: 'Nước Hoa Ánh Dương Quyến Rũ', description: 'Sự kết hợp hoàn hảo của các nốt hương trái cây nhiệt đới ngọt ngào.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp', priceMin: 150, priceMax: 250 },
-  { name: 'Nước Hoa Hương Hoa Hồng Cổ', description: 'Hương thơm dịu dàng, lãng mạn chiết xuất từ hoa hồng cổ điển nước Pháp.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp', priceMin: 180, priceMax: 320 },
+  { name: 'Intense Volumizing Mascara', description: 'Long-lasting, waterproof mascara for extreme volume and length without smudging.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp', priceMin: 15, priceMax: 30 },
+  { name: 'Eyeshadow Palette with Mirror', description: '12-color trendy eyeshadow palette with a convenient built-in makeup mirror.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp', priceMin: 25, priceMax: 50 },
+  { name: 'Oil-Control Setting Powder', description: 'Ultra-fine setting powder that controls oil all day and blurs pores perfectly.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp', priceMin: 20, priceMax: 40 },
+  { name: 'Ruby Red Matte Lipstick', description: 'Luxurious ruby red matte lipstick, moisturizing formula that keeps lips soft.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp', priceMin: 18, priceMax: 35 },
+  { name: 'Classic Red Nail Polish', description: 'Classic pure red nail polish, quick-drying, long-lasting, and safe for nails.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp', priceMin: 5, priceMax: 15 },
+  { name: 'Basic Unisex Perfume', description: 'Gentle unisex fragrance with long-lasting scent from 8 to 12 hours.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp', priceMin: 100, priceMax: 200 },
+  { name: 'Mysterious Black Perfume for Women', description: 'Captivating and elegant scent, perfect for evening parties and special events.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp', priceMin: 200, priceMax: 350 },
+  { name: 'Fresh Floral Perfume for Women', description: 'Radiant jasmine and orchid scent, perfect for an active and vibrant summer.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dior-j\'adore/1.webp', priceMin: 180, priceMax: 300 },
+  { name: 'Sunlight Glamour Perfume', description: 'A perfect combination of sweet tropical fruit notes for a charming aura.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp', priceMin: 150, priceMax: 250 },
+  { name: 'Vintage Rose Perfume', description: 'Gentle, romantic fragrance extracted from classic French roses.', category: Category.Cosmetics, imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp', priceMin: 180, priceMax: 320 },
 
   // Home Living (10)
-  { name: 'Giường Ngủ Gỗ Sồi Tân Cổ Điển', description: 'Giường ngủ chất liệu gỗ sồi tự nhiên, thiết kế tân cổ điển sang trọng.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp', priceMin: 1500, priceMax: 2500 },
-  { name: 'Ghế Sofa Bọc Nỉ Sang Trọng', description: 'Ghế sofa nỉ cao cấp mềm mại, êm ái cho phòng khách gia đình.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp', priceMin: 2000, priceMax: 3500 },
-  { name: 'Tủ Đầu Giường Gỗ Phong Phi', description: 'Tủ đầu giường nhỏ gọn, tiện lợi, đường nét gỗ tự nhiên sắc sảo.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp', priceMin: 200, priceMax: 400 },
-  { name: 'Ghế Xoay Văn Phòng Cao Cấp', description: 'Ghế làm việc chống đau lưng với lớp đệm mút đúc cực kỳ thoải mái.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp', priceMin: 350, priceMax: 600 },
-  { name: 'Tủ Lavabo Nhà Tắm Kèm Gương', description: 'Bộ tủ chậu rửa mặt chống nước đi kèm gương trang điểm thông minh.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp', priceMin: 400, priceMax: 700 },
-  { name: 'Xích Đu Trang Trí Nghệ Thuật', description: 'Xích đu thư giãn treo phòng khách hoặc ban công, dây đan chắc chắn.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/1.webp', priceMin: 150, priceMax: 300 },
-  { name: 'Khung Ảnh Gia Đình Treo Tường', description: 'Combo khung ảnh gia đình đa kích thước làm từ gỗ ép cao cấp.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/1.webp', priceMin: 30, priceMax: 60 },
-  { name: 'Cây Mô Hình Trang Trí', description: 'Cây mô hình sinh động trang trí phòng làm việc, không cần tưới nước.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/1.webp', priceMin: 15, priceMax: 40 },
-  { name: 'Chậu Cây Gốm Sứ Bắc Âu', description: 'Chậu cây mini bằng gốm tráng men phong cách Bắc Âu tĩnh lặng.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/1.webp', priceMin: 10, priceMax: 25 },
-  { name: 'Đèn Bàn Cổ Điển Ánh Sáng Vàng', description: 'Đèn bàn trang trí với ánh sáng vàng ấm áp, thích hợp cho phòng ngủ.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/1.webp', priceMin: 45, priceMax: 90 },
+  { name: 'Neoclassical Oak Wood Bed', description: 'Natural oak wood bed featuring an elegant and luxurious neoclassical design.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp', priceMin: 1500, priceMax: 2500 },
+  { name: 'Luxury Fabric Upholstered Sofa', description: 'Premium fabric sofa, incredibly soft and comfortable for the living room.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp', priceMin: 2000, priceMax: 3500 },
+  { name: 'African Cherry Bedside Table', description: 'Compact and convenient bedside table with sharp natural wood grain details.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp', priceMin: 200, priceMax: 400 },
+  { name: 'Premium Swivel Office Chair', description: 'Ergonomic office chair with highly comfortable molded foam padding to prevent back pain.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp', priceMin: 350, priceMax: 600 },
+  { name: 'Bathroom Vanity Cabinet with Mirror', description: 'Waterproof bathroom sink cabinet set paired with a smart makeup mirror.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp', priceMin: 400, priceMax: 700 },
+  { name: 'Artistic Decorative Swing', description: 'Relaxing swing suitable for the living room or balcony, featuring sturdy ropes.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/1.webp', priceMin: 150, priceMax: 300 },
+  { name: 'Family Wall Photo Frame Set', description: 'Multi-size family photo frame combo made from premium pressed wood.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/1.webp', priceMin: 30, priceMax: 60 },
+  { name: 'Decorative Model Plant', description: 'Vivid model plant to decorate your workspace, requires zero watering.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/1.webp', priceMin: 15, priceMax: 40 },
+  { name: 'Nordic Ceramic Plant Pot', description: 'Mini ceramic plant pot featuring a tranquil Nordic glazed finish.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/1.webp', priceMin: 10, priceMax: 25 },
+  { name: 'Classic Warm Light Table Lamp', description: 'Decorative table lamp providing warm ambient light, perfect for the bedroom.', category: Category.Home_Living, imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/1.webp', priceMin: 45, priceMax: 90 },
 
   // Food (10)
-  { name: 'Táo Nhập Khẩu Nguyên Thùng', description: 'Táo đỏ giòn ngọt, vỏ mỏng nhập khẩu chính ngạch 100% tươi mới.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/apple/1.webp', priceMin: 10, priceMax: 20 },
-  { name: 'Thăn Bò Mỹ Làm Bít Tết', description: 'Thăn bò Mỹ thượng hạng vân mỡ cẩm thạch lý tưởng làm món bít tết.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp', priceMin: 40, priceMax: 80 },
-  { name: 'Hạt Khô Dinh Dưỡng Cho Mèo', description: 'Thức ăn hạt cao cấp giúp mèo phát triển toàn diện, lông bóng mượt.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp', priceMin: 20, priceMax: 35 },
-  { name: 'Thịt Gà Tươi Sạch Đóng Gói', description: 'Thịt đùi gà tươi sạch đạt chuẩn an toàn thực phẩm, thịt chắc và ngọt.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp', priceMin: 8, priceMax: 15 },
-  { name: 'Dầu Ăn Hướng Dương Nguyên Chất', description: 'Dầu ăn chiết xuất từ hạt hướng dương, chứa nhiều Vitamin E tốt cho tim mạch.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp', priceMin: 6, priceMax: 12 },
-  { name: 'Dưa Leo Hữu Cơ Xanh Giòn', description: 'Dưa leo trồng theo tiêu chuẩn hữu cơ, ăn sống tươi mát, không hóa chất.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp', priceMin: 3, priceMax: 8 },
-  { name: 'Thức Ăn Hạt Khô Cho Chó Bổ Dưỡng', description: 'Cung cấp canxi và vitamin giúp hệ xương khớp của cún khỏe mạnh.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp', priceMin: 25, priceMax: 45 },
-  { name: 'Trứng Gà Tươi Vỏ Nâu Vĩ 10 Quả', description: 'Trứng gà lấy từ nông trại xanh, lòng đỏ béo ngậy, đạt chuẩn VietGAP.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp', priceMin: 4, priceMax: 8 },
-  { name: 'Cá Hồi Fillet Nhập Khẩu Na Uy', description: 'Fillet cá hồi vân mỡ tự nhiên, tươi ngon thích hợp làm sushi hoặc áp chảo.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp', priceMin: 30, priceMax: 65 },
-  { name: 'Ớt Chuông Xanh Đà Lạt', description: 'Ớt chuông giòn ngọt mọng nước, giàu vitamin C dùng làm salad tuyệt vời.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp', priceMin: 3, priceMax: 7 },
+  { name: 'Imported Whole Box Apples', description: 'Crisp, sweet, thin-skinned red apples, 100% freshly imported.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/apple/1.webp', priceMin: 10, priceMax: 20 },
+  { name: 'US Beef Tenderloin for Steak', description: 'Premium US beef tenderloin with ideal marble fat patterns for perfect steaks.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp', priceMin: 40, priceMax: 80 },
+  { name: 'Nutritious Dry Cat Food', description: 'Premium dry food promoting comprehensive growth and a shiny coat for cats.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp', priceMin: 20, priceMax: 35 },
+  { name: 'Packaged Fresh Chicken Meat', description: 'Clean and fresh chicken drumsticks meeting food safety standards, tender and sweet.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp', priceMin: 8, priceMax: 15 },
+  { name: 'Pure Sunflower Cooking Oil', description: 'Cooking oil extracted from sunflower seeds, rich in Vitamin E, good for the heart.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp', priceMin: 6, priceMax: 12 },
+  { name: 'Crispy Organic Green Cucumber', description: 'Organically grown cucumbers, fresh and crunchy for salads, chemical-free.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp', priceMin: 3, priceMax: 8 },
+  { name: 'Nutritious Dry Dog Food', description: 'Provides calcium and vitamins to ensure a healthy skeletal system for your dog.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp', priceMin: 25, priceMax: 45 },
+  { name: 'Brown Shell Fresh Eggs (10-Pack)', description: 'Eggs from green farms with rich yolks, meeting high agricultural standards.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp', priceMin: 4, priceMax: 8 },
+  { name: 'Norwegian Imported Salmon Fillet', description: 'Salmon fillet with natural fat marbling, fresh and perfect for sushi or pan-searing.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp', priceMin: 30, priceMax: 65 },
+  { name: 'Dalat Green Bell Pepper', description: 'Crisp and juicy green bell pepper, rich in vitamin C, excellent for salads.', category: Category.Food, imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp', priceMin: 3, priceMax: 7 },
 
   // Electronics (10)
-  { name: 'Macbook Pro 14 inch Space Grey', description: 'Siêu phẩm laptop Apple chip M mạnh mẽ, màn hình Liquid Retina XDR rực rỡ.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/1.webp', priceMin: 3500, priceMax: 4500 },
-  { name: 'Laptop Asus Zenbook Hai Màn Hình', description: 'Công nghệ màn hình kép độc đáo, hỗ trợ tối đa cho designer và editor.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/1.webp', priceMin: 3000, priceMax: 4000 },
-  { name: 'Laptop Huawei Matebook X Pro', description: 'Viền màn hình siêu mỏng, vỏ nhôm nguyên khối sang trọng cao cấp.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/1.webp', priceMin: 2500, priceMax: 3200 },
-  { name: 'Laptop Lenovo Yoga Cảm Ứng Xoay', description: 'Máy tính xách tay xoay lật 360 độ, màn hình cảm ứng độ nhạy cao tiện lợi.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/lenovo-yoga-920/1.webp', priceMin: 1800, priceMax: 2600 },
-  { name: 'Dell XPS 13 Viền Màn Hình Tràn', description: 'Dòng máy doanh nhân siêu mỏng nhẹ, bàn phím gõ êm, màn 4K sắc nét.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/new-dell-xps-13-9300-laptop/1.webp', priceMin: 2800, priceMax: 3500 },
-  { name: 'Loa Thông Minh Amazon Echo Plus', description: 'Trợ lý ảo Alexa tích hợp âm thanh vòm 360 độ mạnh mẽ.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/amazon-echo-plus/1.webp', priceMin: 150, priceMax: 250 },
-  { name: 'Tai Nghe Apple Airpods V2', description: 'Tai nghe TWS nhỏ gọn, kết nối ổn định trong hệ sinh thái Apple.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods/1.webp', priceMin: 200, priceMax: 300 },
-  { name: 'Tai Nghe Airpods Max Silver Chống Ồn', description: 'Trải nghiệm âm thanh đỉnh cao với chụp tai êm ái chống ồn tuyệt đối.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods-max-silver/1.webp', priceMin: 800, priceMax: 1200 },
-  { name: 'Đế Sạc Không Dây AirPower', description: 'Đế sạc chuẩn Qi tốc độ cao, cùng lúc sạc nhiều thiết bị tiện dụng.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/1.webp', priceMin: 50, priceMax: 100 },
-  { name: 'Loa Trợ Lý Ảo HomePod Mini Đen', description: 'Âm bass dày dặn, điều khiển ngôi nhà thông minh bằng giọng nói.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/1.webp', priceMin: 120, priceMax: 200 },
+  { name: 'Macbook Pro 14 inch Space Grey', description: 'Apple\'s powerful M-chip laptop featuring a brilliant Liquid Retina XDR display.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/1.webp', priceMin: 3500, priceMax: 4500 },
+  { name: 'Asus Zenbook Dual Screen Laptop', description: 'Unique dual-screen technology, offering maximum support for designers and editors.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/1.webp', priceMin: 3000, priceMax: 4000 },
+  { name: 'Huawei Matebook X Pro', description: 'Ultra-thin bezels with a premium solid aluminum casing for a luxurious feel.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/1.webp', priceMin: 2500, priceMax: 3200 },
+  { name: 'Lenovo Yoga Touch Convertible', description: '360-degree convertible laptop featuring a highly sensitive and convenient touch screen.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/lenovo-yoga-920/1.webp', priceMin: 1800, priceMax: 2600 },
+  { name: 'Dell XPS 13 InfinityEdge Display', description: 'Ultra-thin business laptop with a quiet keyboard and a razor-sharp 4K display.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/new-dell-xps-13-9300-laptop/1.webp', priceMin: 2800, priceMax: 3500 },
+  { name: 'Amazon Echo Plus Smart Speaker', description: 'Alexa voice assistant integrated with powerful 360-degree surround sound.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/amazon-echo-plus/1.webp', priceMin: 150, priceMax: 250 },
+  { name: 'Apple Airpods V2 Earbuds', description: 'Compact TWS earbuds offering stable connectivity within the Apple ecosystem.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods/1.webp', priceMin: 200, priceMax: 300 },
+  { name: 'Airpods Max Silver Noise Cancelling', description: 'Ultimate audio experience with comfortable ear cushions and absolute noise cancellation.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods-max-silver/1.webp', priceMin: 800, priceMax: 1200 },
+  { name: 'AirPower Wireless Charging Pad', description: 'High-speed Qi standard charging pad, conveniently charges multiple devices at once.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/1.webp', priceMin: 50, priceMax: 100 },
+  { name: 'HomePod Mini Black Smart Assistant', description: 'Deep bass sound and smart home voice control capabilities.', category: Category.Electronics, imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/1.webp', priceMin: 120, priceMax: 200 },
 
   // Fashion (10)
-  { name: 'Áo Sơ Mi Nam Kẻ Caro Xanh Đen', description: 'Chất liệu vải lanh thoáng mát, dáng áo suông rộng mặc thoải mái.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/1.webp', priceMin: 25, priceMax: 40 },
-  { name: 'Áo Thun Nam Chơi Game Aorus', description: 'Áo thun cotton họa tiết dành riêng cho game thủ cực ngầu.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/gigabyte-aorus-men-tshirt/1.webp', priceMin: 15, priceMax: 30 },
-  { name: 'Áo Sơ Mi Caro Plaid Năng Động', description: 'Dễ dàng mix & match cùng quần jean, mang lại vẻ ngoài năng động trẻ trung.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-plaid-shirt/1.webp', priceMin: 20, priceMax: 45 },
-  { name: 'Áo Sơ Mi Ngắn Tay Đi Biển', description: 'Chất vải lụa mềm mượt mỏng nhẹ, họa tiết sặc sỡ lý tưởng du lịch hè.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-short-sleeve-shirt/1.webp', priceMin: 18, priceMax: 35 },
-  { name: 'Áo Sơ Mi Kẻ Sọc Công Sở', description: 'Dáng vừa vặn tôn body, phù hợp đi làm hay tham gia các buổi tiệc.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/men-check-shirt/1.webp', priceMin: 30, priceMax: 60 },
-  { name: 'Giày Jordan 1 Cổ Cao Đỏ Đen', description: 'Phiên bản sneaker bóng rổ kinh điển siêu hiếm được săn đón nhiều nhất.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-air-jordan-1-red-and-black/1.webp', priceMin: 350, priceMax: 600 },
-  { name: 'Giày Thể Thao Nike Đinh Sân Cỏ', description: 'Đế đinh bám sân tuyệt đối, hỗ trợ lực bật nhảy cực mạnh khi thi đấu.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-baseball-cleats/1.webp', priceMin: 120, priceMax: 200 },
-  { name: 'Giày Chạy Bộ Puma Trợ Lực', description: 'Lớp đệm xốp êm ái, bọc vải dệt thông minh hạn chế chấn thương cổ chân.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/puma-future-rider-trainers/1.webp', priceMin: 80, priceMax: 150 },
-  { name: 'Sneaker Thể Thao Viền Đỏ Năng Động', description: 'Thiết kế hầm hố phá cách, đế độn cao 3cm giúp hack dáng nhẹ nhàng.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-&-red/1.webp', priceMin: 45, priceMax: 90 },
-  { name: 'Sneaker Chạy Thể Dục Mềm Nhẹ', description: 'Đế cao su lưu hóa siêu dẻo dai, trọng lượng giày chưa tới 300g rất linh hoạt.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-red/1.webp', priceMin: 40, priceMax: 80 },
+  { name: 'Men\'s Blue/Black Check Shirt', description: 'Breathable linen material with a loose fit for a comfortable wearing experience.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/1.webp', priceMin: 25, priceMax: 40 },
+  { name: 'Aorus Gaming Men\'s T-Shirt', description: 'Patterned cotton T-shirt designed exclusively for gamers looking for a cool style.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/gigabyte-aorus-men-tshirt/1.webp', priceMin: 15, priceMax: 30 },
+  { name: 'Dynamic Plaid Check Shirt', description: 'Easy to mix and match with jeans, providing a dynamic and youthful appearance.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-plaid-shirt/1.webp', priceMin: 20, priceMax: 45 },
+  { name: 'Short Sleeve Beach Shirt', description: 'Soft, lightweight silk-like fabric with colorful patterns ideal for summer travel.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-short-sleeve-shirt/1.webp', priceMin: 18, priceMax: 35 },
+  { name: 'Office Striped Dress Shirt', description: 'Fitted shape that flatters the body, suitable for work or attending parties.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/men-check-shirt/1.webp', priceMin: 30, priceMax: 60 },
+  { name: 'Jordan 1 High Top Red/Black', description: 'A highly sought-after, rare classic basketball sneaker edition.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-air-jordan-1-red-and-black/1.webp', priceMin: 350, priceMax: 600 },
+  { name: 'Nike Turf Football Cleats', description: 'Absolute field-gripping studded soles, supporting powerful jumps during matches.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-baseball-cleats/1.webp', priceMin: 120, priceMax: 200 },
+  { name: 'Puma Assist Running Shoes', description: 'Soft foam padding with smart woven fabric covering to minimize ankle injuries.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/puma-future-rider-trainers/1.webp', priceMin: 80, priceMax: 150 },
+  { name: 'Dynamic Red-Trim Sports Sneaker', description: 'Aggressive and edgy design, featuring a 3cm elevated sole for a slight height boost.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-&-red/1.webp', priceMin: 45, priceMax: 90 },
+  { name: 'Soft & Light Exercise Sneaker', description: 'Super flexible vulcanized rubber sole, incredibly agile weighing under 300g.', category: Category.Fashion, imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-red/1.webp', priceMin: 40, priceMax: 80 },
 ];
 
 /**
@@ -130,6 +130,74 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
     });
 
     createdCount++;
+  }
+  
+  // Seed reviews for the first published product to mock HomepageSocialProof data
+  const firstProduct = await prisma.product.findFirst({
+    where: { status: ProductStatus.Published },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  if (firstProduct) {
+    console.log('--- Seeding 4 authentic English Reviews for the first product ---');
+    const customers = await prisma.user.findMany({
+      where: { role: Role.CUSTOMER },
+      take: 4,
+    });
+
+    const mockReviewTexts = [
+      "Absolutely love this product! The quality exceeded my expectations and delivery was super fast. Highly recommended!",
+      "Great value for the price. I've been using it for a week now and it works exactly as described. Very satisfied.",
+      "Good quality overall. The packaging was a bit dented, but the item itself was in perfect condition.",
+      "Amazing shopping experience! Customer service was very helpful and the product is stunning."
+    ];
+
+    let totalRating = 0;
+
+    for (let i = 0; i < customers.length; i++) {
+      const customer = customers[i];
+      const rating = i === 2 ? 4 : 5; // one 4-star, three 5-star
+      totalRating += rating;
+
+      // 1. Create dummy order
+      const order = await prisma.order.create({
+        data: {
+          userId: customer.id,
+          totalAmount: firstProduct.price,
+          shippingAddress: faker.location.streetAddress(),
+          phoneNumber: faker.phone.number(),
+          paymentMethod: 'COD',
+          status: 'DELIVERED',
+        }
+      });
+
+      // 2. Create order item
+      await prisma.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: firstProduct.id,
+          quantity: 1,
+          price: firstProduct.price,
+        }
+      });
+
+      // 3. Create review
+      await prisma.review.create({
+        data: {
+          rating,
+          comment: mockReviewTexts[i],
+          productId: firstProduct.id,
+          userId: customer.id,
+          orderId: order.id,
+        }
+      });
+    }
+
+    // Update product average rating
+    await prisma.product.update({
+      where: { id: firstProduct.id },
+      data: { averageRating: totalRating / customers.length }
+    });
   }
 
   console.log(`seedProducts done. Created: ${createdCount}. Distributed across ${sellers.length} seller(s).`);

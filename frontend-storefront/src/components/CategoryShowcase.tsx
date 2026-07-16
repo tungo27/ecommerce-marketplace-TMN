@@ -13,103 +13,110 @@ interface Category {
 const CATEGORIES: Category[] = [
   {
     id: '1',
-    label: 'Điện Tử',
+    label: 'Electronics',
     value: 'Electronics',
-    emoji: '📱',
-    imageUrl: 'https://picsum.photos/seed/cat-electronics/300/300',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=300&auto=format&fit=crop',
     productCount: 128,
-    color: 'from-blue-500 to-blue-700',
+    color: '',
   },
   {
     id: '2',
-    label: 'Thời Trang',
+    label: 'Fashion',
     value: 'Fashion',
-    emoji: '👗',
-    imageUrl: 'https://picsum.photos/seed/cat-fashion/300/300',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=300&auto=format&fit=crop',
     productCount: 245,
-    color: 'from-pink-500 to-rose-600',
+    color: '',
   },
   {
     id: '3',
-    label: 'Nhà & Nội Thất',
+    label: 'Home & Living',
     value: 'Home_Living',
-    emoji: '🛋️',
-    imageUrl: 'https://picsum.photos/seed/cat-home/300/300',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=300&auto=format&fit=crop',
     productCount: 87,
-    color: 'from-green-500 to-emerald-700',
+    color: '',
   },
   {
     id: '4',
-    label: 'Mỹ Phẩm',
+    label: 'Cosmetics',
     value: 'Cosmetics',
-    emoji: '💄',
-    imageUrl: 'https://picsum.photos/seed/cat-cosmetics/300/300',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=300&auto=format&fit=crop',
     productCount: 193,
-    color: 'from-purple-500 to-violet-700',
+    color: '',
   },
   {
     id: '5',
-    label: 'Thực Phẩm',
+    label: 'Food',
     value: 'Food',
-    emoji: '🍜',
-    imageUrl: 'https://picsum.photos/seed/cat-food/300/300',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop',
     productCount: 312,
-    color: 'from-orange-400 to-orange-600',
+    color: '',
   },
   {
     id: '6',
-    label: 'Tất Cả',
+    label: 'All Categories',
     value: '',
-    emoji: '🛍️',
-    imageUrl: 'https://picsum.photos/seed/cat-all/300/300',
-    productCount: 965,
-    color: 'from-gray-500 to-gray-700',
+    emoji: '',
+    imageUrl: 'https://images.unsplash.com/photo-1472851294502-8a8bef1cf152?q=80&w=300&auto=format&fit=crop',
+    productCount: 0,
+    color: '',
   },
 ];
 
-export default function CategoryShowcase() {
+interface CategoryShowcaseProps {
+  counts?: Record<string, number>;
+}
+
+export default function CategoryShowcase({ counts = {} }: CategoryShowcaseProps) {
   return (
     <section>
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-extrabold text-gray-900 sm:text-2xl">Danh Mục Nổi Bật</h2>
-          <p className="mt-1 text-sm text-gray-500">Khám phá sản phẩm theo từng danh mục</p>
+          <h2 className="text-xl font-extrabold text-gray-900 sm:text-2xl">Top Categories</h2>
+          <p className="mt-1 text-sm text-gray-500">Explore products by category</p>
         </div>
         <Link
           href="/"
-          className="text-sm font-semibold text-orange-500 hover:text-orange-600 hover:underline"
+          className="text-sm font-semibold text-primary hover:text-primary/80 hover:underline"
         >
-          Xem tất cả →
+          View All →
         </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-6">
-        {CATEGORIES.map((cat) => (
-          <Link
-            key={cat.id}
-            href={cat.value ? `/?category=${cat.value}` : '/'}
-            className="group relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-          >
-            {/* Background image */}
-            <div className="relative h-36 w-full sm:h-40">
-              <img
-                src={cat.imageUrl}
-                alt={cat.label}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {/* Gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${cat.color} opacity-60`} />
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
-                <span className="text-3xl drop-shadow-md">{cat.emoji}</span>
-                <p className="mt-2 text-sm font-bold text-white drop-shadow-md leading-tight">
-                  {cat.label}
-                </p>
-                <p className="mt-0.5 text-xs text-white/80 drop-shadow">{cat.productCount} SP</p>
+        {CATEGORIES.map((cat) => {
+          const count = counts[cat.value] ?? cat.productCount;
+          return (
+            <Link
+              key={cat.id}
+              href={cat.value ? `/?category=${cat.value}` : '/'}
+              scroll={false}
+              className="group relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            >
+              {/* Background image */}
+              <div className="relative h-36 w-full sm:h-40">
+                <img
+                  src={cat.imageUrl}
+                  alt={cat.label}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                {/* Subtle bottom shadow overlay instead of full gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+                {/* Content */}
+                <div className="absolute inset-x-0 bottom-0 flex flex-col p-3">
+                  <p className="text-base font-bold text-white drop-shadow-md leading-tight">
+                    {cat.label}
+                  </p>
+                  <p className="text-xs text-gray-300 drop-shadow">{count} Items</p>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

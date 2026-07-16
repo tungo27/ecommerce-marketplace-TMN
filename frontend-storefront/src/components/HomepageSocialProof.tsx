@@ -1,46 +1,6 @@
-interface Review {
-  id: string;
-  avatarUrl: string;
-  name: string;
-  rating: number;
-  comment: string;
-  date: string;
+interface HomepageSocialProofProps {
+  reviews?: any[];
 }
-
-const REVIEWS: Review[] = [
-  {
-    id: '1',
-    avatarUrl: 'https://picsum.photos/seed/user-review-1/80/80',
-    name: 'Nguyễn Thị Lan',
-    rating: 5,
-    comment: 'Sản phẩm chất lượng tuyệt vời! Giao hàng nhanh, đóng gói cẩn thận. Sẽ quay lại mua tiếp!',
-    date: '12/07/2025',
-  },
-  {
-    id: '2',
-    avatarUrl: 'https://picsum.photos/seed/user-review-2/80/80',
-    name: 'Trần Minh Tuấn',
-    rating: 5,
-    comment: 'Mình rất hài lòng với trải nghiệm mua sắm. Shop tư vấn nhiệt tình và giao hàng đúng hẹn.',
-    date: '10/07/2025',
-  },
-  {
-    id: '3',
-    avatarUrl: 'https://picsum.photos/seed/user-review-3/80/80',
-    name: 'Phạm Hồng Nhung',
-    rating: 4,
-    comment: 'Sản phẩm đúng mô tả, chất liệu đẹp. Giá cả hợp lý so với chất lượng nhận được.',
-    date: '08/07/2025',
-  },
-  {
-    id: '4',
-    avatarUrl: 'https://picsum.photos/seed/user-review-4/80/80',
-    name: 'Lê Văn Đức',
-    rating: 5,
-    comment: 'Ứng dụng dễ sử dụng, thanh toán nhanh. Đây là lần mua thứ 3 của mình rồi, cực kỳ tin tưởng!',
-    date: '05/07/2025',
-  },
-];
 
 const PARTNERS = [
   { name: 'Visa', color: 'text-blue-700' },
@@ -69,16 +29,26 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function HomepageSocialProof() {
+const AVATARS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=100&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
+];
+
+export default function HomepageSocialProof({ reviews = [] }: HomepageSocialProofProps) {
+  // Use mock avatars if users don't have one
+  const displayReviews = reviews.slice(0, 4);
+
   return (
     <section className="rounded-2xl bg-white px-6 py-10 shadow-sm sm:px-10">
       {/* Header */}
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-          Khách Hàng Nói Gì?
+          What Our Customers Say
         </h2>
         <p className="mt-2 text-sm text-gray-500">
-          Hơn 10.000 khách hàng hài lòng đã tin chọn chúng tôi
+          Over 10,000 satisfied customers have trusted us
         </p>
         {/* Overall rating */}
         <div className="mt-4 flex items-center justify-center gap-2">
@@ -90,35 +60,42 @@ export default function HomepageSocialProof() {
 
       {/* Reviews grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {REVIEWS.map((review) => (
+        {displayReviews.map((review, idx) => (
           <div
             key={review.id}
             className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-gray-50 p-5 transition-shadow duration-300 hover:shadow-md"
           >
             {/* Stars */}
-            <StarRating rating={review.rating} />
+            <StarRating rating={review.rating || 5} />
             {/* Comment */}
             <p className="flex-1 text-sm text-gray-700 leading-relaxed">&ldquo;{review.comment}&rdquo;</p>
             {/* User */}
             <div className="flex items-center gap-3 border-t border-gray-100 pt-3">
               <img
-                src={review.avatarUrl}
-                alt={review.name}
-                className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-100"
+                src={AVATARS[idx % AVATARS.length]}
+                alt={review.user?.name || 'Customer'}
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20"
               />
               <div>
-                <p className="text-sm font-bold text-gray-900">{review.name}</p>
-                <p className="text-xs text-gray-400">{review.date}</p>
+                <p className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</p>
+                <p className="text-xs text-gray-400" suppressHydrationWarning>
+                  {new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                </p>
               </div>
             </div>
           </div>
         ))}
+        {displayReviews.length === 0 && (
+          <p className="col-span-full text-center text-sm text-gray-500 py-4">
+            No reviews yet. Check back later!
+          </p>
+        )}
       </div>
 
       {/* Partner logos */}
       <div className="mt-10 border-t border-gray-100 pt-8">
         <p className="mb-5 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
-          Đối Tác Thanh Toán & Vận Chuyển
+          Payment & Shipping Partners
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
           {PARTNERS.map((partner) => (

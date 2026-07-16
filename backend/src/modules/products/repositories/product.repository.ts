@@ -22,13 +22,16 @@ export class ProductRepository {
     if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: Number(query.maxPrice) } });
 
     if (query.search && query.search.trim() !== '') {
-      const searchStr = query.search.trim();
-      whereConditions.push({
+      // search may be a comma-separated list of expanded synonyms
+      const terms = query.search.split(',').map(t => t.trim()).filter(Boolean);
+      const termConditions: Prisma.ProductWhereInput[] = terms.map(term => ({
         OR: [
-          { name: { contains: searchStr, mode: 'insensitive' } },
-          { description: { contains: searchStr, mode: 'insensitive' } },
+          { name: { contains: term, mode: 'insensitive' as const } },
+          { description: { contains: term, mode: 'insensitive' as const } },
         ],
-      });
+      }));
+      // A product matches if ANY of the synonym terms matches
+      whereConditions.push({ OR: termConditions });
     }
 
     const where: Prisma.ProductWhereInput = { AND: whereConditions };

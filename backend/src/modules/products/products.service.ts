@@ -23,11 +23,76 @@ export class ProductsService {
       .trim();
   }
 
+  /**
+   * Map of Vietnamese keywords → their English equivalents (and vice versa).
+   * The normalizeSearchKeyword() strips diacritics first, then we look up the map.
+   */
+  private readonly SYNONYM_MAP: Record<string, string[]> = {
+    // Footwear
+    'giay': ['shoe', 'sneaker', 'boot', 'sandal', 'slipper', 'loafer', 'heel', 'footwear'],
+    'dep': ['sandal', 'slipper', 'flipflop'],
+    // Clothing
+    'ao': ['shirt', 'blouse', 'top', 'hoodie', 'sweater', 'polo'],
+    'quan': ['pant', 'trouser', 'jeans', 'short', 'legging'],
+    'vay': ['dress', 'skirt'],
+    'ao khoac': ['jacket', 'coat', 'hoodie', 'cardigan'],
+    'ao phong': ['tshirt', 't-shirt', 'polo'],
+    // Electronics
+    'dien thoai': ['phone', 'smartphone', 'mobile', 'iphone', 'android'],
+    'may tinh': ['computer', 'laptop', 'pc', 'notebook', 'macbook'],
+    'tai nghe': ['headphone', 'earphone', 'earbuds', 'headset'],
+    // Cosmetics
+    'son': ['lipstick', 'lip gloss', 'balm'],
+    'kem': ['cream', 'lotion', 'moisturizer', 'sunscreen', 'serum'],
+    'phan': ['powder', 'foundation', 'blush', 'eyeshadow'],
+    'nuoc hoa': ['perfume', 'cologne', 'fragrance'],
+    // Food
+    'ca phe': ['coffee'],
+    'tra': ['tea'],
+    'banh': ['cake', 'cookie', 'bread', 'biscuit', 'snack'],
+    // Home & Living
+    'ghe': ['chair', 'sofa', 'couch', 'stool', 'bench'],
+    'ban': ['table', 'desk'],
+    'den': ['lamp', 'light', 'bulb'],
+    // Sports
+    'the thao': ['sport', 'fitness', 'gym', 'athletic', 'exercise'],
+    'bong da': ['football', 'soccer'],
+    'bong ro': ['basketball'],
+    // Bags
+    'tui': ['bag', 'backpack', 'handbag', 'purse'],
+    'vi': ['wallet', 'purse'],
+    // Watches & Jewelry
+    'dong ho': ['watch', 'clock'],
+    'nhan': ['ring', 'jewelry'],
+    'vong': ['bracelet', 'necklace', 'bangle'],
+  };
+
+  private expandSearchKeywords(keyword: string): string[] {
+    const normalized = this.normalizeSearchKeyword(keyword);
+    const terms = new Set<string>([normalized]);
+
+    // Check direct match in synonym map
+    for (const [key, synonyms] of Object.entries(this.SYNONYM_MAP)) {
+      if (normalized.includes(key)) {
+        synonyms.forEach(s => terms.add(s));
+      }
+      // Also check if the keyword is an English synonym that maps back
+      if (synonyms.some(s => normalized.includes(s))) {
+        terms.add(key);
+        synonyms.forEach(s => terms.add(s));
+      }
+    }
+
+    return Array.from(terms);
+  }
+
   async findPublicProducts(query: QueryProductDto) {
     const normalizedQuery = { ...query };
 
     if (typeof query.search === 'string' && query.search.trim()) {
-      normalizedQuery.search = this.normalizeSearchKeyword(query.search);
+      // Store expanded keywords in query as comma-separated for the repository
+      const expanded = this.expandSearchKeywords(query.search);
+      normalizedQuery.search = expanded.join(',');
     }
 
     return this.productRepository.findPublicProducts(normalizedQuery);
