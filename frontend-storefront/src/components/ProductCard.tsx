@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +20,10 @@ type ProductCardProps = {
     };
   };
 };
+
+// Reusable VND formatter — Intl.NumberFormat handles grouping & symbol correctly
+const formatVND = (value: number): string =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
@@ -42,8 +47,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     router.push('/cart');
   };
 
-  const price = Number(product.price) || 0;
-  const originalPrice = price * 1.15;
+  // Prisma Decimal arrives as a string — cast strictly before any arithmetic
+  const numericPrice = Number(product.price) || 0;
+  const originalPrice = numericPrice * 1.15;
+
   const imageUrl =
     product.images?.[0] ||
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
@@ -54,10 +61,13 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white">
           -15%
         </div>
-        <img
+        {/* Next.js <Image /> with fill to prevent CLS — parent has aspect ratio set */}
+        <Image
           src={imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover transition duration-300 group-hover:scale-105"
         />
       </Link>
 
@@ -87,21 +97,21 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="ml-1 text-xs text-gray-500">
             {product.averageRating && product.averageRating > 0
               ? `${Number(product.averageRating).toFixed(1)} (${product.reviewCount ?? 0})`
-              : 'Chưa có đánh giá'}
+              : 'No reviews yet'}
           </span>
         </div>
 
         <div className="mt-auto pt-5">
           <div className="text-lg font-bold text-primary">
-            {price.toLocaleString('vi-VN')} VND
+            {formatVND(numericPrice)}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
             <span className="line-through">
-              {originalPrice.toLocaleString('vi-VN')} VND
+              {formatVND(originalPrice)}
             </span>
             <span>{product.stock > 0 ? `${product.stock} left` : 'Out of stock'}</span>
           </div>
-          <button 
+          <button
             onClick={handleAddToCart}
             disabled={product.stock <= 0}
             className="mt-4 w-full rounded-md bg-primary py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"

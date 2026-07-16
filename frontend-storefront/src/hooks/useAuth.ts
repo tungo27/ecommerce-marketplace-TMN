@@ -34,17 +34,17 @@ export const useAuth = create<AuthStore>((set) => {
   return {
     user: initialUser,
     isLoading: false,
-  error: null,
-  setUser: (user) => set({ user }),
-  setLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-    }
-    set({ user: null });
-  },
+    error: null,
+    setUser: (user) => set({ user }),
+    setLoading: (loading) => set({ isLoading: loading }),
+    setError: (error) => set({ error }),
+    clearError: () => set({ error: null }),
+    logout: () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+      }
+      set({ user: null });
+    },
   };
 });

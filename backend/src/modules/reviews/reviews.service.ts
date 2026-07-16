@@ -29,7 +29,7 @@ export class ReviewsService {
     });
 
     if (!order) {
-      throw new ForbiddenException('Đơn hàng không tồn tại, không thuộc về bạn hoặc chưa được giao thành công.');
+      throw new ForbiddenException('Order not found, does not belong to you, or has not been successfully delivered.');
     }
 
     // 2. Kiểm tra xem user đã review sản phẩm này cho order này chưa
@@ -42,7 +42,7 @@ export class ReviewsService {
     });
 
     if (existingReview) {
-      throw new ForbiddenException('Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.');
+      throw new ForbiddenException('You have already reviewed this product for this order.');
     }
 
     // 3. Transaction: Chèn Review mới + Tính averageRating + Update Product

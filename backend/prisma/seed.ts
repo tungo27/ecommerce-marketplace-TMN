@@ -6,6 +6,10 @@ import { seedUsers } from './seeds/user.seed';
 
 const prisma = new PrismaClient();
 
+/**
+ * Ensures the legacy admin account (admin@tmn.com) always exists.
+ * Uses a strong dedicated password separate from the Faker seed password.
+ */
 async function ensureLegacyAdmin() {
   const passwordHash = await bcrypt.hash('Admin@123456', 10);
 
@@ -30,16 +34,14 @@ async function ensureLegacyAdmin() {
 async function main() {
   console.log('=== Start database seed ===');
 
-  const users = await seedUsers(prisma);
+  // 1. Seed users first (generates Admins, Sellers, Customers via Faker.js)
+  await seedUsers(prisma);
+
+  // 2. Ensure the legacy admin account always exists
   await ensureLegacyAdmin();
 
-  const sellerAccount = users.find((user) => user.role === Role.SELLER);
-
-  if (!sellerAccount) {
-    throw new Error('Cannot find a SELLER account to link seeded products.');
-  }
-
-  await seedProducts(prisma, sellerAccount.id);
+  // 3. Seed products — sellers are fetched internally by seedProducts
+  await seedProducts(prisma);
 
   const [userCount, productCount, publicProductCount] = await Promise.all([
     prisma.user.count(),
@@ -53,7 +55,7 @@ async function main() {
   ]);
 
   console.log(
-    `Seed completed: ${userCount} users, ${productCount} products, ${publicProductCount} public products.`,
+    `=== Seed completed: ${userCount} users, ${productCount} products, ${publicProductCount} public products. ===`,
   );
 }
 

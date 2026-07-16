@@ -86,7 +86,7 @@ export class CartService {
     } catch (error) {
       this.logger.error(`Lỗi ghi giỏ hàng vào Redis [key=${key}]:`, error);
       throw new BadRequestException(
-        'Không thể lưu giỏ hàng. Vui lòng thử lại.',
+        'Failed to save cart. Please try again.',
       );
     }
   }
@@ -136,7 +136,7 @@ export class CartService {
     // Bước 1: Validate quantity (class-validator đã check >= 1, nhưng double-check ở service)
     if ((!quantity || quantity <= 0)) {
       throw new BadRequestException(
-        'Số lượng sản phẩm phải lớn hơn 0.',
+        'Product quantity must be greater than 0.',
       );
     }
 
@@ -155,14 +155,14 @@ export class CartService {
 
     if (!product) {
       throw new NotFoundException(
-        `Sản phẩm với ID "${productId}" không tồn tại.`,
+        `Product with ID "${productId}" does not exist.`,
       );
     }
 
     // Kiểm tra trạng thái sản phẩm - chỉ cho phép thêm sản phẩm Published
     if (product.status !== 'Published') {
       throw new BadRequestException(
-        'Sản phẩm hiện không khả dụng để thêm vào giỏ hàng.',
+        'This product is currently unavailable to add to cart.',
       );
     }
 
@@ -248,7 +248,7 @@ export class CartService {
 
     if (filteredItems.length === currentItems.length) {
       throw new NotFoundException(
-        `Sản phẩm với ID "${productId}" không có trong giỏ hàng.`,
+        `Product with ID "${productId}" is not in your cart.`,
       );
     }
 
@@ -275,7 +275,7 @@ export class CartService {
     newQuantity: number,
   ): Promise<CartResponse> {
     if (newQuantity <= 0) {
-      throw new BadRequestException('Số lượng phải lớn hơn 0.');
+      throw new BadRequestException('Quantity must be greater than 0.');
     }
 
     // Lấy thông tin tồn kho từ DB để validate
@@ -286,7 +286,7 @@ export class CartService {
 
     if (!product) {
       throw new NotFoundException(
-        `Sản phẩm với ID "${productId}" không tồn tại.`,
+        `Product with ID "${productId}" does not exist.`,
       );
     }
 
@@ -303,7 +303,7 @@ export class CartService {
 
     if (itemIndex === -1) {
       throw new NotFoundException(
-        `Sản phẩm với ID "${productId}" không có trong giỏ hàng.`,
+        `Product with ID "${productId}" is not in your cart.`,
       );
     }
 

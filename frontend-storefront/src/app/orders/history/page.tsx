@@ -8,11 +8,11 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 
 const TABS = [
-  { label: 'Tất cả', value: '' },
-  { label: 'Chờ duyệt', value: 'PENDING' },
-  { label: 'Đã xác nhận', value: 'CONFIRMED' },
-  { label: 'Đang giao', value: 'SHIPPED' },
-  { label: 'Đã giao', value: 'DELIVERED' },
+  { label: 'All', value: '' },
+  { label: 'Pending', value: 'PENDING' },
+  { label: 'Confirmed', value: 'CONFIRMED' },
+  { label: 'Shipping', value: 'SHIPPED' },
+  { label: 'Delivered', value: 'DELIVERED' },
 ];
 
 export default function OrderHistoryPage() {
@@ -68,15 +68,15 @@ export default function OrderHistoryPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">Chờ duyệt</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">Pending</span>;
       case 'CONFIRMED':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200">Đã xác nhận</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200">Confirmed</span>;
       case 'SHIPPED':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-200">Đang giao</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-200">Shipping</span>;
       case 'DELIVERED':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">Đã giao</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">Delivered</span>;
       case 'CANCELLED':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">Đã hủy</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">Cancelled</span>;
       default:
         return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 border border-gray-200">{status}</span>;
     }
@@ -146,17 +146,17 @@ export default function OrderHistoryPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Chưa có đơn hàng nào</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No orders yet</h3>
             <p className="text-gray-500 mb-8 max-w-md mx-auto">
               {activeTab
-                ? `Bạn chưa có đơn hàng nào trong trạng thái "${TABS.find(t => t.value === activeTab)?.label}".`
-                : 'Bạn chưa thực hiện bất kỳ đơn hàng nào. Hãy khám phá các sản phẩm tuyệt vời của chúng tôi!'}
+                ? `You have no orders with status "${TABS.find(t => t.value === activeTab)?.label}".`
+                : 'You have not placed any orders yet. Explore our great products!'}
             </p>
             <Link
               href="/"
               className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-full text-white bg-[#FF4742] hover:bg-[#E63E39] shadow-lg shadow-red-200 transition-all duration-200 transform hover:-translate-y-0.5"
             >
-              Tiếp tục mua sắm
+              Continue Shopping
             </Link>
           </div>
         ) : (
@@ -166,15 +166,15 @@ export default function OrderHistoryPage() {
                 <div className="border-b border-gray-100 p-5 sm:p-6 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Mã đơn hàng</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Order ID</p>
                       <p className="font-bold text-gray-900">#{order.orderId.substring(0, 8).toUpperCase()}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Ngày đặt</p>
-                      <p className="font-semibold text-gray-900">{new Date(order.createdAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Date Placed</p>
+                      <p className="font-semibold text-gray-900">{new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tổng tiền</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Total Amount</p>
                       <p className="font-bold text-[#FF4742]">{formatCurrency(order.totalPrice)}</p>
                     </div>
                   </div>
@@ -207,16 +207,16 @@ export default function OrderHistoryPage() {
                             <p className="ml-4 whitespace-nowrap text-[#FF4742]">{formatCurrency(item.price)}</p>
                           </div>
                           <div className="flex justify-between items-end mt-2">
-                            <p className="text-sm text-gray-500 font-medium">Số lượng: {item.quantity}</p>
+                            <p className="text-sm text-gray-500 font-medium">Qty: {item.quantity}</p>
                             {order.status === 'DELIVERED' && !item.hasReviewed && (
                               <Link href={`/products/${item.productId}?review_order=${order.orderId}`}>
                                 <button className="px-4 py-2 bg-white text-[#FF4742] border border-[#FF4742] text-xs font-bold rounded-lg hover:bg-red-50 transition-colors focus:outline-none shadow-sm">
-                                  Đánh giá
+                                  Write a Review
                                 </button>
                               </Link>
                             )}
                             {order.status === 'DELIVERED' && item.hasReviewed && (
-                              <span className="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium border border-green-200">Đã đánh giá</span>
+                              <span className="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium border border-green-200">Reviewed</span>
                             )}
                           </div>
                         </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { apiClient } from '../../utils/api';
+import { Link } from 'react-router-dom';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -57,68 +58,82 @@ export const SellerDashboard: React.FC = () => {
         ) : stats ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1: Revenue */}
-            <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div>
-                  <Typography className="text-slate-500 font-medium mb-1">Total Revenue</Typography>
-                  <Typography className="text-3xl font-bold text-slate-900 text-right">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.revenue)}
-                  </Typography>
-                </div>
-                <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
-                  <AttachMoneyIcon />
+            <Link
+              to="/seller/orders"
+              className="block"
+            >
+              <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Typography className="text-slate-500 font-medium mb-1">Total Revenue</Typography>
+                    <Typography className="text-3xl font-bold text-slate-900 text-right">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.revenue)}
+                    </Typography>
+                  </div>
+                  <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
+                    <AttachMoneyIcon />
+                  </div>
                 </div>
               </div>
-            </div>
-
+            </Link>
             {/* Card 2: New Orders */}
-            <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-orange-50 rounded-bl-full -z-0 opacity-50" />
-              <div className="flex justify-between items-start z-10">
-                <div>
-                  <Typography className="text-slate-500 font-medium mb-1">New Orders</Typography>
-                  <Typography className="text-3xl font-bold text-slate-900 text-right">
-                    {stats.newOrders}
-                  </Typography>
-                </div>
-                <div className="bg-orange-50 p-2 rounded-lg text-orange-600 animate-pulse">
-                  <FiberNewIcon />
+            <Link
+              to="/seller/orders"
+              className="block"
+            >
+              <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-orange-50 rounded-bl-full -z-0 opacity-50" />
+                <div className="flex justify-between items-start z-10">
+                  <div>
+                    <Typography className="text-slate-500 font-medium mb-1">New Orders</Typography>
+                    <Typography className="text-3xl font-bold text-slate-900 text-right">
+                      {stats.newOrders}
+                    </Typography>
+                  </div>
+                  <div className="bg-orange-50 p-2 rounded-lg text-orange-600 animate-pulse">
+                    <FiberNewIcon />
+                  </div>
                 </div>
               </div>
-              {/* <Typography className="text-orange-600 text-sm font-semibold mt-4 z-10">
-                Action required
-              </Typography> */}
-            </div>
-
+            </Link>
             {/* Card 3: Total Orders */}
-            <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div>
-                  <Typography className="text-slate-500 font-medium mb-1">Total Orders</Typography>
-                  <Typography className="text-3xl font-bold text-slate-900 text-right">
-                    {stats.totalOrders}
-                  </Typography>
-                </div>
-                <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
-                  <ShoppingCartIcon />
+            <Link
+              to="/seller/orders"
+              className="block"
+            >
+              <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Typography className="text-slate-500 font-medium mb-1">Total Orders</Typography>
+                    <Typography className="text-3xl font-bold text-slate-900 text-right">
+                      {stats.totalOrders}
+                    </Typography>
+                  </div>
+                  <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
+                    <ShoppingCartIcon />
+                  </div>
                 </div>
               </div>
-            </div>
-
+            </Link>
             {/* Card 4: Total Products */}
-            <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div>
-                  <Typography className="text-slate-500 font-medium mb-1">Total Products</Typography>
-                  <Typography className="text-3xl font-bold text-slate-900 text-right">
-                    {stats.totalProducts}
-                  </Typography>
-                </div>
-                <div className="bg-purple-50 p-2 rounded-lg text-purple-600">
-                  <InventoryIcon />
+            <Link
+              to="/seller/products"
+              className="block"
+            >
+              <div className="bg-white p-6 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Typography className="text-slate-500 font-medium mb-1">Total Products</Typography>
+                    <Typography className="text-3xl font-bold text-slate-900 text-right">
+                      {stats.totalProducts}
+                    </Typography>
+                  </div>
+                  <div className="bg-purple-50 p-2 rounded-lg text-purple-600">
+                    <InventoryIcon />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         ) : null}
       </Box>

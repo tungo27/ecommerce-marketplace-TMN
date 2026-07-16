@@ -42,9 +42,9 @@ const getNextStatus = (current: Order['status']): Order['status'] | null => {
 };
 
 const getActionLabel = (next: Order['status'] | null): string => {
-  if (next === 'CONFIRMED') return 'Confirmed';
-  if (next === 'SHIPPED') return 'Shipped';
-  if (next === 'DELIVERED') return 'Delivered';
+  if (next === 'CONFIRMED') return 'Confirm Order';
+  if (next === 'SHIPPED') return 'Ship Order';
+  if (next === 'DELIVERED') return 'Mark Delivered';
   return '';
 };
 
@@ -75,9 +75,9 @@ export const OrdersPage: React.FC = () => {
   const handleUpdateStatus = async (orderId: string, nextStatus: Order['status']) => {
     const success = await updateOrderStatus(orderId, nextStatus);
     if (success) {
-      setToast({ open: true, message: `Update status to ${statusMap[nextStatus].label}`, severity: 'success' });
+      setToast({ open: true, message: `Status updated to ${statusMap[nextStatus].label}`, severity: 'success' });
     } else {
-      setToast({ open: true, message: 'Failed to update order', severity: 'error' });
+      setToast({ open: true, message: 'Failed to update status', severity: 'error' });
     }
   };
 
@@ -138,12 +138,12 @@ export const OrdersPage: React.FC = () => {
           <TableHead sx={{ bgcolor: '#F3F4F6' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold' }}>Order ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Order Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Products</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Action</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -163,7 +163,7 @@ export const OrdersPage: React.FC = () => {
                     <TableCell sx={{ color: '#4B5563', fontSize: '0.875rem' }}>
                       {order.id.split('-')[0]}
                     </TableCell>
-                    <TableCell>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                    <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         {order.customer.name}

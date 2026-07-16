@@ -45,7 +45,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
   return (
     <header className="sticky top-0 z-50 border-b-4 border-[#F05545] bg-[#FF4742] shadow-md">
       {/* Mobile: flex-wrap to break search into next line. Desktop: h-16, flex-nowrap */}
-      <div className="mx-auto flex flex-wrap lg:flex-nowrap lg:h-16 max-w-7xl items-center justify-between lg:justify-start gap-4 px-4 py-3 lg:py-0">
+      <div className="mx-auto flex flex-wrap lg:flex-nowrap lg:h-16 max-w-[1600px] items-center justify-between lg:justify-start gap-4 px-4 py-3 lg:py-0">
         
         {/* Logo and Hamburger (Mobile Dòng 1) */}
         <div className="flex items-center gap-3 shrink-0">
@@ -95,7 +95,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
           <Link
             href="/cart"
             id="cart-icon-btn"
-            aria-label={`Giỏ hàng ${isMounted && totalItems > 0 ? `(${totalItems} sản phẩm)` : ''}`}
+            aria-label={`Shopping cart ${isMounted && totalItems > 0 ? `(${totalItems} item${totalItems > 1 ? 's' : ''})` : ''}`}
             className="relative flex h-10 w-10 items-center justify-center rounded-full text-white transition hover:bg-[#E63E39]"
           >
             <svg
@@ -144,7 +144,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                 className="flex items-center gap-2 rounded-full px-2 py-1 text-white transition hover:bg-[#E63E39]"
               >
                 <img
-                  src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                  src={(user as any).picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`}
                   alt="Avatar"
                   className="w-8 h-8 rounded-full object-cover border border-white"
                 />
@@ -229,7 +229,7 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
                <>
                  <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
                    <img
-                     src={(user as any).picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+                     src={(user as any).picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`}
                      alt="Avatar"
                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
                    />

@@ -2,9 +2,9 @@ import { IsEnum, IsNotEmpty } from 'class-validator';
 import { OrderStatus } from '@prisma/client';
 
 export class UpdateOrderStatusDto {
-  @IsNotEmpty({ message: 'Trạng thái đơn hàng không được để trống' })
+  @IsNotEmpty({ message: 'Order status must not be empty' })
   @IsEnum(OrderStatus, {
-    message: 'Trạng thái đơn hàng không hợp lệ (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED)',
+    message: 'Invalid order status. Must be one of: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED',
   })
   status!: OrderStatus;
 }

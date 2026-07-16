@@ -5,7 +5,7 @@ export default function ProductDetailLoading() {
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-[1600px] px-4 py-8">
         {/* Breadcrumbs Skeleton */}
         <div className="mb-6 h-5 w-64 rounded bg-gray-200 animate-pulse"></div>
 

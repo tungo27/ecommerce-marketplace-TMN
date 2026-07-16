@@ -121,7 +121,7 @@ export const SellerLayout: React.FC = () => {
       </Drawer>
 
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         {/* Header */}
         <AppBar 
           position="sticky" 
