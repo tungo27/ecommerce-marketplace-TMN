@@ -12,6 +12,9 @@ import { EditProduct } from './pages/seller/EditProduct';
 import { OrdersPage } from './pages/seller/OrdersPage';
 import { ReviewsPage } from './pages/seller/ReviewsPage';
 import { SellerLayout } from './layouts/SellerLayout';
+import { AnalyticsPage } from './pages/seller/AnalyticsPage';
+import { StoreProfile } from './pages/seller/StoreProfile';
+import { Settings } from './pages/seller/Settings';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -62,6 +65,18 @@ export const router = createBrowserRouter([
           {
             path: '/seller/reviews',
             element: <ReviewsPage />,
+          },
+          {
+            path: '/seller/analytics',
+            element: <AnalyticsPage />,
+          },
+          {
+            path: '/seller/profile',
+            element: <StoreProfile />,
+          },
+          {
+            path: '/seller/settings',
+            element: <Settings />,
           },
         ]
       }

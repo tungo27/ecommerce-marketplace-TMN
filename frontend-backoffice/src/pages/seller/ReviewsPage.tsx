@@ -74,7 +74,7 @@ export const ReviewsPage: React.FC = () => {
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number | 'ALL') => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number | 'ALL') => {
     setFilterRating(newValue);
   };
 

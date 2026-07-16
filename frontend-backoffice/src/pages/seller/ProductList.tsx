@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../utils/api';
-import { useAuthStore } from '../../stores/authStore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
@@ -84,7 +83,7 @@ export const ProductList: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const total = products.length;
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 

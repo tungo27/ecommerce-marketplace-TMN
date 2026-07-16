@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Avatar, IconButton } from '@mui/material';
+import { Box, Typography, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Avatar } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -7,6 +7,9 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import InsightsIcon from '@mui/icons-material/Insights';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const DRAWER_WIDTH = 260;
 const HEADER_HEIGHT = 72;
@@ -29,6 +32,9 @@ export const SellerLayout: React.FC = () => {
     { text: 'Products', path: '/seller/products', icon: <InventoryIcon /> },
     { text: 'Orders', path: '/seller/orders', icon: <ShoppingCartIcon /> },
     { text: 'Reviews', path: '/seller/reviews', icon: <RateReviewIcon /> },
+    { text: 'Analytics', path: '/seller/analytics', icon: <InsightsIcon /> },
+    { text: 'Store Profile', path: '/seller/profile', icon: <StorefrontIcon /> },
+    { text: 'Settings', path: '/seller/settings', icon: <SettingsIcon /> },
   ];
 
   return (
@@ -92,8 +98,11 @@ export const SellerLayout: React.FC = () => {
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ fontWeight: isActive ? 700 : 500 }}
+                    primary={
+                      <Typography sx={{ fontWeight: isActive ? 700 : 500 }}>
+                        {item.text}
+                      </Typography>
+                    }
                   />
                 </ListItemButton>
               </ListItem>
@@ -114,7 +123,13 @@ export const SellerLayout: React.FC = () => {
               <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                 <LogoutIcon />
               </ListItemIcon>
-              <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 600 }} />
+              <ListItemText
+                primary={
+                  <Typography sx={{ fontWeight: 600 }}>
+                    Logout
+                  </Typography>
+                }
+              />
             </ListItemButton>
           </ListItem>
         </Box>
