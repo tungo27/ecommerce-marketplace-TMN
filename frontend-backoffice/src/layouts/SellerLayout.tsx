@@ -117,7 +117,7 @@ export const SellerLayout: React.FC = () => {
             color: '#111827',
           }}
         >
-          <Toolbar sx={{ justifyContent: 'flex-end' }}>
+          <Toolbar sx={{ justifyContent: 'flex-end' ,minHeight: '80px !important' }}>
             {user && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>

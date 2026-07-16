@@ -19,11 +19,11 @@ import {
 import { useSellerOrders, type Order } from '../../hooks/useSellerOrders';
 
 const statusMap: Record<Order['status'], { label: string; color: 'warning' | 'info' | 'primary' | 'success' | 'error' }> = {
-  PENDING: { label: 'Chờ xác nhận', color: 'warning' },
-  CONFIRMED: { label: 'Đã xác nhận', color: 'info' },
-  SHIPPED: { label: 'Đang giao hàng', color: 'primary' },
-  DELIVERED: { label: 'Đã giao', color: 'success' },
-  CANCELLED: { label: 'Đã hủy', color: 'error' },
+  PENDING: { label: 'Pending', color: 'warning' },
+  CONFIRMED: { label: 'Confirmed', color: 'info' },
+  SHIPPED: { label: 'Shipping', color: 'primary' },
+  DELIVERED: { label: 'Delivered', color: 'success' },
+  CANCELLED: { label: 'Cancelled', color: 'error' },
 };
 
 const getNextStatus = (current: Order['status']): Order['status'] | null => {
@@ -40,9 +40,9 @@ const getNextStatus = (current: Order['status']): Order['status'] | null => {
 };
 
 const getActionLabel = (next: Order['status'] | null): string => {
-  if (next === 'CONFIRMED') return 'Xác nhận đơn';
-  if (next === 'SHIPPED') return 'Giao hàng';
-  if (next === 'DELIVERED') return 'Hoàn thành';
+  if (next === 'CONFIRMED') return 'Confirm Order';
+  if (next === 'SHIPPED') return 'Ship Order';
+  if (next === 'DELIVERED') return 'Mark Delivered';
   return '';
 };
 
@@ -72,9 +72,9 @@ export const OrdersPage: React.FC = () => {
   const handleUpdateStatus = async (orderId: string, nextStatus: Order['status']) => {
     const success = await updateOrderStatus(orderId, nextStatus);
     if (success) {
-      setToast({ open: true, message: `Đã chuyển trạng thái thành ${statusMap[nextStatus].label}`, severity: 'success' });
+      setToast({ open: true, message: `Status updated to ${statusMap[nextStatus].label}`, severity: 'success' });
     } else {
-      setToast({ open: true, message: 'Cập nhật thất bại', severity: 'error' });
+      setToast({ open: true, message: 'Failed to update status', severity: 'error' });
     }
   };
 
@@ -89,7 +89,7 @@ export const OrdersPage: React.FC = () => {
   return (
     <Box sx={{ p: 4, bgcolor: '#F9FAFB', minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: '#111827' }}>
-        Quản lý Đơn hàng
+        Order Management
       </Typography>
 
       {error && (
@@ -110,20 +110,20 @@ export const OrdersPage: React.FC = () => {
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ bgcolor: '#F3F4F6' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Mã đơn</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Ngày đặt</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Khách hàng</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Sản phẩm</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Tổng tiền</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Trạng thái</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Hành động</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Order ID</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Products</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {orders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4, color: '#6B7280' }}>
-                  Không có đơn hàng nào
+                  No orders found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -136,7 +136,7 @@ export const OrdersPage: React.FC = () => {
                     <TableCell sx={{ color: '#4B5563', fontSize: '0.875rem' }}>
                       {order.id.split('-')[0]}
                     </TableCell>
-                    <TableCell>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                    <TableCell>{new Date(order.createdAt).toLocaleDateString('en-US')}</TableCell>
                     <TableCell>
                       <Typography variant="body2" fontWeight="bold">
                         {order.customer.name}
@@ -189,7 +189,7 @@ export const OrdersPage: React.FC = () => {
                             variant="outlined"
                             size="small"
                             onClick={() => {
-                              if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                              if (window.confirm('Are you sure you want to cancel this order?')) {
                                 handleUpdateStatus(order.id, 'CANCELLED');
                               }
                             }}
@@ -203,7 +203,7 @@ export const OrdersPage: React.FC = () => {
                               },
                             }}
                           >
-                            Hủy
+                            Cancel
                           </Button>
                         )}
                       </Box>
@@ -221,7 +221,7 @@ export const OrdersPage: React.FC = () => {
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Số dòng:"
+          labelRowsPerPage="Rows per page:"
         />
       </TableContainer>
 

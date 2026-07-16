@@ -48,7 +48,7 @@ export const useSellerOrders = () => {
       setOrders(response.data.data);
       setTotal(response.data.meta.total);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Không thể tải danh sách đơn hàng');
+      setError(err.response?.data?.message || 'Failed to load order list');
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ export const useSellerOrders = () => {
       );
       return true;
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Cập nhật trạng thái thất bại';
+      const msg = err.response?.data?.message || 'Failed to update order status';
       setError(msg);
       return false;
     }
