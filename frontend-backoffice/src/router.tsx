@@ -10,6 +10,7 @@ import { CreateProduct } from './pages/seller/CreateProduct';
 import { ProductList } from './pages/seller/ProductList';
 import { EditProduct } from './pages/seller/EditProduct';
 import { OrdersPage } from './pages/seller/OrdersPage';
+import { ReviewsPage } from './pages/seller/ReviewsPage';
 import { SellerLayout } from './layouts/SellerLayout';
 
 export const router = createBrowserRouter([
@@ -57,6 +58,10 @@ export const router = createBrowserRouter([
           {
             path: '/seller/orders',
             element: <OrdersPage />,
+          },
+          {
+            path: '/seller/reviews',
+            element: <ReviewsPage />,
           },
         ]
       }

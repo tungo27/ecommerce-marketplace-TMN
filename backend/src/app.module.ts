@@ -9,6 +9,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { UploadModule } from './upload/upload.module';
+import { SellerModule } from './modules/seller/seller.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UploadModule } from './upload/upload.module';
     CartModule,
     OrdersModule,
     ReviewsModule,
+    SellerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

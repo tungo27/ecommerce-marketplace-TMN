@@ -5,8 +5,11 @@ import { useAuthStore } from '../stores/authStore';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LogoutIcon from '@mui/icons-material/Logout';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const DRAWER_WIDTH = 260;
+const HEADER_HEIGHT = 72;
 
 export const SellerLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -22,8 +25,10 @@ export const SellerLayout: React.FC = () => {
   const getInitials = (name = 'User') => name.charAt(0).toUpperCase();
 
   const menuItems = [
-    { text: 'Products', path: '/seller/dashboard', icon: <InventoryIcon /> },
+    { text: 'Dashboard', path: '/seller/dashboard', icon: <DashboardIcon /> },
+    { text: 'Products', path: '/seller/products', icon: <InventoryIcon /> },
     { text: 'Orders', path: '/seller/orders', icon: <ShoppingCartIcon /> },
+    { text: 'Reviews', path: '/seller/reviews', icon: <RateReviewIcon /> },
   ];
 
   return (
@@ -42,7 +47,17 @@ export const SellerLayout: React.FC = () => {
           },
         }}
       >
-        <Box sx={{ p: 3, borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            height: HEADER_HEIGHT,
+            px: 3,
+            boxSizing: 'border-box',
+            borderBottom: '1px solid #E5E7EB',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
           <Box sx={{ width: 32, height: 32, bgcolor: '#FF4742', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Typography variant="h6" sx={{ color: 'white', fontWeight: 900, lineHeight: 1 }}>E</Typography>
           </Box>
@@ -53,8 +68,8 @@ export const SellerLayout: React.FC = () => {
         
         <List sx={{ px: 2, pt: 2, flex: 1 }}>
           {menuItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.path.split('/')[2] === 'dashboard' ? '/seller/dashboard' : item.path) && 
-                             !(item.path === '/seller/dashboard' && location.pathname.includes('/orders'));
+            const isActive = location.pathname.startsWith(item.path) &&
+                             (item.path !== '/seller/dashboard' || location.pathname === '/seller/dashboard');
                              
             return (
               <ListItem disablePadding sx={{ mb: 1 }} key={item.text}>
@@ -117,7 +132,14 @@ export const SellerLayout: React.FC = () => {
             color: '#111827',
           }}
         >
-          <Toolbar sx={{ justifyContent: 'flex-end' }}>
+          <Toolbar
+            sx={{
+              justifyContent: 'flex-end',
+              minHeight: HEADER_HEIGHT,
+              height: HEADER_HEIGHT,
+              boxSizing: 'border-box',
+            }}
+          >
             {user && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>

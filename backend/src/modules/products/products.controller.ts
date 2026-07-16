@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/guards/roles.decorator';
 import { CreateProductDto } from './dtos/create-product.dto';
+import { PatchProductStatusDto } from './dtos/patch-product-status.dto';
 import { UpdateProductDto } from './dtos/update-product.dto';
 import { ProductsService } from './products.service';
 
@@ -100,12 +101,17 @@ export class ProductsController {
   async patchSellerProductStatus(
     @Req() req: { user: { id: string } },
     @Param('id') id: string,
-    @Body('status') status: string,
+    @Body() body: PatchProductStatusDto,
   ) {
-    if (!['Draft', 'Hidden'].includes(status)) {
-      throw new BadRequestException('Status must be Draft or Hidden');
+    const dto = plainToInstance(PatchProductStatusDto, body, { enableImplicitConversion: true });
+    const validationErrors = await validate(dto);
+
+    if (validationErrors.length > 0) {
+      const constraints = validationErrors.flatMap((error) => Object.values(error.constraints ?? {}));
+      throw new BadRequestException(constraints);
     }
-    return this.productsService.patchSellerProductStatus(req.user.id, id, status as 'Draft' | 'Hidden');
+
+    return this.productsService.patchSellerProductStatus(req.user.id, id, dto.status);
   }
 
   @Post('seller/products')

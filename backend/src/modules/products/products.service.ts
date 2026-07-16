@@ -145,7 +145,7 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     });
   }
 
-  async patchSellerProductStatus(sellerId: string, productId: string, status: 'Draft' | 'Hidden') {
+  async patchSellerProductStatus(sellerId: string, productId: string, status: 'Published' | 'Hidden') {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
       include: {
@@ -166,6 +166,14 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
 
     if (product.status === 'Hidden' && product.AuditLog.length > 0) {
       throw new ForbiddenException('This product has been rejected by an admin and cannot be modified');
+    }
+
+    if (status === 'Hidden' && product.status !== 'Published') {
+      throw new BadRequestException('Only published products can be hidden');
+    }
+
+    if (status === 'Published' && product.status !== 'Hidden') {
+      throw new BadRequestException('Only hidden products can be unhidden to published');
     }
 
     return this.prismaService.product.update({

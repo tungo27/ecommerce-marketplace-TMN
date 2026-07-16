@@ -15,15 +15,17 @@ import {
   Alert,
   Snackbar,
   TablePagination,
+  MenuItem,
+  Select,
 } from '@mui/material';
 import { useSellerOrders, type Order } from '../../hooks/useSellerOrders';
 
 const statusMap: Record<Order['status'], { label: string; color: 'warning' | 'info' | 'primary' | 'success' | 'error' }> = {
-  PENDING: { label: 'Chờ xác nhận', color: 'warning' },
-  CONFIRMED: { label: 'Đã xác nhận', color: 'info' },
-  SHIPPED: { label: 'Đang giao hàng', color: 'primary' },
-  DELIVERED: { label: 'Đã giao', color: 'success' },
-  CANCELLED: { label: 'Đã hủy', color: 'error' },
+  PENDING: { label: 'Pending', color: 'warning' },
+  CONFIRMED: { label: 'Confirmed', color: 'info' },
+  SHIPPED: { label: 'Shipped', color: 'primary' },
+  DELIVERED: { label: 'Delivered', color: 'success' },
+  CANCELLED: { label: 'Cancelled', color: 'error' },
 };
 
 const getNextStatus = (current: Order['status']): Order['status'] | null => {
@@ -40,9 +42,9 @@ const getNextStatus = (current: Order['status']): Order['status'] | null => {
 };
 
 const getActionLabel = (next: Order['status'] | null): string => {
-  if (next === 'CONFIRMED') return 'Xác nhận đơn';
-  if (next === 'SHIPPED') return 'Giao hàng';
-  if (next === 'DELIVERED') return 'Hoàn thành';
+  if (next === 'CONFIRMED') return 'Confirmed';
+  if (next === 'SHIPPED') return 'Shipped';
+  if (next === 'DELIVERED') return 'Delivered';
   return '';
 };
 
@@ -55,6 +57,7 @@ export const OrdersPage: React.FC = () => {
     message: '',
     severity: 'success',
   });
+  const [statusFilter, setStatusFilter] = useState<string>('');
 
   useEffect(() => {
     fetchOrders(page + 1, rowsPerPage);
@@ -72,25 +75,49 @@ export const OrdersPage: React.FC = () => {
   const handleUpdateStatus = async (orderId: string, nextStatus: Order['status']) => {
     const success = await updateOrderStatus(orderId, nextStatus);
     if (success) {
-      setToast({ open: true, message: `Đã chuyển trạng thái thành ${statusMap[nextStatus].label}`, severity: 'success' });
+      setToast({ open: true, message: `Update status to ${statusMap[nextStatus].label}`, severity: 'success' });
     } else {
-      setToast({ open: true, message: 'Cập nhật thất bại', severity: 'error' });
+      setToast({ open: true, message: 'Failed to update order', severity: 'error' });
     }
   };
 
   if (loading && orders.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress sx={{ color: '#FF4742' }} />
       </Box>
     );
   }
 
+  const filteredOrders = statusFilter ? orders.filter(o => o.status === statusFilter) : orders;
+
   return (
     <Box sx={{ p: 4, bgcolor: '#F9FAFB', minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: '#111827' }}>
-        Quản lý Đơn hàng
-      </Typography>
+      <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, borderRadius: 3, border: '1px solid #E5E7EB', bgcolor: 'white', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: '#111827' }}>
+          Order Management
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#6B7280', mt: 1 }}>
+          Manage your store's customer orders and status updates.
+        </Typography>
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap', mt: 3 }}>
+          <Select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            displayEmpty
+            size="small"
+            sx={{ minWidth: 180, bgcolor: '#FFFFFF' }}
+          >
+            <MenuItem value="">All status</MenuItem>
+            <MenuItem value="PENDING">Pending</MenuItem>
+            <MenuItem value="CONFIRMED">Confirmed</MenuItem>
+            <MenuItem value="SHIPPED">Shipped</MenuItem>
+            <MenuItem value="DELIVERED">Delivered</MenuItem>
+            <MenuItem value="CANCELLED">Cancelled</MenuItem>
+          </Select>
+        </Box>
+      </Paper>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -110,24 +137,24 @@ export const OrdersPage: React.FC = () => {
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ bgcolor: '#F3F4F6' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Mã đơn</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Ngày đặt</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Khách hàng</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Sản phẩm</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Tổng tiền</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Trạng thái</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Hành động</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Order ID</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Order Date</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.length === 0 ? (
+            {filteredOrders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4, color: '#6B7280' }}>
-                  Không có đơn hàng nào
+                  No orders found.
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order) => {
+              filteredOrders.map((order) => {
                 const nextStatus = getNextStatus(order.status);
                 const actionLabel = getActionLabel(nextStatus);
 
@@ -138,7 +165,7 @@ export const OrdersPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" fontWeight="bold">
+                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         {order.customer.name}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
@@ -189,7 +216,7 @@ export const OrdersPage: React.FC = () => {
                             variant="outlined"
                             size="small"
                             onClick={() => {
-                              if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                              if (window.confirm('Are you sure you want to cancel this order?')) {
                                 handleUpdateStatus(order.id, 'CANCELLED');
                               }
                             }}
@@ -203,7 +230,7 @@ export const OrdersPage: React.FC = () => {
                               },
                             }}
                           >
-                            Hủy
+                            Cancel
                           </Button>
                         )}
                       </Box>
@@ -216,12 +243,12 @@ export const OrdersPage: React.FC = () => {
         </Table>
         <TablePagination
           component="div"
-          count={total}
+          count={statusFilter ? filteredOrders.length : total}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Số dòng:"
+          labelRowsPerPage="Rows per page:"
         />
       </TableContainer>
 
