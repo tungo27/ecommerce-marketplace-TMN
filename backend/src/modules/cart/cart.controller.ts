@@ -104,7 +104,7 @@ export class CartController {
       return {
         requiresLocalStorage: true,
         message:
-          'Guest mode: Vui lòng lưu giỏ hàng tại LocalStorage. Đăng nhập để đồng bộ lên server.',
+          'Guest mode: Please save your cart in LocalStorage. Log in to sync to the server.',
       };
     }
 
@@ -122,7 +122,7 @@ export class CartController {
   async getCart(@Req() req: Request): Promise<CartResponse> {
     const user = (req as any).user;
     if (!user) {
-      throw new UnauthorizedException('Bạn cần đăng nhập để xem giỏ hàng.');
+      throw new UnauthorizedException('You must be logged in to view your cart.');
     }
     return this.cartService.getCart(user.id);
   }
@@ -141,11 +141,11 @@ export class CartController {
     const user = (req as any).user;
     if (!user) {
       throw new UnauthorizedException(
-        'Bạn cần đăng nhập để thực hiện thao tác này.',
+        'You must be logged in to perform this action.',
       );
     }
     if (!productId || productId.trim() === '') {
-      throw new BadRequestException('productId không hợp lệ.');
+      throw new BadRequestException('Invalid productId.');
     }
     return this.cartService.removeItem(user.id, productId);
   }
@@ -168,13 +168,13 @@ export class CartController {
     const user = (req as any).user;
     if (!user) {
       throw new UnauthorizedException(
-        'Bạn cần đăng nhập để thực hiện thao tác này.',
+        'You must be logged in to perform this action.',
       );
     }
 
     const parsedQuantity = Number(quantity);
     if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      throw new BadRequestException('quantity phải là số nguyên dương.');
+      throw new BadRequestException('quantity must be a positive integer.');
     }
 
     return this.cartService.setItemQuantity(user.id, productId, parsedQuantity);
@@ -197,7 +197,7 @@ export class CartController {
     const user = (req as any).user;
     if (!user) {
       throw new UnauthorizedException(
-        'Bạn cần đăng nhập để đồng bộ giỏ hàng.',
+        'You must be logged in to sync your cart.',
       );
     }
 
@@ -221,7 +221,7 @@ export class CartController {
     const user = (req as any).user;
     if (!user) {
       throw new UnauthorizedException(
-        'Bạn cần đăng nhập để thực hiện thao tác này.',
+        'You must be logged in to perform this action.',
       );
     }
     await this.cartService.clearCart(user.id);

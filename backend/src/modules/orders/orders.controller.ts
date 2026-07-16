@@ -21,7 +21,7 @@ export class OrdersController {
   ) {
     const orders = await this.ordersService.getMyOrders(user.id, getOrdersDto);
     return {
-      message: 'Lấy lịch sử đơn hàng thành công',
+      message: 'Order history retrieved successfully',
       data: orders,
     };
   }
@@ -37,7 +37,7 @@ export class OrdersController {
     const order = await this.ordersService.createOrder(user.id, createOrderDto);
     
     return {
-      message: 'Đặt hàng thành công',
+      message: 'Order placed successfully',
       data: order,
     };
   }
@@ -71,7 +71,7 @@ export class OrdersController {
     );
 
     return {
-      message: 'Cập nhật trạng thái đơn hàng thành công',
+      message: 'Order status updated successfully',
       data: updatedOrder,
     };
   }

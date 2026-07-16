@@ -17,7 +17,7 @@ import { GoogleOAuthGuard } from './guards/google-oauth.guard';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'fallback_secret_for_dev',
-      signOptions: { expiresIn: (process.env.JWT_EXPIRATION || '24h') as any },
+      signOptions: { expiresIn: (process.env.JWT_EXPIRATION || '15m') as any },
     }),
   ],
   controllers: [AuthController],

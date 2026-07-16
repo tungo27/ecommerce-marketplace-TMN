@@ -115,7 +115,7 @@ export class OrdersService {
     // 1. Lấy thông tin giỏ hàng từ CartService
     const cart = await this.cartService.getCart(userId);
     if (!cart || cart.items.length === 0) {
-      throw new BadRequestException('Giỏ hàng của bạn đang trống.');
+      throw new BadRequestException('Your cart is empty.');
     }
 
     const { shippingAddress, phoneNumber, paymentMethod } = createOrderDto;
@@ -136,10 +136,10 @@ export class OrdersService {
           for (const item of cart.items) {
             const product = products.find((p) => p.id === item.productId);
             if (!product) {
-              throw new BadRequestException(`Sản phẩm ${item.name} không tồn tại`);
+              throw new BadRequestException(`Product ${item.name} does not exist`);
             }
             if (product.stock < item.quantity) {
-              throw new BadRequestException(`Sản phẩm ${product.name} không đủ số lượng trong kho`);
+              throw new BadRequestException(`Product ${product.name} does not have enough stock`);
             }
           }
 
@@ -198,7 +198,7 @@ export class OrdersService {
           
           if (attempt >= MAX_RETRIES) {
             throw new ConflictException(
-              'Hệ thống đang có quá nhiều giao dịch. Vui lòng thử lại sau.'
+              'Too many concurrent transactions. Please try again later.'
             );
           }
           continue;
@@ -283,7 +283,7 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException('Đơn hàng không tồn tại hoặc bạn không có quyền truy cập');
+      throw new NotFoundException('Order not found or you do not have access');
     }
 
     // State machine tuyến tính
@@ -298,7 +298,7 @@ export class OrdersService {
     // Nhưng yêu cầu chỉ cho PENDING -> CONFIRMED -> SHIPPED -> DELIVERED
     if (newStatus === OrderStatus.CANCELLED) {
       if (order.status === OrderStatus.DELIVERED || order.status === OrderStatus.SHIPPED) {
-        throw new BadRequestException('Không thể hủy đơn hàng đang giao hoặc đã giao thành công');
+        throw new BadRequestException('Cannot cancel an order that is being shipped or has been delivered');
       }
     } else {
       const currentIndex = statusOrder.indexOf(order.status);
@@ -306,13 +306,13 @@ export class OrdersService {
 
       // Nếu trạng thái cũ là CANCELLED thì không cho đổi đi đâu hết
       if (order.status === OrderStatus.CANCELLED) {
-        throw new BadRequestException('Đơn hàng đã bị hủy, không thể thay đổi trạng thái');
+        throw new BadRequestException('Order has been cancelled and cannot be changed');
       }
 
       // Bắt buộc chuyển đổi tuần tự (chỉ cho phép tiến 1 bước)
       if (newIndex !== currentIndex + 1) {
         throw new BadRequestException(
-          `Chuyển đổi trạng thái không hợp lệ. Trạng thái hiện tại là ${order.status}, không thể nhảy cóc sang ${newStatus}`
+          `Invalid status transition. Current status is ${order.status}, cannot skip to ${newStatus}`
         );
       }
     }
