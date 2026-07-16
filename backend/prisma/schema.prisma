@@ -77,6 +77,9 @@ model Product {
   reviews       Review[]
   waitlists     Waitlist[]
   AuditLog      AuditLog[]
+
+  // Note: A GIN index named "product_fts_gin_idx" is manually managed via raw SQL migration
+  // to support PostgreSQL Full-Text Search on name and description.
 }
 
 model Order {
