@@ -248,7 +248,7 @@ export const useCart = create<CartState>((set, get) => ({
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
-        axiosError.response?.data?.message || 'Không thể tải giỏ hàng.';
+        axiosError.response?.data?.message || 'Failed to load cart.';
       get().showToast(message, 'error');
     } finally {
       set({ isLoading: false });
@@ -276,7 +276,7 @@ export const useCart = create<CartState>((set, get) => ({
 
         // Trường hợp hiếm: server trả về requiresLocalStorage (token hết hạn mid-session)
         if (data.requiresLocalStorage) {
-          throw new Error('Session đã hết hạn. Vui lòng đăng nhập lại.');
+          throw new Error('Session expired. Please log in again.');
         }
 
         set({
@@ -284,7 +284,7 @@ export const useCart = create<CartState>((set, get) => ({
           totalCartPrice: data.totalCartPrice,
           totalItems: data.totalItems,
         });
-        get().showToast(`Đã thêm "${product.name}" vào giỏ hàng!`, 'success');
+        get().showToast(`Added "${product.name}" to cart!`, 'success');
       } else {
         // Guest: cập nhật LocalStorage
         const currentGuestItems = readGuestCartFromStorage();
@@ -328,13 +328,13 @@ export const useCart = create<CartState>((set, get) => ({
         const cartItems = toCartItems(currentGuestItems);
         const totals = calculateTotals(cartItems);
         set({ items: cartItems, ...totals });
-        get().showToast(`Đã thêm "${product.name}" vào giỏ hàng!`, 'success');
+        get().showToast(`Added "${product.name}" to cart!`, 'success');
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
         axiosError.response?.data?.message ||
-        (error instanceof Error ? error.message : 'Không thể thêm vào giỏ hàng.');
+        (error instanceof Error ? error.message : 'Failed to add to cart.');
       get().showToast(message, 'error');
     } finally {
       set({ isLoading: false });
@@ -346,7 +346,7 @@ export const useCart = create<CartState>((set, get) => ({
   setQuantity: async (productId, newQuantity, isAuthenticated) => {
     // Validate phía client trước để phản hồi ngay lập tức
     if (newQuantity <= 0) {
-      get().showToast('Số lượng phải lớn hơn 0.', 'error');
+      get().showToast('Quantity must be greater than 0.', 'error');
       return;
     }
 
@@ -377,7 +377,7 @@ export const useCart = create<CartState>((set, get) => ({
         );
 
         if (itemIndex === -1) {
-          get().showToast('Sản phẩm không có trong giỏ hàng.', 'error');
+          get().showToast('Product is not in the cart.', 'error');
           return;
         }
 
@@ -400,7 +400,7 @@ export const useCart = create<CartState>((set, get) => ({
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
-        axiosError.response?.data?.message || 'Không thể cập nhật số lượng.';
+        axiosError.response?.data?.message || 'Failed to update quantity.';
       get().showToast(message, 'error');
     } finally {
       set({ isLoading: false });
@@ -433,11 +433,11 @@ export const useCart = create<CartState>((set, get) => ({
         const totals = calculateTotals(cartItems);
         set({ items: cartItems, ...totals });
       }
-      get().showToast('Đã xóa sản phẩm khỏi giỏ hàng.', 'info');
+      get().showToast('Item removed from cart.', 'info');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
-        axiosError.response?.data?.message || 'Không thể xóa sản phẩm.';
+        axiosError.response?.data?.message || 'Failed to remove item.';
       get().showToast(message, 'error');
     } finally {
       set({ isLoading: false });
@@ -477,14 +477,14 @@ export const useCart = create<CartState>((set, get) => ({
 
       set({ items, totalCartPrice, totalItems });
       get().showToast(
-        `Đã đồng bộ ${guestItems.length} sản phẩm từ giỏ hàng tạm lên tài khoản!`,
+        `Synced ${guestItems.length} items from guest cart to your account!`,
         'success',
       );
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
         axiosError.response?.data?.message ||
-        'Không thể đồng bộ giỏ hàng. Vui lòng thử lại.';
+        'Failed to sync cart. Please try again.';
       get().showToast(message, 'error');
 
       // Dù sync thất bại, vẫn tải giỏ hàng user từ Redis
@@ -505,11 +505,11 @@ export const useCart = create<CartState>((set, get) => ({
       // Dù là user hay guest, xóa cả LocalStorage
       clearGuestCartFromStorage();
       set({ items: [], totalCartPrice: 0, totalItems: 0 });
-      get().showToast('Đã xóa toàn bộ giỏ hàng.', 'info');
+      get().showToast('Cart cleared.', 'info');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       const message =
-        axiosError.response?.data?.message || 'Không thể xóa giỏ hàng.';
+        axiosError.response?.data?.message || 'Failed to clear cart.';
       get().showToast(message, 'error');
     } finally {
       set({ isLoading: false });
