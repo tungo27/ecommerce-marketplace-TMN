@@ -285,7 +285,7 @@ export default function CartPage() {
           currentMaxPrice={undefined}
         />
 
-        <main className="mx-auto max-w-7xl px-4 py-8">
+        <main className="mx-auto max-w-[1600px] px-4 py-8">
           {/* Page Header */}
           <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>

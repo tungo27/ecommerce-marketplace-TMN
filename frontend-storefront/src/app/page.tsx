@@ -68,8 +68,9 @@ const buildHref = (
 
 async function fetchProducts(resolvedParams: SearchParams) {
   try {
+    const page = getFirstParam(resolvedParams.page) || '1';
     const params = new URLSearchParams({
-      page: '1',
+      page,
       limit: '12',
     });
 
@@ -107,6 +108,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const data = await fetchProducts(resolvedParams);
   const products = data.products || [];
   const total = data.meta?.total || 0;
+  const currentPage = Number(getFirstParam(resolvedParams.page)) || 1;
+  const totalPages = Math.ceil(total / 12);
 
   const currentCategory = getFirstParam(resolvedParams.category);
   const currentSearch = getFirstParam(resolvedParams.search) || '';
@@ -124,7 +127,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         currentMaxPrice={currentMaxPrice}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main className="mx-auto max-w-[1600px] px-4 py-6">
         <section className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#FF654C] via-[#FF4B39] to-[#FF2A24] px-6 py-12 text-white shadow-lg">
           <div className="absolute inset-y-0 left-0 w-72 opacity-30 blur-3xl">
             <div className="h-full w-full rounded-full bg-white/20" />
@@ -132,7 +135,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <div className="absolute inset-y-0 right-0 w-72 opacity-20 blur-3xl">
             <div className="h-full w-full rounded-full bg-white/20" />
           </div>
-          <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-6 md:flex-row">
+          <div className="relative mx-auto flex max-w-[1600px] flex-col items-center gap-6 md:flex-row">
             <div className="flex-1">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
                 Welcome to
@@ -172,6 +175,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         key={category.label}
                         href={buildHref(resolvedParams, {
                           category: category.value,
+                          page: '1', // reset page on category change
                         })}
                         className={`shrink-0 rounded-full lg:rounded-md px-4 py-1.5 lg:px-3 lg:py-2 text-sm transition ${
                           isActive
@@ -203,6 +207,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                         href={buildHref(resolvedParams, {
                           minPrice: range.minPrice,
                           maxPrice: range.maxPrice,
+                          page: '1', // reset page on filter change
                         })}
                         className={`shrink-0 rounded-full lg:rounded-md px-4 py-1.5 lg:px-3 lg:py-2 text-sm transition ${
                           isActive
@@ -237,6 +242,53 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <div className="mt-4 rounded-md border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
                 No products found. Start the backend and seed the database to
                 load homepage products.
+              </div>
+            )}
+
+            {/* Premium Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-12 mb-8 flex justify-center items-center gap-2">
+                <Link
+                  href={currentPage > 1 ? buildHref(resolvedParams, { page: (currentPage - 1).toString() }) : '#'}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
+                    currentPage > 1
+                      ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
+                      : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
+                  }`}
+                  aria-disabled={currentPage <= 1}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </Link>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <Link
+                    key={page}
+                    href={buildHref(resolvedParams, { page: page.toString() })}
+                    className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold transition-all duration-300 ${
+                      page === currentPage
+                        ? 'bg-primary text-white shadow-md transform scale-110'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-[#FFF1EE]'
+                    }`}
+                  >
+                    {page}
+                  </Link>
+                ))}
+
+                <Link
+                  href={currentPage < totalPages ? buildHref(resolvedParams, { page: (currentPage + 1).toString() }) : '#'}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
+                    currentPage < totalPages
+                      ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
+                      : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
+                  }`}
+                  aria-disabled={currentPage >= totalPages}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               </div>
             )}
           </section>

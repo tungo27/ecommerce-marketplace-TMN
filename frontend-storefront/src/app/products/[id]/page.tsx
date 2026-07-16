@@ -1,4 +1,5 @@
 import Header from '@/components/Header';
+import Image from 'next/image';
 import Link from 'next/link';
 import ProductDetailActions from '@/components/ProductDetailActions';
 import ProductReviewsSection from '@/components/ProductReviewsSection';
@@ -12,7 +13,7 @@ async function fetchProduct(id: string) {
 
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
     const response = await fetch(`${apiBaseUrl}/products/${id}`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) {
@@ -34,7 +35,7 @@ async function fetchProductReviews(id: string) {
 
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
     const response = await fetch(`${apiBaseUrl}/products/${id}/reviews`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) {
@@ -74,8 +75,13 @@ export default async function ProductDetailPage({
     );
   }
 
-  const price = Number(product.price) || 0;
-  const originalPrice = price * 1.15; // Simulated original price
+  // Prisma Decimal arrives as a string — cast strictly before any arithmetic
+  const numericPrice = Number(product.price) || 0;
+  const originalPrice = numericPrice * 1.15; // Simulated original price
+
+  // VND currency formatter using the standard Intl API
+  const formatVND = (value: number): string =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   const imageUrl =
     product.images?.[0] ||
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
@@ -84,7 +90,7 @@ export default async function ProductDetailPage({
     <div className="min-h-screen bg-white lg:bg-gray-50 text-gray-900 pb-20 lg:pb-0">
       <Header />
 
-      <main className="mx-auto max-w-7xl lg:px-4 lg:py-8">
+      <main className="mx-auto max-w-[1600px] lg:px-4 lg:py-8">
         {/* Breadcrumbs - scrollable on mobile */}
         <nav className="mb-2 lg:mb-6 text-sm text-gray-500 overflow-x-auto p-4 lg:p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <ol className="flex items-center space-x-2 whitespace-nowrap">
@@ -136,17 +142,21 @@ export default async function ProductDetailPage({
                 <div className="absolute left-4 top-4 z-10 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white shadow-md">
                   -15% OFF
                 </div>
-                <img
+                {/* priority prop boosts LCP by eagerly loading the hero image */}
+                <Image
                   src={imageUrl}
                   alt={product.name}
-                  className="h-full w-full object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal"
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal"
                 />
               </div>
               {product.images && product.images.length > 1 && (
                 <div className="flex gap-4 overflow-x-auto pb-2 px-4 lg:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {product.images.map((img: string, idx: number) => (
                     <button key={idx} className={`relative h-20 w-20 lg:h-24 lg:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 ${idx === 0 ? 'border-primary' : 'border-transparent'} bg-gray-100 transition hover:border-primary/50`}>
-                      <img src={img} alt={`${product.name} ${idx + 1}`} className="h-full w-full object-cover" />
+                      <Image src={img} alt={`${product.name} ${idx + 1}`} fill sizes="120px" className="object-cover" />
                     </button>
                   ))}
                 </div>
@@ -193,10 +203,10 @@ export default async function ProductDetailPage({
 
               <div className="mt-2 lg:mt-6 flex flex-wrap items-end gap-3 lg:gap-4 border-b border-gray-100 pb-4 lg:pb-6">
                 <span className="text-3xl lg:text-4xl font-black tracking-tight text-primary">
-                  {price.toLocaleString('vi-VN')} ₫
+                  {formatVND(numericPrice)}
                 </span>
                 <span className="mb-1 text-base lg:text-lg font-medium text-gray-400 line-through">
-                  {originalPrice.toLocaleString('vi-VN')} ₫
+                  {formatVND(originalPrice)}
                 </span>
               </div>
 

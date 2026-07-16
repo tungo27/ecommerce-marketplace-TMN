@@ -29,12 +29,15 @@ function OAuthCallbackContent() {
         }).join(''));
         
         const payload = JSON.parse(jsonPayload);
+        console.log('JWT Payload from backend:', payload);
+        
+        const urlName = searchParams.get('name');
         
         const user = {
           id: payload.sub,
           email: payload.email,
           role: payload.role,
-          name: payload.email.split('@')[0], // Fallback for name since JWT might not contain it
+          name: urlName || payload.name || payload.fullName || payload.given_name || payload.email.split('@')[0], // Use name from URL or JWT payload if available, else fallback
           picture: payload.picture
         };
         

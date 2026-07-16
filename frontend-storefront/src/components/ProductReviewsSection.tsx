@@ -67,8 +67,13 @@ export default function ProductReviewsSection({
     reviewOrderFromUrl ?? null,
   );
   const [submitting, setSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchReviews = useCallback(async () => {
     try {
@@ -169,7 +174,7 @@ export default function ProductReviewsSection({
       setError(
         Array.isArray(message)
           ? message.join(', ')
-          : message || 'Không thể gửi đánh giá. Vui lòng thử lại.',
+          : message || 'Failed to submit review. Please try again.',
       );
     } finally {
       setSubmitting(false);
@@ -183,7 +188,7 @@ export default function ProductReviewsSection({
     <section className="mt-10 border-t border-gray-100 pt-10">
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-bold text-gray-900 lg:text-2xl">
-          Đánh giá sản phẩm
+          Product Reviews
         </h2>
         <div className="flex items-center gap-3">
           <StarRatingDisplay rating={averageRating} size="md" />
@@ -191,7 +196,7 @@ export default function ProductReviewsSection({
             {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
           </span>
           <span className="text-sm text-gray-500">
-            ({reviews.length} đánh giá)
+            ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
           </span>
         </div>
       </div>
@@ -199,13 +204,13 @@ export default function ProductReviewsSection({
       {activeOrderId && (
         <div className="mb-8 rounded-xl border border-gray-100 bg-gray-50 p-6">
           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            Viết đánh giá của bạn
+            Write Your Review
           </h3>
 
           <form onSubmit={handleSubmitReview} className="space-y-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Chọn số sao
+                Select star rating
               </label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -214,7 +219,7 @@ export default function ProductReviewsSection({
                     type="button"
                     onClick={() => setSelectedRating(star)}
                     className="rounded p-0.5 transition hover:scale-110"
-                    aria-label={`${star} sao`}
+                    aria-label={`${star} star${star > 1 ? 's' : ''}`}
                   >
                     <StarIcon filled={star <= selectedRating} size="lg" />
                   </button>
@@ -230,7 +235,7 @@ export default function ProductReviewsSection({
                 htmlFor="review-comment"
                 className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Nhận xét (tùy chọn)
+                Comment (optional)
               </label>
               <textarea
                 id="review-comment"
@@ -241,7 +246,7 @@ export default function ProductReviewsSection({
                   }
                 }}
                 rows={4}
-                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                placeholder="Share your experience with this product..."
                 className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#FF4742] focus:outline-none focus:ring-1 focus:ring-[#FF4742]"
               />
               <p
@@ -268,7 +273,7 @@ export default function ProductReviewsSection({
               disabled={submitting}
               className="inline-flex items-center justify-center rounded-lg bg-[#FF4742] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#E63E39] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+              {submitting ? 'Submitting...' : 'Submit Review'}
             </button>
           </form>
         </div>
@@ -277,7 +282,7 @@ export default function ProductReviewsSection({
       {reviews.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 py-12 text-center">
           <p className="text-gray-500">
-            Chưa có đánh giá nào cho sản phẩm này.
+            No reviews yet for this product.
           </p>
         </div>
       ) : (
@@ -297,11 +302,11 @@ export default function ProductReviewsSection({
                       {review.user.name}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(review.createdAt).toLocaleDateString('vi-VN', {
+                      {isMounted ? new Date(review.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
-                      })}
+                      }) : ''}
                     </p>
                   </div>
                 </div>
