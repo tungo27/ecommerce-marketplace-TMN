@@ -98,6 +98,14 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
   // Delete old products
   await prisma.auditLog.deleteMany();
   await prisma.waitlist.deleteMany();
+  
+  // Tương thích đa nhánh (cross-branch compatibility): Xóa ReviewReply nếu bảng này đang tồn tại
+  try {
+    await prisma.$executeRawUnsafe('DELETE FROM "ReviewReply"');
+  } catch (error) {
+    // Bỏ qua lỗi nếu bảng chưa được tạo ở nhánh hiện tại
+  }
+
   await prisma.review.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.product.deleteMany();
