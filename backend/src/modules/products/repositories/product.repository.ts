@@ -25,16 +25,16 @@ export class ProductRepository {
           p.id,
           count(p.id) OVER() as full_count,
           ts_rank(
-            setweight(to_tsvector('simple', f_unaccent(coalesce(p.name, ''))), 'A') ||
-            setweight(to_tsvector('simple', f_unaccent(coalesce(p.description, ''))), 'B'),
+            setweight(to_tsvector('simple', f_unaccent(coalesce(p.name::text, ''))), 'A') ||
+            setweight(to_tsvector('simple', f_unaccent(coalesce(p.description::text, ''))), 'B'),
             to_tsquery('simple', ${searchQuery})
           ) as rank
         FROM "Product" p
         WHERE p.status = 'Published' 
           AND p.stock > 0
           AND (
-            setweight(to_tsvector('simple', f_unaccent(coalesce(p.name, ''))), 'A') ||
-            setweight(to_tsvector('simple', f_unaccent(coalesce(p.description, ''))), 'B')
+            setweight(to_tsvector('simple', f_unaccent(coalesce(p.name::text, ''))), 'A') ||
+            setweight(to_tsvector('simple', f_unaccent(coalesce(p.description::text, ''))), 'B')
           ) @@ to_tsquery('simple', ${searchQuery})
           ${query.category ? Prisma.sql`AND p.category = CAST(${query.category} AS "Category")` : Prisma.empty}
           ${query.minPrice !== undefined ? Prisma.sql`AND p.price >= ${query.minPrice}` : Prisma.empty}

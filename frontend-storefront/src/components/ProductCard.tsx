@@ -25,6 +25,8 @@ type ProductCardProps = {
 const formatVND = (value: number): string =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
+const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -64,7 +66,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Next.js <Image /> with fill to prevent CLS — parent has aspect ratio set */}
         <Image
           src={imageUrl}
-          alt={product.name}
+          alt={getLocalizedText(product.name)}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition duration-300 group-hover:scale-105"
@@ -76,7 +78,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.seller?.name || 'Official Store'}
         </p>
         <Link href={`/products/${product.id}`} className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-gray-900 hover:text-primary transition-colors">
-          {product.name}
+          {getLocalizedText(product.name)}
         </Link>
 
         <div className="mt-1 flex items-center gap-0.5">

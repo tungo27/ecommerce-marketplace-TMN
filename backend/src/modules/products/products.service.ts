@@ -25,6 +25,7 @@ export class ProductsService {
    */
   private normalizeSearchKeyword(keyword: string): string {
     return keyword
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D') // handle Vietnamese d
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '') // remove diacritics (ă→a, ơ→o, etc.)
       .toLowerCase()
@@ -46,18 +47,18 @@ export class ProductsService {
     'giay': ['shoe', 'sneaker', 'boot', 'sandal', 'slipper', 'loafer', 'heel', 'footwear'],
     'dep':  ['sandal', 'slipper', 'flipflop'],
     // Clothing — single-word keys
-    'ao':   ['shirt', 'blouse', 'top', 'hoodie', 'sweater', 'polo', 'tshirt'],
-    'quan': ['pant', 'trouser', 'jeans', 'short', 'legging'],
+    'ao':   ['shirt', 'blouse', 'hoodie', 'sweater', 'polo', 'tshirt', 'jacket'],
+    'quan': ['pant', 'trouser', 'jeans', 'shorts', 'legging'],
     'vay':  ['dress', 'skirt'],
     // Clothing — multi-word phrases (normalized, no diacritics)
     'ao khoac': ['jacket', 'coat', 'hoodie', 'cardigan'],
     'ao phong':  ['tshirt', 'polo'],
     // Electronics
     'dien thoai': ['phone', 'smartphone', 'mobile', 'iphone', 'android'],
-    'may tinh':   ['computer', 'laptop', 'pc', 'notebook', 'macbook'],
+    'may tinh':   ['computer', 'laptop', 'desktop', 'notebook', 'macbook'],
     'tai nghe':   ['headphone', 'earphone', 'earbuds', 'headset'],
     // Cosmetics
-    'son':       ['lipstick', 'gloss', 'balm'],
+    'son':       ['lipstick', 'lipgloss', 'lipbalm'],
     'kem':       ['cream', 'lotion', 'moisturizer', 'sunscreen', 'serum'],
     'phan':      ['powder', 'foundation', 'blush', 'eyeshadow'],
     'nuoc hoa':  ['perfume', 'cologne', 'fragrance'],
@@ -68,7 +69,7 @@ export class ProductsService {
     // Home & Living
     'ghe': ['chair', 'sofa', 'couch', 'stool', 'bench'],
     'ban': ['table', 'desk'],
-    'den': ['lamp', 'light', 'bulb'],
+    'den': ['lamp', 'lighting', 'bulb'],
     // Sports
     'the thao': ['sport', 'fitness', 'gym', 'athletic', 'exercise'],
     'bong da':  ['football', 'soccer'],
@@ -97,39 +98,59 @@ export class ProductsService {
    * The resulting string is intended for use with to_tsquery('simple', ...).
    */
   buildTsQuery(rawKeyword: string): string {
-    const normalized = this.normalizeSearchKeyword(rawKeyword);
-    const wordSet = new Set<string>();
+    let normalized = this.normalizeSearchKeyword(rawKeyword);
+    const groups: string[] = [];
 
-    // 1. Add each individual token from the user query
-    normalized
-      .split(/\s+/)
-      .filter(t => t.length >= 2)
-      .forEach(t => wordSet.add(t));
+    // Sort keys by length descending to match longest phrases first (e.g. 'ao khoac' before 'ao')
+    const sortedKeys = Object.keys(this.SYNONYM_MAP).sort((a, b) => b.length - a.length);
 
-    // 2. Expand synonyms: check if normalized query contains any map key
-    for (const [key, synonyms] of Object.entries(this.SYNONYM_MAP)) {
-      const matched = normalized.includes(key) ||
-        synonyms.some(s => normalized.includes(s));
+    for (const key of sortedKeys) {
+      const synonyms = this.SYNONYM_MAP[key];
+      // All possible phrases to match for this group (key + synonyms), sorted by length descending
+      const allPhrases = [key, ...synonyms].sort((a, b) => b.length - a.length);
 
-      if (matched) {
-        // Add key's individual tokens
-        key.split(/\s+/).filter(w => w.length >= 2).forEach(w => wordSet.add(w));
-        // Add all synonym tokens
-        synonyms.forEach(s =>
-          s.split(/\s+/).filter(w => w.length >= 2).forEach(w => wordSet.add(w))
-        );
+      let paddedNormalized = ` ${normalized} `;
+      let matchedPhrase: string | null = null;
+
+      for (const phrase of allPhrases) {
+        if (paddedNormalized.includes(` ${phrase} `)) {
+          matchedPhrase = phrase;
+          break;
+        }
+      }
+
+      if (matchedPhrase) {
+        const formatToken = (t: string) => t.length >= 4 ? `${t}:*` : t;
+
+        // Build the tsquery group for this entire concept
+        const keyTokens = key.split(/\s+/).filter(t => t.length > 0).map(formatToken).join(' & ');
+        const synQueries = synonyms.map(syn => {
+          const sTokens = syn.split(/\s+/).filter(t => t.length > 0).map(formatToken).join(' & ');
+          return sTokens ? `(${sTokens})` : null;
+        }).filter(Boolean);
+        
+        const groupQuery = `((${keyTokens})` + (synQueries.length > 0 ? ` | ${synQueries.join(' | ')}` : '') + `)`;
+        groups.push(groupQuery);
+
+        // Remove ONLY the matched phrase from the normalized string so it's not processed again as remaining tokens
+        paddedNormalized = paddedNormalized.replace(` ${matchedPhrase} `, ' ');
+        normalized = paddedNormalized.trim().replace(/\s+/g, ' ');
       }
     }
 
-    if (wordSet.size === 0) {
-      // Fallback: use the entire normalized string as a single prefix term
-      return normalized.length >= 2 ? `${normalized}:*` : normalized;
+    // Process remaining words
+    const formatToken = (t: string) => t.length >= 4 ? `${t}:*` : t;
+    const remainingTokens = normalized.split(/\s+/).filter(t => t.length > 0);
+    for (const token of remainingTokens) {
+      groups.push(formatToken(token));
     }
 
-    // Build: "token1:* | token2:* | ..."
-    return Array.from(wordSet)
-      .map(w => `${w}:*`)
-      .join(' | ');
+    if (groups.length === 0) {
+      // Fallback: If normalized only contained spaces (empty)
+      return "";
+    }
+
+    return groups.join(' & ');
   }
 
   // ---------------------------------------------------------------------------

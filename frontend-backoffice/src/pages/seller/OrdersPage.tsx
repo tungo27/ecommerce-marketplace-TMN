@@ -55,9 +55,10 @@ export const OrdersPage: React.FC = () => {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
-    severity: 'success',
   });
   const [statusFilter, setStatusFilter] = useState<string>('');
+
+  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
 
   useEffect(() => {
     fetchOrders(page + 1, rowsPerPage);
@@ -175,7 +176,7 @@ export const OrdersPage: React.FC = () => {
                     <TableCell>
                       {order.items.map((item, idx) => (
                         <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
-                          • {item.product.name} (x{item.quantity})
+                          • {getLocalizedText(item.product.name)} (x{item.quantity})
                         </Typography>
                       ))}
                     </TableCell>

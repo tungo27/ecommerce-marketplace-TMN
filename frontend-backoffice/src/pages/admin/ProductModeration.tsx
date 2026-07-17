@@ -13,6 +13,8 @@ export const ProductModeration: React.FC = () => {
   const [toast, setToast] = useState<{ open: boolean, message: string, severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -87,7 +89,7 @@ export const ProductModeration: React.FC = () => {
                     <TableCell sx={{ py: 3 }}>
                       <Avatar src={row.images?.[0]} variant="rounded" sx={{ width: 56, height: 56, border: '1px solid #E5E7EB', bgcolor: '#F3F4F6' }} />
                     </TableCell>
-                    <TableCell sx={{ py: 3, color: '#111827', fontWeight: 600 }}>{row.name}</TableCell>
+                    <TableCell sx={{ py: 3, color: '#111827', fontWeight: 600 }}>{getLocalizedText(row.name)}</TableCell>
                     <TableCell sx={{ py: 3, color: '#111827' }}>${row.price}</TableCell>
                     <TableCell sx={{ py: 3, color: '#374151' }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: '#111827' }}>{row.seller.name}</Typography>

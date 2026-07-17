@@ -274,7 +274,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               {products.length === 0 && (
                 <div className="mt-4 rounded-md border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
-                  No products found. Please run the backend and seed the database to load products.
+                  No products found. Try again later.
                 </div>
               )}
 

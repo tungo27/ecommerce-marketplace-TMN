@@ -102,7 +102,7 @@ export default function CheckoutPage() {
               <div className="mb-4 max-h-60 overflow-y-auto pr-2 text-sm">
                 {items.map(item => (
                   <div key={item.productId} className="mb-3 flex justify-between gap-2 border-b border-gray-100 pb-3 last:border-0">
-                    <div className="line-clamp-2 flex-1 text-gray-700">{item.name} <span className="font-bold text-gray-900">x{item.quantity}</span></div>
+                    <div className="line-clamp-2 flex-1 text-gray-700">{typeof item.name === 'string' ? item.name : ((item.name as any)?.en || (item.name as any)?.vi || '')} <span className="font-bold text-gray-900">x{item.quantity}</span></div>
                     <div className="font-medium">{(item.price * item.quantity).toLocaleString()} VND</div>
                   </div>
                 ))}

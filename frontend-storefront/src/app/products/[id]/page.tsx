@@ -86,6 +86,8 @@ export default async function ProductDetailPage({
     product.images?.[0] ||
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
 
+  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
   return (
     <div className="min-h-screen bg-white lg:bg-gray-50 text-gray-900 pb-20 lg:pb-0">
       <Header />
@@ -104,8 +106,8 @@ export default async function ProductDetailPage({
               </Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900 font-medium truncate max-w-[200px] md:max-w-xs" title={product.name}>
-              {product.name}
+            <li className="text-gray-900 font-medium truncate max-w-[200px] md:max-w-xs" title={getLocalizedText(product.name)}>
+              {getLocalizedText(product.name)}
             </li>
           </ol>
         </nav>
@@ -120,7 +122,7 @@ export default async function ProductDetailPage({
               </span>
             </div>
             <h1 className="text-xl font-bold leading-tight text-gray-900">
-              {product.name}
+              {getLocalizedText(product.name)}
             </h1>
             <div className="mt-2 flex items-center gap-2">
               <div className="flex items-center text-[#F59E0B]">
@@ -145,7 +147,7 @@ export default async function ProductDetailPage({
                 {/* priority prop boosts LCP by eagerly loading the hero image */}
                 <Image
                   src={imageUrl}
-                  alt={product.name}
+                  alt={getLocalizedText(product.name)}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -156,7 +158,7 @@ export default async function ProductDetailPage({
                 <div className="flex gap-4 overflow-x-auto pb-2 px-4 lg:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {product.images.map((img: string, idx: number) => (
                     <button key={idx} className={`relative h-20 w-20 lg:h-24 lg:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 ${idx === 0 ? 'border-primary' : 'border-transparent'} bg-gray-100 transition hover:border-primary/50`}>
-                      <Image src={img} alt={`${product.name} ${idx + 1}`} fill sizes="120px" className="object-cover" />
+                      <Image src={img} alt={`${getLocalizedText(product.name)} ${idx + 1}`} fill sizes="120px" className="object-cover" />
                     </button>
                   ))}
                 </div>
@@ -175,7 +177,7 @@ export default async function ProductDetailPage({
                 </div>
                 
                 <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl lg:text-4xl">
-                  {product.name}
+                  {getLocalizedText(product.name)}
                 </h1>
 
                 <div className="mt-4 flex items-center gap-4">
@@ -215,7 +217,7 @@ export default async function ProductDetailPage({
                   Description
                 </h3>
                 <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-                  {product.description || (
+                  {getLocalizedText(product.description) || (
                     <p>No description provided for this product.</p>
                   )}
                 </div>

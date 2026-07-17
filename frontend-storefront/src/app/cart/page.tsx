@@ -8,6 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import { apiClient } from '@/utils/api';
 
+const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
 // Toast Component
 
 function Toast({
@@ -391,7 +393,7 @@ export default function CartPage() {
                                   <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
                                     <img
                                       src={imageUrl(item.images)}
-                                      alt={item.name}
+                                      alt={getLocalizedText(item.name)}
                                       className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                     />
                                     {/* Stock badge */}
@@ -408,7 +410,7 @@ export default function CartPage() {
                                   </div>
                                   <div className="min-w-0">
                                     <p className="line-clamp-2 text-sm font-semibold leading-snug text-gray-800">
-                                      {item.name}
+                                      {getLocalizedText(item.name)}
                                     </p>
                                     {/* Hiển thị đơn giá trên mobile */}
                                     <p className="mt-1 text-xs text-gray-500 sm:hidden">
@@ -451,7 +453,7 @@ export default function CartPage() {
                                   id={`remove-item-${item.productId}`}
                                   onClick={() => handleRemoveItem(item.productId)}
                                   disabled={isLoading}
-                                  aria-label={`Remove ${item.name} from cart`}
+                                  aria-label={`Remove ${getLocalizedText(item.name)} from cart`}
                                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-gray-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
                                 >
                                   <svg
@@ -500,7 +502,7 @@ export default function CartPage() {
                           className="flex justify-between gap-2 text-sm"
                         >
                           <span className="text-gray-600 line-clamp-1 flex-1">
-                            {item.name}
+                            {getLocalizedText(item.name)}
                             <span className="ml-1 text-gray-400">×{item.quantity}</span>
                           </span>
                           <span className="font-semibold text-gray-800 shrink-0">

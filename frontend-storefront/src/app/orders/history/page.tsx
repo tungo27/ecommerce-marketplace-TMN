@@ -65,6 +65,8 @@ export default function OrderHistoryPage() {
     }).format(Number(amount));
   };
 
+  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING':
@@ -192,7 +194,7 @@ export default function OrderHistoryPage() {
                           {item.thumbnailUrl ? (
                             <img
                               src={item.thumbnailUrl}
-                              alt={item.productName}
+                              alt={getLocalizedText(item.productName)}
                               className="h-full w-full object-contain object-center"
                             />
                           ) : (
@@ -204,7 +206,7 @@ export default function OrderHistoryPage() {
 
                         <div className="flex flex-1 flex-col justify-center">
                           <div className="flex justify-between text-base font-semibold text-gray-900 mb-1">
-                            <h4 className="line-clamp-2 pr-4">{item.productName}</h4>
+                            <h4 className="line-clamp-2 pr-4">{getLocalizedText(item.productName)}</h4>
                             <p className="ml-4 whitespace-nowrap text-[#FF4742]">{formatCurrency(item.price)}</p>
                           </div>
                           <div className="flex justify-between items-end mt-2">
