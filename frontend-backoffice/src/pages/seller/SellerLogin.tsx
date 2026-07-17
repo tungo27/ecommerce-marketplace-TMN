@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Typography, Button, Divider } from '@mui/material';
 import { AuthLayout } from '../../components/AuthLayout';
@@ -6,25 +6,62 @@ import { AuthForm } from '../../components/AuthForm';
 import { InputField } from '../../components/InputField';
 import { useAuthApi } from '../../hooks/useAuthApi';
 import { useAuthStore } from '../../stores/authStore';
+import { useNotificationStore } from '../../stores/notificationStore';
 
 export const SellerLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [retryAfter, setRetryAfter] = useState<number>(0);
   const navigate = useNavigate();
   const { login } = useAuthApi();
   const { isLoading, error } = useAuthStore();
+  const { showNotification } = useNotificationStore();
+
+  // Đếm ngược thời gian chờ khi bị Rate Limit (NFR UX)
+  useEffect(() => {
+    if (retryAfter <= 0) return;
+
+    showNotification(`Too many attempts. Please try again in ${retryAfter}s...`, 'error');
+
+    const timer = setTimeout(() => {
+      setRetryAfter(retryAfter - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [retryAfter, showNotification]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
+    setFieldErrors({});
+    if (retryAfter > 0) return;
+
+    const result = await login(email, password);
+    if (result.success) {
       const user = useAuthStore.getState().user;
       if (user && user.role === 'CUSTOMER') {
         useAuthStore.getState().logout();
-        useAuthStore.getState().setError('Your account does not have permission to access the seller portal.');
+        showNotification('Your account does not have permission to access the seller portal.', 'error');
         return;
       }
       navigate('/seller/dashboard');
+    } else {
+      if (result.retryAfter) {
+        setRetryAfter(result.retryAfter);
+        showNotification(`Too many attempts. Please try again in ${result.retryAfter}s...`, 'error');
+      } else if (result.fields) {
+        // Tự động map lỗi validation từ backend vào trường nhập liệu tương ứng
+        setFieldErrors(result.fields);
+      } else {
+        // Hiển thị thông báo thân thiện cho các lỗi khác (401, 500, Network)
+        let friendlyMsg = 'Login failed. Please try again.';
+        if (result.error?.includes('Unauthorized') || result.error?.toLowerCase().includes('invalid') || result.error?.toLowerCase().includes('incorrect')) {
+          friendlyMsg = 'Incorrect password or email. Please double-check and try again.';
+        } else if (result.error?.toLowerCase().includes('unexpected error')) {
+          friendlyMsg = 'Server error. An unexpected error occurred. Please try again later.';
+        }
+        showNotification(friendlyMsg, 'error');
+      }
     }
   };
 
@@ -38,14 +75,20 @@ export const SellerLogin: React.FC = () => {
         title="Seller Login"
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        disabled={retryAfter > 0}
         error={error}
-        submitButtonText="Login"
+        submitButtonText={retryAfter > 0 ? `Retry in ${retryAfter}s` : 'Login'}
       >
         <InputField
           label="Email Address"
           type="email"
           value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+            setFieldErrors(prev => ({ ...prev, email: '' }));
+          }}
+          error={!!fieldErrors.email}
+          helperText={fieldErrors.email}
           required
         />
 
@@ -53,7 +96,12 @@ export const SellerLogin: React.FC = () => {
           label="Password"
           type="password"
           value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPassword(e.target.value);
+            setFieldErrors(prev => ({ ...prev, password: '' }));
+          }}
+          error={!!fieldErrors.password}
+          helperText={fieldErrors.password}
           required
         />
 

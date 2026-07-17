@@ -6,16 +6,20 @@ interface AuthFormProps {
   title: string;
   onSubmit: (e: React.FormEvent) => void;
   isLoading?: boolean;
+  disabled?: boolean;
   error?: string | null;
   children: React.ReactNode;
+  submitButtonText?: string;
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({
   title,
   onSubmit,
   isLoading = false,
+  disabled = false,
   error,
   children,
+  submitButtonText = 'Submit',
 }) => {
   return (
     <div 
@@ -43,10 +47,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             {children}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || disabled}
               className="w-full bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-6 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-2 disabled:opacity-50"
             >
-              {isLoading ? 'Loading...' : 'Submit'}
+              {isLoading ? 'Loading...' : submitButtonText}
             </button>
           </form>
         </div>

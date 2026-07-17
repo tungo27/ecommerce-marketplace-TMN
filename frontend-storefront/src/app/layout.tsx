@@ -1,4 +1,5 @@
 import './globals.css';
+import { Toast } from '@/components/Toast';
 
 export const metadata = {
   title: 'E-commerce MVP - Storefront',
@@ -12,7 +13,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Toast thông báo toàn cục (NFR UX) */}
+        <Toast />
+      </body>
     </html>
   );
 }

@@ -11,12 +11,18 @@ export const useAuthApi = () => {
       const response = await authApi.register({ email, password, name, role });
       setUser(response.data);
       setLoading(false);
-      return true;
+      return { success: true };
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Registration failed';
-      setError(errorMessage);
       setLoading(false);
-      return false;
+      const data = err.response?.data;
+      const errorMessage = data?.message || 'Registration failed';
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+        fields: data?.fields,
+        retryAfter: data?.retryAfter,
+      };
     }
   };
 
@@ -29,12 +35,18 @@ export const useAuthApi = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       setUser(response.data.user);
       setLoading(false);
-      return true;
+      return { success: true };
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Login failed';
-      setError(errorMessage);
       setLoading(false);
-      return false;
+      const data = err.response?.data;
+      const errorMessage = data?.message || 'Login failed';
+      setError(errorMessage);
+      return {
+        success: false,
+        error: errorMessage,
+        fields: data?.fields,
+        retryAfter: data?.retryAfter,
+      };
     }
   };
 

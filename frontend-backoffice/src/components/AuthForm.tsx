@@ -5,6 +5,7 @@ interface AuthFormProps {
   title: string;
   onSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
+  disabled?: boolean;
   error?: string | null;
   children: React.ReactNode;
   submitButtonText?: string;
@@ -14,6 +15,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   title,
   onSubmit,
   isLoading,
+  disabled = false,
   error,
   children,
   submitButtonText = 'Submit',
@@ -32,7 +34,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         type="submit"
         variant="contained"
         fullWidth
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         sx={{ mt: 2, py: 1.5 }}
       >
         {isLoading ? 'Loading...' : submitButtonText}

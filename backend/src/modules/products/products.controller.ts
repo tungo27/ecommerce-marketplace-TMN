@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiQuery } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
@@ -42,6 +43,8 @@ interface MulterFile {
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  // Cache kết quả trả về của API này (NFR Performance)
+  @UseInterceptors(CacheInterceptor)
   @Get('products')
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 12)' })
@@ -53,6 +56,8 @@ export class ProductsController {
     return this.productsService.findPublicProducts(query);
   }
 
+  // Cache kết quả trả về của API này
+  @UseInterceptors(CacheInterceptor)
   @Get('products/:id')
   async findPublicProductById(@Param('id') id: string) {
     return this.productsService.findPublicProductById(id);

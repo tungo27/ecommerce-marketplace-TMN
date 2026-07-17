@@ -1,24 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from './AuthForm';
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/utils/api';
 import { useCart } from '@/hooks/useCart';
+import { useToastStore } from '@/hooks/useToastStore';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [retryAfter, setRetryAfter] = useState<number>(0);
   const { isLoading, error, setLoading, setError, setUser } = useAuth();
+  const { showToast } = useToastStore();
 
   const router = useRouter();
+
+  // Đếm ngược thời gian chờ khi bị Rate Limit (NFR UX)
+  useEffect(() => {
+    if (retryAfter <= 0) return;
+
+    showToast(`Too many attempts. Please try again in ${retryAfter}s...`, 'error');
+
+    const timer = setTimeout(() => {
+      setRetryAfter(retryAfter - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [retryAfter, showToast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+    if (retryAfter > 0) return;
     setLoading(true);
 
     try {
@@ -42,9 +61,27 @@ export const LoginForm: React.FC = () => {
       // Redirect to home page
       router.push('/');
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
-      setError(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
       setLoading(false);
+      const data = err.response?.data;
+
+      if (err.response?.status === 429) {
+        const seconds = data?.retryAfter || 60;
+        setRetryAfter(seconds);
+        showToast(`Too many attempts. Please try again in ${seconds}s...`, 'error');
+      } else if (err.response?.status === 400 && data?.fields) {
+        // Tự động map lỗi validation vào đúng helper text dưới input tương ứng
+        setFieldErrors(data.fields);
+      } else {
+        // Hiển thị thông báo thân thiện cho các lỗi khác (401, 500, Network)
+        let friendlyMsg = 'Login failed. Please try again.';
+        if (err.response?.status === 401 || data?.message?.toLowerCase().includes('invalid') || data?.message?.toLowerCase().includes('incorrect')) {
+          friendlyMsg = 'Incorrect password or email. Please double-check and try again.';
+        } else if (err.response?.status >= 500) {
+          friendlyMsg = 'Server error. An unexpected error occurred. Please try again later.';
+        }
+        showToast(friendlyMsg, 'error');
+        setError(friendlyMsg);
+      }
     }
   };
 
@@ -53,6 +90,8 @@ export const LoginForm: React.FC = () => {
       title="Customer Login"
       onSubmit={handleSubmit}
       isLoading={isLoading}
+      disabled={retryAfter > 0}
+      submitButtonText={retryAfter > 0 ? `Retry in ${retryAfter}s` : 'Login'}
       error={error}
     >
       <div>
@@ -62,11 +101,21 @@ export const LoginForm: React.FC = () => {
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors bg-white text-gray-900"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setFieldErrors(prev => ({ ...prev, email: '' }));
+          }}
+          className={`w-full px-4 py-2.5 border rounded-md focus:outline-none focus:ring-1 transition-colors bg-white text-gray-900 ${
+            fieldErrors.email 
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 focus:border-primary focus:ring-primary'
+          }`}
           placeholder="you@example.com"
           required
         />
+        {fieldErrors.email && (
+          <p className="text-red-500 text-xs mt-1.5 font-medium">{fieldErrors.email}</p>
+        )}
       </div>
 
       <div>
@@ -77,8 +126,15 @@ export const LoginForm: React.FC = () => {
           <input
             type={showPassword ? 'text' : 'password'}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors bg-white text-gray-900"
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setFieldErrors(prev => ({ ...prev, password: '' }));
+            }}
+            className={`w-full px-4 py-2.5 border rounded-md focus:outline-none focus:ring-1 transition-colors bg-white text-gray-900 ${
+              fieldErrors.password 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:border-primary focus:ring-primary'
+            }`}
             placeholder="••••••••"
             required
           />
@@ -90,6 +146,9 @@ export const LoginForm: React.FC = () => {
             {showPassword ? '👁️' : '👁️‍🗨️'}
           </button>
         </div>
+        {fieldErrors.password && (
+          <p className="text-red-500 text-xs mt-1.5 font-medium">{fieldErrors.password}</p>
+        )}
       </div>
 
       <div className="text-center mt-6">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { AuthLayout } from '../../components/AuthLayout';
@@ -7,6 +7,7 @@ import { InputField } from '../../components/InputField';
 import { useAuthApi } from '../../hooks/useAuthApi';
 import { useAuthStore } from '../../stores/authStore';
 import { validateEmail, validatePassword, validateName } from '../../utils/validation';
+import { useNotificationStore } from '../../stores/notificationStore';
 
 export const SellerRegister: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -16,9 +17,24 @@ export const SellerRegister: React.FC = () => {
     confirmPassword: '',
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [retryAfter, setRetryAfter] = useState<number>(0);
   const navigate = useNavigate();
   const { register } = useAuthApi();
   const { isLoading, error } = useAuthStore();
+  const { showNotification } = useNotificationStore();
+
+  // Đếm ngược thời gian chờ khi bị Rate Limit (NFR UX)
+  useEffect(() => {
+    if (retryAfter <= 0) return;
+
+    showNotification(`Too many attempts. Please try again in ${retryAfter}s...`, 'error');
+
+    const timer = setTimeout(() => {
+      setRetryAfter(retryAfter - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [retryAfter, showNotification]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -50,20 +66,39 @@ export const SellerRegister: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (retryAfter > 0) return;
 
     if (!validateForm()) {
       return;
     }
 
-    const success = await register(
+    const result = await register(
       formData.email,
       formData.password,
       formData.name,
       'SELLER'
     );
 
-    if (success) {
+    if (result.success) {
+      showNotification('Account registered successfully. Please sign in.', 'success');
       navigate('/seller/login');
+    } else {
+      if (result.retryAfter) {
+        setRetryAfter(result.retryAfter);
+        showNotification(`Too many attempts. Please try again in ${result.retryAfter}s...`, 'error');
+      } else if (result.fields) {
+        // Ánh xạ lỗi validation từ API xuống trường nhập liệu tương ứng
+        setFieldErrors(result.fields);
+      } else {
+        // Hiển thị thông báo thân thiện cho các lỗi khác
+        let friendlyMsg = 'Registration failed. Please try again.';
+        if (result.error?.toLowerCase().includes('already exists') || result.error?.toLowerCase().includes('conflict')) {
+          friendlyMsg = 'Email is already registered. Please use another email or sign in.';
+        } else if (result.error?.toLowerCase().includes('unexpected error')) {
+          friendlyMsg = 'Server error. An unexpected error occurred. Please try again later.';
+        }
+        showNotification(friendlyMsg, 'error');
+      }
     }
   };
 
@@ -77,8 +112,9 @@ export const SellerRegister: React.FC = () => {
         title="Create Seller Account"
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        disabled={retryAfter > 0}
         error={error}
-        submitButtonText="Register"
+        submitButtonText={retryAfter > 0 ? `Retry in ${retryAfter}s` : 'Register'}
       >
         <InputField
           label="Full Name"
