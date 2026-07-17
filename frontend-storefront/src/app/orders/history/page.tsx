@@ -16,17 +16,17 @@ const TABS = [
 ];
 
 export default function OrderHistoryPage() {
-  const { user } = useAuth();
+  const { user, isHydrated } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user === null) {
+    if (isHydrated && user === null) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [user, isHydrated, router]);
 
   useEffect(() => {
     if (user) {
@@ -82,6 +82,7 @@ export default function OrderHistoryPage() {
     }
   };
 
+  if (!isHydrated) return null;
   if (!user) return null;
 
   return (

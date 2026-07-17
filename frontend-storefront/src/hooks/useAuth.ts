@@ -9,6 +9,7 @@ export interface User {
 
 interface AuthStore {
   user: User | null;
+  isHydrated: boolean;
   isLoading: boolean;
   error: string | null;
   setUser: (user: User | null) => void;
@@ -19,20 +20,10 @@ interface AuthStore {
 }
 
 export const useAuth = create<AuthStore>((set) => {
-  let initialUser = null;
-  if (typeof window !== 'undefined') {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        initialUser = JSON.parse(storedUser);
-      } catch (e) {
-        console.error('Failed to parse user from localStorage', e);
-      }
-    }
-  }
-
+  // Start with null user (matches SSR state) - hydrate after mount
   return {
-    user: initialUser,
+    user: null,
+    isHydrated: false,
     isLoading: false,
     error: null,
     setUser: (user) => set({ user }),
@@ -48,3 +39,18 @@ export const useAuth = create<AuthStore>((set) => {
     },
   };
 });
+
+// Hydrate the store from localStorage after the component mounts on the client
+if (typeof window !== 'undefined') {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      useAuth.setState({ user: JSON.parse(storedUser), isHydrated: true });
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e);
+      useAuth.setState({ isHydrated: true });
+    }
+  } else {
+    useAuth.setState({ isHydrated: true });
+  }
+}
