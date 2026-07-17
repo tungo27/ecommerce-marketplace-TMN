@@ -1,11 +1,11 @@
 'use client';
 import Link from 'next/link';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useTransition, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function Header({ searchAction, currentSearch, currentCategory, currentMinPrice, currentMaxPrice }: any) {
+function HeaderContent({ searchAction, currentSearch, currentCategory, currentMinPrice, currentMaxPrice }: any) {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -15,6 +15,8 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
   const formRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const isAuthenticated = Boolean(user);
 
@@ -36,11 +38,34 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
   }, [isMounted, isAuthenticated]);
 
   const handleSearchInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const val = e.target.value;
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
     debounceRef.current = setTimeout(() => {
-      formRef.current?.requestSubmit();
-    }, 500);
-  }, []);
+      // Build new URL
+      const current = new URLSearchParams(Array.from(searchParams.entries()));
+      
+      if (val.trim()) {
+        current.set('search', val);
+      } else {
+        current.delete('search');
+      }
+      
+      // Always reset page to 1 when searching
+      current.set('page', '1');
+
+      // Use searchAction as base path if provided, else use "/"
+      const basePath = searchAction && searchAction.split('?')[0] ? searchAction.split('?')[0] : '/';
+      const searchStr = current.toString();
+      const newUrl = searchStr ? `${basePath}?${searchStr}` : basePath;
+      
+      startTransition(() => {
+        router.push(newUrl, { scroll: false });
+      });
+    }, 400); // 400ms debounce
+  }, [router, searchParams, searchAction]);
 
   const handleLogout = () => {
     useCart.setState({ items: [], totalCartPrice: 0, totalItems: 0 });
@@ -76,24 +101,33 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
         </div>
 
         {/* Search Bar */}
-        <form ref={formRef} method="get" action={searchAction} className="relative w-full lg:w-auto lg:flex-1 order-last lg:order-none">
+        <form ref={formRef} method="get" action={searchAction} onSubmit={(e) => e.preventDefault()} className="relative w-full lg:w-auto lg:flex-1 order-last lg:order-none">
           <input
             name="search"
             defaultValue={currentSearch}
+            onChange={handleSearchInput}
             type="search"
             placeholder="Search products"
-            onChange={handleSearchInput}
             className="h-10 w-full rounded-md border border-transparent bg-white px-4 pr-24 text-sm text-gray-900 outline-none transition focus:border-white focus:ring-2 focus:ring-white/50 shadow-inner"
           />
           <input type="hidden" name="category" value={currentCategory || ''} />
           <input type="hidden" name="minPrice" value={currentMinPrice || ''} />
           <input type="hidden" name="maxPrice" value={currentMaxPrice || ''} />
-          <button
-            type="submit"
-            className="absolute right-1 top-1/2 h-8 -translate-y-1/2 rounded-md bg-[#E63E39] px-4 text-sm font-semibold text-white transition hover:bg-[#D53530]"
-          >
-            Search
-          </button>
+          
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {isPending && (
+              <svg className="h-5 w-5 animate-spin text-[#E63E39]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            <button
+              type="submit"
+              className="h-8 rounded-md bg-[#E63E39] px-4 text-sm font-semibold text-white transition hover:bg-[#D53530]"
+            >
+              Search
+            </button>
+          </div>
         </form>
 
         {/* Desktop Nav */}
@@ -252,5 +286,13 @@ export default function Header({ searchAction, currentSearch, currentCategory, c
         </div>
       </div>
     </header>
+  );
+}
+
+export default function Header(props: any) {
+  return (
+    <Suspense fallback={<header className="sticky top-0 z-50 h-[72px] lg:h-[68px] border-b-4 border-[#F05545] bg-[#FF4742] shadow-md"></header>}>
+      <HeaderContent {...props} />
+    </Suspense>
   );
 }

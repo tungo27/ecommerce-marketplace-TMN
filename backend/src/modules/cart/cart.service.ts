@@ -15,7 +15,7 @@ import type { Redis } from 'ioredis';
  */
 export interface CartItem {
   productId: string;
-  name: string;
+  name: any;
   price: number;
   images: string[];
   quantity: number;

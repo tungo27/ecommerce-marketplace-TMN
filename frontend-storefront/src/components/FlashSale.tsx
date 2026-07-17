@@ -13,6 +13,8 @@ type FlashSaleProps = {
 const formatVND = (price: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
+const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
 function Countdown() {
   const [time, setTime] = useState({ h: 2, m: 15, s: 30 });
 
@@ -118,7 +120,7 @@ export default function FlashSale({ products = [] }: FlashSaleProps) {
                 <div className="relative overflow-hidden aspect-[4/3] shrink-0">
                   <img
                     src={imageUrl}
-                    alt={product.name}
+                    alt={getLocalizedText(product.name)}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute top-2 left-2 rounded-lg bg-red-500 px-2 py-1 text-xs font-black text-white shadow">
@@ -130,7 +132,7 @@ export default function FlashSale({ products = [] }: FlashSaleProps) {
                 <div className="flex flex-1 flex-col justify-between p-3">
                   <div>
                     <p className="line-clamp-2 min-h-[2.5rem] text-xs font-semibold text-gray-800 sm:text-sm">
-                      {product.name}
+                      {getLocalizedText(product.name)}
                     </p>
 
                     <div className="mt-2 flex flex-col gap-0.5">

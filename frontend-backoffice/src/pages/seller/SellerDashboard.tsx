@@ -44,6 +44,8 @@ export const SellerDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
 
+  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+
   const fetchProducts = async (status = '') => {
     setIsLoading(true);
     setError('');
@@ -148,7 +150,7 @@ export const SellerDashboard: React.FC = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Box sx={{ width: 64, height: 64, borderRadius: 2, overflow: 'hidden', bgcolor: '#F3F4F6' }}>
                           {product.images.length > 0 ? (
-                            <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={product.images[0]} alt={getLocalizedText(product.name)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <Box sx={{ alignItems: 'center', display: 'flex', height: '100%', justifyContent: 'center', color: '#9CA3AF' }}>
                               No image
@@ -156,7 +158,7 @@ export const SellerDashboard: React.FC = () => {
                           )}
                         </Box>
                         <Box>
-                          <Typography sx={{ fontWeight: 700, color: '#111827' }}>{product.name}</Typography>
+                          <Typography sx={{ fontWeight: 700, color: '#111827' }}>{getLocalizedText(product.name)}</Typography>
                           <Typography variant="caption" sx={{ color: '#6B7280' }}>
                             ID: {product.id}
                           </Typography>

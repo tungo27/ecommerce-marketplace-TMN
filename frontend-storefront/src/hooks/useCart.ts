@@ -284,7 +284,8 @@ export const useCart = create<CartState>((set, get) => ({
           totalCartPrice: data.totalCartPrice,
           totalItems: data.totalItems,
         });
-        get().showToast(`Added "${product.name}" to cart!`, 'success');
+        const productName = typeof product.name === 'string' ? product.name : ((product.name as any)?.en || (product.name as any)?.vi || 'Product');
+        get().showToast(`Added "${productName}" to cart!`, 'success');
       } else {
         // Guest: cập nhật LocalStorage
         const currentGuestItems = readGuestCartFromStorage();
@@ -328,7 +329,8 @@ export const useCart = create<CartState>((set, get) => ({
         const cartItems = toCartItems(currentGuestItems);
         const totals = calculateTotals(cartItems);
         set({ items: cartItems, ...totals });
-        get().showToast(`Added "${product.name}" to cart!`, 'success');
+        const productName = typeof product.name === 'string' ? product.name : ((product.name as any)?.en || (product.name as any)?.vi || 'Product');
+        get().showToast(`Added "${productName}" to cart!`, 'success');
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;

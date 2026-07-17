@@ -98,8 +98,10 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
   // Delete old products
   await prisma.auditLog.deleteMany();
   await prisma.waitlist.deleteMany();
+  await prisma.transaction.deleteMany();
   await prisma.review.deleteMany();
   await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
   await prisma.product.deleteMany();
   console.log('--- Cleared old products ---');
 
