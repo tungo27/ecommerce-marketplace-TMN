@@ -25,6 +25,7 @@ import { apiClient } from '../../utils/api';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
+import AddIcon from '@mui/icons-material/Add';
 
 interface SellerProduct {
   id: string;
@@ -188,12 +189,8 @@ export const ProductList: React.FC = () => {
               <MenuItem value="Draft">Draft</MenuItem>
             </Select>
 
-            <Button
-              variant="contained"
-              sx={{ bgcolor: '#FF4742', '&:hover': { bgcolor: '#e63f3a' } }}
-              onClick={() => navigate('/seller/products/new')}
-            >
-              Add product
+            <Button variant="contained" startIcon={<AddIcon />} sx={{ bgcolor: '#FF4742', '&:hover': { bgcolor: '#e63f3a' } }} onClick={() => navigate('/seller/products/new')}>
+              Add Product
             </Button>
           </Box>
         </Paper>

@@ -188,8 +188,11 @@ export const CreateProduct: React.FC = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: '#F9FAFB', py: 4, px: { xs: 2, md: 4 } }}>
       <Paper elevation={0} sx={{ maxWidth: 900, mx: 'auto', border: '1px solid #E5E7EB', borderRadius: 3, overflow: 'hidden' }}>
         <Box sx={{ bgcolor: '#FF4742', px: 4, py: 3 }}>
-          <Button sx={{ color: 'white', fontWeight: 700, fontSize: '1rem' }} onClick={() => navigate('/seller/products')}>
-            ← Back to Product List
+          <Button sx={{ color: 'white', fontWeight: 700, fontSize: '1rem', p: 0, minWidth: 0, mb: 1, justifyContent: 'flex-start', }} onClick={() => navigate('/seller/products')}>
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg> 
+            Back to Product List
           </Button>
           <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
             Create New Product

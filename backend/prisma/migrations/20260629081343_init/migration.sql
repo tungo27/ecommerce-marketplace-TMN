@@ -1,3 +1,6 @@
+-- Enable unaccent extension (required for full-text search migrations)
+CREATE EXTENSION IF NOT EXISTS "unaccent";
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('CUSTOMER', 'SELLER', 'ADMIN');
 
