@@ -47,8 +47,9 @@ export const LoginForm: React.FC = () => {
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      // Also write token to cookie so Next.js middleware (Edge Runtime) can read it
+      // Also write token and user to cookie so Next.js middleware and SSR can read it
       document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+      document.cookie = `userCookie=${encodeURIComponent(JSON.stringify(response.data.user))}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
       
       // Update AuthContext user state
       setUser(response.data.user);

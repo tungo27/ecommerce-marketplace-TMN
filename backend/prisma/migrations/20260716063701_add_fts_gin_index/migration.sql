@@ -1,0 +1,19 @@
+-- Create extension for unaccent if it doesn't exist
+CREATE EXTENSION IF NOT EXISTS "unaccent";
+
+-- Create an immutable wrapper for unaccent so it can be used in an index
+CREATE OR REPLACE FUNCTION f_unaccent(text)
+  RETURNS text AS
+$func$
+SELECT unaccent('unaccent', $1)
+$func$  LANGUAGE sql IMMUTABLE;
+
+-- Create GIN index for Full-Text Search on Product name and description
+-- Weights: name gets A (highest), description gets B
+CREATE INDEX IF NOT EXISTS "product_fts_gin_idx" ON "Product"
+USING GIN (
+  (
+    setweight(to_tsvector('simple', f_unaccent(coalesce("name", ''))), 'A') ||
+    setweight(to_tsvector('simple', f_unaccent(coalesce("description", ''))), 'B')
+  )
+);

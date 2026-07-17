@@ -15,19 +15,133 @@ export class ProductsService {
     private readonly uploadService: UploadService,
   ) {}
 
+  // ---------------------------------------------------------------------------
+  // Keyword Normalization
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Strip Vietnamese diacritics, lowercase, and sanitize the keyword so it
+   * contains only ASCII letters/digits and spaces — safe for building tsquery.
+   */
   private normalizeSearchKeyword(keyword: string): string {
     return keyword
       .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
+      .replace(/\p{Diacritic}/gu, '') // remove diacritics (ă→a, ơ→o, etc.)
       .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')   // remove non-alphanumeric (|, &, !, etc.)
+      .replace(/\s+/g, ' ')           // collapse whitespace
       .trim();
   }
+
+  // ---------------------------------------------------------------------------
+  // Synonym Map  (Vietnamese ↔ English, accent-stripped keys)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Keys are accent-stripped Vietnamese words (already normalized via normalizeSearchKeyword).
+   * Values are English equivalents that should also be searched.
+   */
+  private readonly SYNONYM_MAP: Record<string, string[]> = {
+    // Footwear
+    'giay': ['shoe', 'sneaker', 'boot', 'sandal', 'slipper', 'loafer', 'heel', 'footwear'],
+    'dep':  ['sandal', 'slipper', 'flipflop'],
+    // Clothing — single-word keys
+    'ao':   ['shirt', 'blouse', 'top', 'hoodie', 'sweater', 'polo', 'tshirt'],
+    'quan': ['pant', 'trouser', 'jeans', 'short', 'legging'],
+    'vay':  ['dress', 'skirt'],
+    // Clothing — multi-word phrases (normalized, no diacritics)
+    'ao khoac': ['jacket', 'coat', 'hoodie', 'cardigan'],
+    'ao phong':  ['tshirt', 'polo'],
+    // Electronics
+    'dien thoai': ['phone', 'smartphone', 'mobile', 'iphone', 'android'],
+    'may tinh':   ['computer', 'laptop', 'pc', 'notebook', 'macbook'],
+    'tai nghe':   ['headphone', 'earphone', 'earbuds', 'headset'],
+    // Cosmetics
+    'son':       ['lipstick', 'gloss', 'balm'],
+    'kem':       ['cream', 'lotion', 'moisturizer', 'sunscreen', 'serum'],
+    'phan':      ['powder', 'foundation', 'blush', 'eyeshadow'],
+    'nuoc hoa':  ['perfume', 'cologne', 'fragrance'],
+    // Food
+    'ca phe': ['coffee'],
+    'tra':    ['tea'],
+    'banh':   ['cake', 'cookie', 'bread', 'biscuit', 'snack'],
+    // Home & Living
+    'ghe': ['chair', 'sofa', 'couch', 'stool', 'bench'],
+    'ban': ['table', 'desk'],
+    'den': ['lamp', 'light', 'bulb'],
+    // Sports
+    'the thao': ['sport', 'fitness', 'gym', 'athletic', 'exercise'],
+    'bong da':  ['football', 'soccer'],
+    'bong ro':  ['basketball'],
+    // Bags & Wallets
+    'tui': ['bag', 'backpack', 'handbag', 'purse'],
+    'vi':  ['wallet', 'purse'],
+    // Watches & Jewelry
+    'dong ho': ['watch', 'clock'],
+    'nhan':    ['ring', 'jewelry'],
+    'vong':    ['bracelet', 'necklace', 'bangle'],
+  };
+
+  // ---------------------------------------------------------------------------
+  // tsquery Builder
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Converts a raw user keyword into a PostgreSQL tsquery string using:
+   *  1. Tokenization: each word becomes an individual prefix-search token (word:*)
+   *  2. Synonym expansion: Vietnamese → English equivalents added as OR terms
+   *
+   * Example:
+   *   "Giày thể thao" → "giay:* | the:* | thao:* | shoe:* | sneaker:* | sport:* | ..."
+   *
+   * The resulting string is intended for use with to_tsquery('simple', ...).
+   */
+  buildTsQuery(rawKeyword: string): string {
+    const normalized = this.normalizeSearchKeyword(rawKeyword);
+    const wordSet = new Set<string>();
+
+    // 1. Add each individual token from the user query
+    normalized
+      .split(/\s+/)
+      .filter(t => t.length >= 2)
+      .forEach(t => wordSet.add(t));
+
+    // 2. Expand synonyms: check if normalized query contains any map key
+    for (const [key, synonyms] of Object.entries(this.SYNONYM_MAP)) {
+      const matched = normalized.includes(key) ||
+        synonyms.some(s => normalized.includes(s));
+
+      if (matched) {
+        // Add key's individual tokens
+        key.split(/\s+/).filter(w => w.length >= 2).forEach(w => wordSet.add(w));
+        // Add all synonym tokens
+        synonyms.forEach(s =>
+          s.split(/\s+/).filter(w => w.length >= 2).forEach(w => wordSet.add(w))
+        );
+      }
+    }
+
+    if (wordSet.size === 0) {
+      // Fallback: use the entire normalized string as a single prefix term
+      return normalized.length >= 2 ? `${normalized}:*` : normalized;
+    }
+
+    // Build: "token1:* | token2:* | ..."
+    return Array.from(wordSet)
+      .map(w => `${w}:*`)
+      .join(' | ');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------------------
 
   async findPublicProducts(query: QueryProductDto) {
     const normalizedQuery = { ...query };
 
     if (typeof query.search === 'string' && query.search.trim()) {
-      normalizedQuery.search = this.normalizeSearchKeyword(query.search);
+      // Replace raw user keyword with a ready-to-use PostgreSQL tsquery string
+      normalizedQuery.search = this.buildTsQuery(query.search);
     }
 
     return this.productRepository.findPublicProducts(normalizedQuery);

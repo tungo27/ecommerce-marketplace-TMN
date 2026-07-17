@@ -294,7 +294,7 @@ export default function CartPage() {
                 <div className="mt-4">
                   <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-lg font-semibold text-[#FF4742] transition-all duration-200 hover:text-[#e63d39] hover:translate-x-1"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#FF4742] px-4 py-2 text-sm font-semibold !text-white shadow-sm transition-all duration-200 hover:bg-[#e63d39] hover:-translate-y-0.5"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
