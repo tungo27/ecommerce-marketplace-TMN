@@ -14,6 +14,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { UploadModule } from './upload/upload.module';
 import { SellerModule } from './modules/seller/seller.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { CmsModule } from './modules/cms/cms.module';
+import { DisputesModule } from './modules/disputes/disputes.module';
 
 @Module({
   imports: [
@@ -42,6 +46,10 @@ import { SellerModule } from './modules/seller/seller.module';
     OrdersModule,
     ReviewsModule,
     SellerModule,
+    AdminModule,
+    CategoriesModule,
+    CmsModule,
+    DisputesModule,
   ],
   controllers: [AppController],
   providers: [

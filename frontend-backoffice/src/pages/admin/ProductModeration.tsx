@@ -140,7 +140,7 @@ export const ProductModeration: React.FC = () => {
 
       <Snackbar 
         open={toast.open} 
-        autoHideDuration={6000} 
+        autoHideDuration={5000} 
         onClose={handleCloseToast}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >

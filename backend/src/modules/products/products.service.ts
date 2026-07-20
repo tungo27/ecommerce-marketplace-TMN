@@ -252,7 +252,7 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     const coreFieldsChanged =
       (dto.name !== undefined && dto.name.trim() !== product.name) ||
       (dto.price !== undefined && dto.price !== currentPrice) ||
-      (dto.category !== undefined && dto.category !== product.category);
+      (dto.categoryId !== undefined && dto.categoryId !== product.categoryId);
 
     const updateData: any = {
       description: dto.description !== undefined ? dto.description.trim() : product.description,
@@ -265,8 +265,8 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     if (dto.price !== undefined) {
       updateData.price = dto.price;
     }
-    if (dto.category !== undefined) {
-      updateData.category = dto.category;
+    if (dto.categoryId !== undefined) {
+      updateData.categoryId = dto.categoryId;
     }
 
     if (coreFieldsChanged) {
@@ -327,7 +327,7 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
         name: dto.name.trim(),
         description: dto.description.trim(),
         price: dto.price,
-        category: dto.category,
+        categoryId: dto.categoryId,
         stock: dto.stock,
         images: uploadedImageUrls,
         sellerId,
@@ -352,7 +352,7 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
         where: { status: ProductStatus.Pending },
       }),
     ]);
-    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { products: data, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
   }
 
   async reviewProduct(adminId: string, productId: string, action: 'APPROVE' | 'REJECT') {

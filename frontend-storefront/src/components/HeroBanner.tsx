@@ -2,9 +2,10 @@ import Link from 'next/link';
 
 interface HeroBannerProps {
   product?: any;
+  heroImage?: string;
 }
 
-export default function HeroBanner({ product }: HeroBannerProps) {
+export default function HeroBanner({ product, heroImage }: HeroBannerProps) {
   return (
     <section className="relative overflow-hidden rounded-2xl bg-primary text-white shadow-xl">
       {/* Decorative blobs */}
@@ -61,7 +62,7 @@ export default function HeroBanner({ product }: HeroBannerProps) {
             <p className="text-3xl font-black text-white leading-none">50%</p>
           </div>
           <img
-            src={product?.images?.[0] || "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop"}
+            src={heroImage || product?.images?.[0] || "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop"}
             alt="Hero Shopping"
             className="h-72 w-full rounded-2xl object-cover shadow-2xl ring-4 ring-white/20 transition-transform duration-500 hover:-translate-y-2 lg:h-80 bg-white"
           />

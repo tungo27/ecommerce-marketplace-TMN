@@ -17,7 +17,7 @@ function App() {
       {/* Toast thông báo toàn cục (NFR UX) */}
       <Snackbar
         open={open}
-        autoHideDuration={4000}
+        autoHideDuration={5000}
         onClose={closeNotification}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >

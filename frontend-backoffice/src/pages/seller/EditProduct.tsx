@@ -201,7 +201,7 @@ export const EditProduct: React.FC = () => {
 
           <Snackbar
             open={Boolean(successMessage)}
-            autoHideDuration={2000}
+            autoHideDuration={5000}
             onClose={() => setSuccessMessage('')}
             anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           >

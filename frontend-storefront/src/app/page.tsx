@@ -16,15 +16,6 @@ type HomePageProps = {
   searchParams: Promise<SearchParams>;
 };
 
-const categories = [
-  { label: 'All', value: null },
-  { label: 'Electronics', value: 'Electronics' },
-  { label: 'Fashion', value: 'Fashion' },
-  { label: 'Home & Living', value: 'Home_Living' },
-  { label: 'Cosmetics', value: 'Cosmetics' },
-  { label: 'Food', value: 'Food' },
-];
-
 const priceRanges = [
   { label: 'Any Price', minPrice: null, maxPrice: null },
   { label: 'Under 500k', minPrice: '0', maxPrice: '500000' },
@@ -126,6 +117,36 @@ async function fetchReviews(productId: string) {
   }
 }
 
+async function fetchStorefrontConfig() {
+  try {
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+    const response = await fetch(`${apiBaseUrl}/cms/storefront`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCategories() {
+  try {
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+    const response = await fetch(`${apiBaseUrl}/categories`, { cache: 'no-store' });
+    if (!response.ok) return [];
+    return await response.json();
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedParams = await searchParams;
   const data = await fetchProducts(resolvedParams);
@@ -139,12 +160,28 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     reviews = await fetchReviews(products[0].id);
   }
 
+  const fetchedCategories = await fetchCategories();
+  const categories = [
+    { label: 'All', value: null },
+    ...fetchedCategories.map((c: any) => ({ label: c.name, value: c.id }))
+  ];
+
+  const storefrontConfig = await fetchStorefrontConfig();
+
+  // Hero product lookup if admin chose a product instead of a URL
+  let heroImage = storefrontConfig?.heroImage || '';
+  if (storefrontConfig?.heroProductId && !heroImage) {
+    const heroProductInList = products.find((p: any) => p.id === storefrontConfig.heroProductId);
+    if (heroProductInList?.images?.[0]) {
+      heroImage = heroProductInList.images[0];
+    }
+  }
+  const showcaseCategories = storefrontConfig?.featuredCategoryIds?.length
+    ? fetchedCategories.filter((c: any) => storefrontConfig.featuredCategoryIds.includes(c.id))
+    : fetchedCategories.slice(0, 5);
+
   const categoriesCountArr = await Promise.all([
-    fetchProducts({ category: 'Electronics' }).then(r => ({ value: 'Electronics', count: r.meta?.total || 0 })),
-    fetchProducts({ category: 'Fashion' }).then(r => ({ value: 'Fashion', count: r.meta?.total || 0 })),
-    fetchProducts({ category: 'Home_Living' }).then(r => ({ value: 'Home_Living', count: r.meta?.total || 0 })),
-    fetchProducts({ category: 'Cosmetics' }).then(r => ({ value: 'Cosmetics', count: r.meta?.total || 0 })),
-    fetchProducts({ category: 'Food' }).then(r => ({ value: 'Food', count: r.meta?.total || 0 })),
+    ...showcaseCategories.map((c: any) => fetchProducts({ category: c.id }).then(r => ({ value: c.id, count: r.meta?.total || 0 }))),
     fetchProducts({}).then(r => ({ value: '', count: r.meta?.total || 0 })),
   ]);
 
@@ -169,16 +206,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         currentMaxPrice={currentMaxPrice}
       />
 
-      <main className="mx-auto max-w-[1600px] px-4 py-6">
+      <main className={`mx-auto max-w-[1600px] px-4 py-6 ${storefrontConfig?.theme === 'dark' ? 'bg-gray-900 text-white' : ''}`}>
+        
+        {storefrontConfig?.announcement && (
+          <div className="mb-4 rounded-md bg-blue-50 p-4 text-sm font-medium text-blue-800 text-center">
+            {storefrontConfig.announcement}
+          </div>
+        )}
+
         {/* Homepage sections — hidden when user is searching */}
         {!currentSearch && (
           <>
             {/* 1. Hero Banner */}
-            <HeroBanner product={products.length > 0 ? products[0] : undefined} />
+            <HeroBanner product={products.length > 0 ? products[0] : undefined} heroImage={heroImage} />
 
             {/* 2. Category Showcase */}
             <div className="mt-8">
-              <CategoryShowcase counts={categoriesCount} />
+              <CategoryShowcase counts={categoriesCount} categories={showcaseCategories} />
             </div>
 
             {/* 3. Flash Sale */}

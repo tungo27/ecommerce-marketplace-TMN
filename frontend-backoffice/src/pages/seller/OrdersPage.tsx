@@ -55,6 +55,7 @@ export const OrdersPage: React.FC = () => {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
     message: '',
+    severity: 'success'
   });
   const [statusFilter, setStatusFilter] = useState<string>('');
 
@@ -255,7 +256,7 @@ export const OrdersPage: React.FC = () => {
 
       <Snackbar
         open={toast.open}
-        autoHideDuration={4000}
+        autoHideDuration={5000}
         onClose={() => setToast((p) => ({ ...p, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >

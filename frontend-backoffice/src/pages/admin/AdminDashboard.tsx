@@ -1,152 +1,213 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Paper, Drawer, List, ListItem, ListItemIcon, ListItemText, ListItemButton, AppBar, Toolbar, Avatar } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/authStore';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { ProductModeration } from './ProductModeration';
+import React, { useEffect, useState } from 'react';
+import {
+  Box, Typography, Paper, CircularProgress, Chip,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import {
+  PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+} from 'recharts';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import { adminApi } from '../../hooks/useAdminApi';
 
-const DRAWER_WIDTH = 260;
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: '#F59E0B',
+  CONFIRMED: '#3B82F6',
+  SHIPPED: '#8B5CF6',
+  DELIVERED: '#10B981',
+  CANCELLED: '#EF4444',
+};
+
+const CATEGORY_COLOR = '#2563EB';
+
+interface StatsData {
+  gmv: number;
+  totalOrders: number;
+  newUsers: number;
+  newSellers: number;
+  orderStatusChart: { status: string; count: number }[];
+  categoryProductChart: { category: string; count: number }[];
+}
+
+const KpiCard: React.FC<{
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  subtitle?: string;
+}> = ({ title, value, icon, subtitle }) => (
+  <Paper
+    elevation={0}
+    sx={{ p: 3, border: '1px solid #E5E7EB', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2, height: '100%' }}
+  >
+    <Box
+      sx={{
+        width: 48, height: 48, borderRadius: 2, bgcolor: '#EFF6FF',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', flexShrink: 0,
+      }}
+    >
+      {icon}
+    </Box>
+    <Box>
+      <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500, mb: 0.25 }}>
+        {title}
+      </Typography>
+      <Typography variant="h6" sx={{ fontWeight: 800, color: '#111827', lineHeight: 1.2 }}>
+        {value}
+      </Typography>
+      {subtitle && (
+        <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
+          {subtitle}
+        </Typography>
+      )}
+    </Box>
+  </Paper>
+);
 
 export const AdminDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'overview' | 'moderation'>('overview');
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    logout();
-    navigate('/admin/login');
-  };
+  useEffect(() => {
+    adminApi.getStats()
+      .then(setStats)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const getInitials = (name = 'Admin') => name.charAt(0).toUpperCase();
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+        <CircularProgress sx={{ color: '#2563EB' }} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Chip label={`Error: ${error}`} color="error" />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F9FAFB' }}>
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-            bgcolor: '#1E3A8A', // Deep Blue
-            color: 'white',
-            borderRight: 'none',
-          },
-        }}
-      >
-        <Box sx={{ p: 3, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.5px' }}>
-            E-commerce MVP
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#93C5FD' }}>
-            Admin Portal
-          </Typography>
-        </Box>
-        <List sx={{ px: 2, pt: 2, flex: 1 }}>
-          <ListItem disablePadding sx={{ mb: 1 }}>
-            <ListItemButton
-              selected={activeTab === 'overview'}
-              onClick={() => setActiveTab('overview')}
-              sx={{
-                borderRadius: 2,
-                '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.2)' },
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Overview" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton
-              selected={activeTab === 'moderation'}
-              onClick={() => setActiveTab('moderation')}
-              sx={{
-                borderRadius: 2,
-                '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.2)' },
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                <FactCheckIcon />
-              </ListItemIcon>
-              <ListItemText primary="Product Moderation" sx={{ '& .MuiListItemText-primary': { fontWeight: 500 } }} />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        <Box sx={{ p: 2 }}>
-          <Button
-            fullWidth
-            variant="text"
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-            sx={{
-              color: '#93C5FD',
-              justifyContent: 'flex-start',
-              px: 2,
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', color: 'white' },
-              textTransform: 'none',
-              fontWeight: 500,
-            }}
-          >
-            Logout
-          </Button>
-        </Box>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* Top Header */}
-        <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #E5E7EB', color: '#111827' }}>
-          <Toolbar sx={{ justifyContent: 'space-between' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {activeTab === 'overview' ? 'Dashboard Overview' : 'Product Moderation Management'}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Hello, {user?.name || 'Admin'}
-              </Typography>
-              <Avatar sx={{ bgcolor: '#2563EB', width: 36, height: 36, fontWeight: 600 }}>
-                {getInitials(user?.name)}
-              </Avatar>
-            </Box>
-          </Toolbar>
-        </AppBar>
-
-        {/* Content Area */}
-        <Box sx={{ p: 4 }}>
-          {activeTab === 'overview' && (
-            <Paper elevation={0} sx={{ p: 6, textAlign: 'center', borderRadius: 3, border: '1px solid #E5E7EB' }}>
-              <Avatar sx={{ width: 80, height: 80, bgcolor: '#EFF6FF', color: '#2563EB', mx: 'auto', mb: 2 }}>
-                <DashboardIcon sx={{ fontSize: 40 }} />
-              </Avatar>
-              <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                MVP Admin System
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#6B7280', mb: 4, maxWidth: 500, mx: 'auto' }}>
-                Welcome to the admin panel. Please select a feature from the navigation bar to get started.
-              </Typography>
-              <Button 
-                variant="contained" 
-                disableElevation
-                onClick={() => setActiveTab('moderation')}
-                sx={{ bgcolor: '#2563EB', '&:hover': { bgcolor: '#1D4ED8' }, textTransform: 'none', fontWeight: 600, px: 4, py: 1.5, borderRadius: 2 }}
-              >
-                Go to Product Moderation
-              </Button>
-            </Paper>
-          )}
-
-          {activeTab === 'moderation' && <ProductModeration />}
-        </Box>
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: '#111827' }}>
+          Dashboard Overview
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5 }}>
+          Platform-wide metrics and analytics
+        </Typography>
       </Box>
+
+      {/* KPI Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="Gross Merchandise Value"
+            value={formatCurrency(stats?.gmv ?? 0)}
+            icon={<TrendingUpIcon />}
+            subtitle="From delivered orders"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="Total Orders"
+            value={stats?.totalOrders ?? 0}
+            icon={<ShoppingCartIcon />}
+            subtitle="All time"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="New Customers"
+            value={stats?.newUsers ?? 0}
+            icon={<PersonAddIcon />}
+            subtitle="Last 7 days"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="New Sellers"
+            value={stats?.newSellers ?? 0}
+            icon={<StorefrontIcon />}
+            subtitle="Last 7 days"
+          />
+        </Grid>
+      </Grid>
+
+      {/* Charts */}
+      <Grid container spacing={3}>
+        {/* Pie Chart — Order Status */}
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Paper elevation={0} sx={{ p: 3, border: '1px solid #E5E7EB', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111827', mb: 3 }}>
+              Order Status Distribution
+            </Typography>
+            {stats?.orderStatusChart && stats.orderStatusChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={stats.orderStatusChart}
+                    dataKey="count"
+                    nameKey="status"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    innerRadius={55}
+                  >
+                    {stats.orderStatusChart.map((entry) => (
+                      <Cell key={entry.status} fill={STATUS_COLORS[entry.status] ?? '#9CA3AF'} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: any, name: any) => [value, name]} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 6, color: '#9CA3AF' }}>
+                <Typography>No order data yet</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Bar Chart — Products by Category */}
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper elevation={0} sx={{ p: 3, border: '1px solid #E5E7EB', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#111827', mb: 3 }}>
+              Products by Category
+            </Typography>
+            {stats?.categoryProductChart && stats.categoryProductChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={stats.categoryProductChart} barSize={32}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <XAxis
+                    dataKey="category"
+                    tick={{ fontSize: 12, fill: '#6B7280' }}
+                    tickFormatter={(v) => v.replace('_', ' ')}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill={CATEGORY_COLOR} radius={[4, 4, 0, 0]} name="Products" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 6, color: '#9CA3AF' }}>
+                <Typography>No product data yet</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

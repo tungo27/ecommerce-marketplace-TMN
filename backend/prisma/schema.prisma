@@ -18,14 +18,6 @@ enum Role {
   ADMIN
 }
 
-enum Category {
-  Electronics
-  Fashion
-  Home_Living
-  Cosmetics
-  Food
-}
-
 enum ProductStatus {
   Draft
   Pending
@@ -42,20 +34,22 @@ enum OrderStatus {
 }
 
 model User {
-  id           String     @id @default(uuid())
+  id           String           @id @default(uuid())
   name         String
-  email        String     @unique
+  email        String           @unique
   passwordHash String?
-  googleId     String?    @unique
+  googleId     String?          @unique
   role         Role
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
   products     Product[]
   orders       Order[]
   reviews      Review[]
   waitlists    Waitlist[]
   AuditLog     AuditLog[]
+  disputes     Dispute[]        @relation("CustomerDisputes")
+  disputeMsgs  DisputeMessage[]
 }
 
 model Product {
@@ -63,7 +57,8 @@ model Product {
   name          String        @db.VarChar(100)
   description   String        @db.VarChar(2000)
   price         Decimal       @db.Decimal(10, 2)
-  category      Category
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
   stock         Int           @default(0)
   images        String[]
   status        ProductStatus @default(Pending)
@@ -89,13 +84,15 @@ model Order {
   totalAmount     Decimal       @db.Decimal(10, 2)
   shippingAddress String
   phoneNumber     String
-  paymentMethod   String        // "COD" or "BANK_TRANSFER"
+  paymentMethod   String // "COD" or "BANK_TRANSFER"
   status          OrderStatus   @default(PENDING)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   items           OrderItem[]
   transactions    Transaction[]
   reviews         Review[]
+  Dispute         Dispute?
+
   @@index([userId, createdAt])
 }
 
@@ -117,20 +114,22 @@ model Transaction {
   amount      Decimal  @db.Decimal(10, 2)
   type        String // "DEBIT" or "CREDIT"
   description String
+  status      String   @default("PENDING") // "PENDING" | "SETTLED"
   createdAt   DateTime @default(now())
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  rating    Int      @db.SmallInt
-  comment   String?  @db.VarChar(200)
+  id        String       @id @default(uuid())
+  rating    Int          @db.SmallInt
+  comment   String?      @db.VarChar(200)
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product      @relation(fields: [productId], references: [id])
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
   orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
-  createdAt DateTime @default(now())
+  order     Order        @relation(fields: [orderId], references: [id])
+  createdAt DateTime     @default(now())
+  isHidden  Boolean      @default(false)
   reply     ReviewReply?
 
   @@unique([userId, productId, orderId])
@@ -163,4 +162,55 @@ model ReviewReply {
   comment   String   @db.VarChar(500)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model StorefrontConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED_REFUND
+  RESOLVED_REJECT
+}
+
+model Dispute {
+  id          String           @id @default(uuid())
+  orderId     String           @unique
+  order       Order            @relation(fields: [orderId], references: [id])
+  customerId  String
+  customer    User             @relation("CustomerDisputes", fields: [customerId], references: [id])
+  reason      String
+  description String
+  status      DisputeStatus    @default(OPEN)
+  resolvedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  messages    DisputeMessage[]
+}
+
+model DisputeMessage {
+  id        String   @id @default(uuid())
+  disputeId String
+  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  message   String   @db.VarChar(1000)
+  createdAt DateTime @default(now())
 }

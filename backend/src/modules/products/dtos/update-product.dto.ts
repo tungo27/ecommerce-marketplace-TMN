@@ -22,8 +22,8 @@ export class UpdateProductDto {
   price?: number;
 
   @IsOptional()
-  @IsEnum(Category)
-  category?: Category;
+  @IsString()
+  categoryId?: string;
 
   @IsOptional()
   @Type(() => Number)

@@ -36,7 +36,7 @@ export class ProductRepository {
             setweight(to_tsvector('simple', f_unaccent(coalesce(p.name::text, ''))), 'A') ||
             setweight(to_tsvector('simple', f_unaccent(coalesce(p.description::text, ''))), 'B')
           ) @@ to_tsquery('simple', ${searchQuery})
-          ${query.category ? Prisma.sql`AND p.category = CAST(${query.category} AS "Category")` : Prisma.empty}
+          ${query.categoryId ? Prisma.sql`AND p."categoryId" = ${query.categoryId}` : Prisma.empty}
           ${query.minPrice !== undefined ? Prisma.sql`AND p.price >= ${query.minPrice}` : Prisma.empty}
           ${query.maxPrice !== undefined ? Prisma.sql`AND p.price <= ${query.maxPrice}` : Prisma.empty}
         ORDER BY rank DESC, p."createdAt" DESC
@@ -82,7 +82,7 @@ export class ProductRepository {
       { stock: { gt: 0 } },
     ];
 
-    if (query.category) whereConditions.push({ category: query.category as any });
+    if (query.categoryId) whereConditions.push({ categoryId: query.categoryId });
     if (query.minPrice !== undefined) whereConditions.push({ price: { gte: Number(query.minPrice) } });
     if (query.maxPrice !== undefined) whereConditions.push({ price: { lte: Number(query.maxPrice) } });
 

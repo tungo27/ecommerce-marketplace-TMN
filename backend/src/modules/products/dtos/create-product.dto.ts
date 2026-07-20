@@ -18,8 +18,9 @@ export class CreateProductDto {
   @Min(0.0001)
   price!: number;
 
-  @IsEnum(Category)
-  category!: Category;
+  @IsString()
+  @IsNotEmpty()
+  categoryId!: string;
 
   @Type(() => Number)
   @IsInt()

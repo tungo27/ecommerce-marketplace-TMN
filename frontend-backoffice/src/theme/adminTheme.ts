@@ -3,36 +3,55 @@ import { createTheme } from '@mui/material/styles';
 export const adminTheme = createTheme({
   palette: {
     primary: {
-      main: '#1E88E5',
-      light: '#42A5F5',
-      dark: '#0D47A1',
+      main: '#2563EB', // Blue
+      light: '#EFF6FF',
+      dark: '#1D4ED8',
     },
     secondary: {
-      main: '#0D47A1',
+      main: '#111827',
     },
     background: {
-      default: '#E3F2FD',
+      default: '#F9FAFB',
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#1F2937',
-      secondary: '#6B7280',
+      primary: '#111827',
+      secondary: '#4B5563',
     },
+    divider: '#E5E7EB',
+  },
+  shape: {
+    borderRadius: 8,
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h6: {
       fontWeight: 600,
     },
+    h4: {
+      fontWeight: 800,
+    },
   },
   components: {
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
-        contained: {
-          backgroundColor: '#1E88E5',
-          '&:hover': {
-            backgroundColor: '#0D47A1',
-          },
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+          padding: '8px 24px',
+        },
+      },
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 0,
+      },
+      styleOverrides: {
+        root: {
+          border: '1px solid #E5E7EB',
         },
       },
     },
@@ -40,11 +59,12 @@ export const adminTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
+            backgroundColor: '#FFFFFF',
             '&:hover fieldset': {
-              borderColor: '#1E88E5',
+              borderColor: '#2563EB',
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#1E88E5',
+              borderColor: '#2563EB',
             },
           },
         },
