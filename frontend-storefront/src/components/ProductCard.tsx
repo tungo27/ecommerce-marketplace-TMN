@@ -19,6 +19,7 @@ type ProductCardProps = {
       name?: string;
     };
   };
+  flashSale?: any;
 };
 
 // Reusable VND formatter — Intl.NumberFormat handles grouping & symbol correctly
@@ -27,11 +28,16 @@ const formatVND = (value: number): string =>
 
 const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, flashSale }: ProductCardProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { addToCart } = useCart();
   const isAuthenticated = !!user;
+  
+  const numericPrice = Number(product.price) || 0;
+  const isFlashSale = !!flashSale;
+  const displayPrice = isFlashSale ? Number(flashSale.salePrice) : numericPrice;
+  const originalPrice = isFlashSale ? numericPrice : numericPrice * 1.15;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +45,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {
         productId: product.id,
         name: product.name,
-        price: Number(product.price),
+        price: displayPrice,
         images: product.images || [],
         stock: product.stock,
       },
@@ -49,10 +55,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     router.push('/cart');
   };
 
-  // Prisma Decimal arrives as a string — cast strictly before any arithmetic
-  const numericPrice = Number(product.price) || 0;
-  const originalPrice = numericPrice * 1.15;
-
   const imageUrl =
     product.images?.[0] ||
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
@@ -60,9 +62,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md group">
       <Link href={`/products/${product.id}`} className="relative aspect-[4/3] overflow-hidden bg-gray-100 block">
-        <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white">
-          -15%
-        </div>
+        {isFlashSale ? (
+          <div className="absolute left-3 top-3 z-10 rounded-md bg-red-500 px-2 py-1 text-xs font-black uppercase tracking-widest text-white shadow">
+            -{flashSale.discountPercentage}% FLASH SALE
+          </div>
+        ) : (
+          <div className="absolute left-3 top-3 z-10 rounded-md bg-primary px-2 py-1 text-xs font-semibold uppercase tracking-widest text-white">
+            -15%
+          </div>
+        )}
         {/* Next.js <Image /> with fill to prevent CLS — parent has aspect ratio set */}
         <Image
           src={imageUrl}
@@ -105,7 +113,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-auto pt-5">
           <div className="text-lg font-bold text-primary">
-            {formatVND(numericPrice)}
+            {formatVND(displayPrice)}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
             <span className="line-through">

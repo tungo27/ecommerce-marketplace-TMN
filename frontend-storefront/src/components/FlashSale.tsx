@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 
 type FlashSaleProps = {
-  products?: any[];
+  flashSales?: any[];
 };
 
 const formatVND = (price: number) =>
@@ -15,21 +15,30 @@ const formatVND = (price: number) =>
 
 const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
 
-function Countdown() {
-  const [time, setTime] = useState({ h: 2, m: 15, s: 30 });
+function Countdown({ endTime }: { endTime: string }) {
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
 
   useEffect(() => {
+    const end = new Date(endTime).getTime();
+    
     const interval = setInterval(() => {
-      setTime((prev) => {
-        let { h, m, s } = prev;
-        if (s > 0) return { h, m, s: s - 1 };
-        if (m > 0) return { h, m: m - 1, s: 59 };
-        if (h > 0) return { h: h - 1, m: 59, s: 59 };
-        return { h: 0, m: 0, s: 0 };
-      });
+      const now = new Date().getTime();
+      const distance = end - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        setTime({ h: 0, m: 0, s: 0 });
+        return;
+      }
+
+      const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+      setTime({ h, m, s });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [endTime]);
 
   const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -47,13 +56,46 @@ function Countdown() {
   );
 }
 
-export default function FlashSale({ products = [] }: FlashSaleProps) {
+export default function FlashSale({ flashSales = [] }: FlashSaleProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const isAuthenticated = !!user;
+  
+  // Drag to scroll logic
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
-  if (!products || products.length === 0) return null;
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const onMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // scroll-fast multiplier
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  if (!flashSales || flashSales.length === 0) return null;
+  
+  const earliestEndTime = flashSales.reduce((earliest, current) => {
+    return new Date(current.endTime) < new Date(earliest.endTime) ? current : earliest;
+  }).endTime;
 
   const handleAddToCart = async (e: React.MouseEvent, product: any, salePrice: number) => {
     e.preventDefault();
@@ -69,6 +111,13 @@ export default function FlashSale({ products = [] }: FlashSaleProps) {
       isAuthenticated
     );
     router.push('/cart');
+  };
+  
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 256; // Exactly one card width (240px) + gap (16px)
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -86,35 +135,44 @@ export default function FlashSale({ products = [] }: FlashSaleProps) {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-gray-500">Ends in:</span>
-          <Countdown />
+          <Countdown endTime={earliestEndTime} />
         </div>
       </div>
 
       {/* Products */}
-      <div className="px-4 py-5 sm:px-6 bg-gray-50">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-5">
-          {products.slice(0, 5).map((product) => {
+      <div className="relative bg-gray-50 px-4 py-5 sm:px-6 group/slider">
+        <button 
+          onClick={() => scroll('left')}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md text-gray-600 hover:text-primary hover:bg-gray-50 transition disabled:opacity-50"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </button>
+
+        <div 
+          ref={scrollRef} 
+          className="flex gap-4 overflow-x-auto hide-scrollbar cursor-grab active:cursor-grabbing"
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseUp={onMouseUp}
+          onMouseMove={onMouseMove}
+        >
+          {flashSales.map((fs) => {
+            const product = fs.product;
             const numericPrice = Number(product.price) || 0;
-            const salePrice = numericPrice * 0.5; // Simulate 50% discount
-            const discountPercent = 50;
+            const salePrice = Number(fs.salePrice) || 0;
+            const discountPercent = fs.discountPercentage;
             const imageUrl =
               product.images?.[0] ||
               'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
             
-            // Mock sold/total just for UI visualization
             const total = 100;
-            const getDeterministicSold = (id: string) => {
-              let hash = 0;
-              for (let i = 0; i < id.length; i++) hash = (hash + id.charCodeAt(i)) % 80;
-              return hash + 10;
-            };
-            const sold = getDeterministicSold(product.id);
+            const sold = 10;
 
             return (
               <Link
-                key={product.id}
+                key={fs.id}
                 href={`/products/${product.id}`}
-                className="group flex h-full flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className="group flex h-full w-[240px] shrink-0 flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
                 {/* Image */}
                 <div className="relative overflow-hidden aspect-[4/3] shrink-0">
@@ -171,7 +229,24 @@ export default function FlashSale({ products = [] }: FlashSaleProps) {
             );
           })}
         </div>
+        
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md text-gray-600 hover:text-primary hover:bg-gray-50 transition disabled:opacity-50"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </button>
       </div>
+      
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </section>
   );
 }

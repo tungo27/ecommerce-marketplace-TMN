@@ -3,9 +3,10 @@ import Link from 'next/link';
 interface HeroBannerProps {
   product?: any;
   heroImage?: string;
+  heroProductId?: string;
 }
 
-export default function HeroBanner({ product, heroImage }: HeroBannerProps) {
+export default function HeroBanner({ product, heroImage, heroProductId }: HeroBannerProps) {
   return (
     <section className="relative overflow-hidden rounded-2xl bg-primary text-white shadow-xl">
       {/* Decorative blobs */}
@@ -29,7 +30,7 @@ export default function HeroBanner({ product, heroImage }: HeroBannerProps) {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
             <Link
-              href={product ? `/products/${product.id}` : '/?category=Electronics'}
+              href={heroProductId ? `/products/${heroProductId}` : product ? `/products/${product.id}` : '/?category=Electronics'}
               style={{ backgroundColor: '#ffffff', color: '#ea580c' }}
               className="group inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-extrabold shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >

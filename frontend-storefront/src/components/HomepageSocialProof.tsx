@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 interface HomepageSocialProofProps {
   reviews?: any[];
 }
@@ -61,9 +63,10 @@ export default function HomepageSocialProof({ reviews = [] }: HomepageSocialProo
       {/* Reviews grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {displayReviews.map((review, idx) => (
-          <div
+          <Link
             key={review.id}
-            className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-gray-50 p-5 transition-shadow duration-300 hover:shadow-md"
+            href={`/products/${review.productId}`}
+            className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-gray-50 p-5 transition-shadow duration-300 hover:shadow-md cursor-pointer"
           >
             {/* Stars */}
             <StarRating rating={review.rating || 5} />
@@ -83,7 +86,7 @@ export default function HomepageSocialProof({ reviews = [] }: HomepageSocialProo
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
         {displayReviews.length === 0 && (
           <p className="col-span-full text-center text-sm text-gray-500 py-4">

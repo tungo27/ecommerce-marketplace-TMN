@@ -90,9 +90,9 @@ export default function Footer() {
       </div>
 
       {/* Main footer */}
-      <div className="grid grid-cols-1 gap-10 px-6 py-12 sm:px-10 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 px-6 py-12 sm:px-10 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand column */}
-        <div className="flex flex-col gap-4">
+        <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
           <div>
             <p className="text-xl font-extrabold text-white">🛍️ Marketplace</p>
             <p className="mt-2 text-sm text-gray-400 leading-relaxed">
@@ -133,8 +133,8 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* About + Contact */}
-        <div>
+        {/* About Us */}
+        <div className="col-span-1">
           <h4 className="mb-4 text-sm font-bold uppercase tracking-widest text-white">
             About Us
           </h4>
@@ -150,21 +150,10 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-          <h4 className="mb-3 text-sm font-bold uppercase tracking-widest text-white">
-            Contact
-          </h4>
-          <ul className="flex flex-col gap-2">
-            {FOOTER_LINKS.contact.map((item) => (
-              <li key={item.icon} className="flex items-start gap-2 text-sm text-gray-400">
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
-              </li>
-            ))}
-          </ul>
         </div>
 
         {/* Newsletter */}
-        <div>
+        <div className="col-span-2 md:col-span-1 lg:col-span-1">
           <h4 className="mb-2 text-sm font-bold uppercase tracking-widest text-white">
             Subscribe for Offers
           </h4>
@@ -213,6 +202,18 @@ export default function Footer() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Contact Section - Horizontal */}
+      <div className="border-t border-gray-800 px-6 py-6 sm:px-10">
+        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+          {FOOTER_LINKS.contact.map((item) => (
+            <div key={item.icon} className="flex items-center gap-2 text-sm text-gray-400">
+              <span className="text-lg">{item.icon}</span>
+              <span>{item.text}</span>
+            </div>
+          ))}
         </div>
       </div>
 

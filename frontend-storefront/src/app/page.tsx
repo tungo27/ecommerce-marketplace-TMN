@@ -75,7 +75,7 @@ async function fetchProducts(resolvedParams: SearchParams) {
     const minPrice = getFirstParam(resolvedParams.minPrice);
     const maxPrice = getFirstParam(resolvedParams.maxPrice);
 
-    if (category) params.set('category', category);
+    if (category) params.set('categoryId', category);
     if (search) params.set('search', search);
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
@@ -147,6 +147,22 @@ async function fetchCategories() {
   }
 }
 
+async function fetchActiveFlashSales() {
+  try {
+    const normalizeApiBaseUrl = (value?: string) => {
+      const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+      return raw.endsWith('/api') ? raw : `${raw}/api`;
+    };
+    const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+    const response = await fetch(`${apiBaseUrl}/flash-sales/active`, { cache: 'no-store' });
+    if (!response.ok) return [];
+    const result = await response.json();
+    return result.data || result || [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedParams = await searchParams;
   const data = await fetchProducts(resolvedParams);
@@ -159,6 +175,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   if (products.length > 0) {
     reviews = await fetchReviews(products[0].id);
   }
+
+  const activeFlashSales = await fetchActiveFlashSales();
+  const flashSalesMap = activeFlashSales.reduce((acc: any, fs: any) => {
+    acc[fs.productId] = fs;
+    return acc;
+  }, {});
+
 
   const fetchedCategories = await fetchCategories();
   const categories = [
@@ -218,7 +241,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {!currentSearch && (
           <>
             {/* 1. Hero Banner */}
-            <HeroBanner product={products.length > 0 ? products[0] : undefined} heroImage={heroImage} />
+            <HeroBanner 
+              product={products.length > 0 ? products[0] : undefined} 
+              heroImage={heroImage} 
+              heroProductId={storefrontConfig?.heroProductId} 
+            />
 
             {/* 2. Category Showcase */}
             <div className="mt-8">
@@ -227,7 +254,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
             {/* 3. Flash Sale */}
             <div className="mt-8">
-              <FlashSale products={products} />
+              <FlashSale flashSales={activeFlashSales} />
             </div>
           </>
         )}
@@ -312,7 +339,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
               <div className="lg:mt-4 grid grid-cols-2 gap-2 lg:gap-4 xl:grid-cols-4">
                 {products.map((product: any) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} flashSale={flashSalesMap[product.id]} />
                 ))}
               </div>
 
@@ -322,54 +349,55 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 </div>
               )}
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-12 mb-8 flex justify-center items-center gap-2">
-                  <Link
-                    href={currentPage > 1 ? buildHref(resolvedParams, { page: (currentPage - 1).toString() }) : '#'}
-                    scroll={false}
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${currentPage > 1
-                        ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
-                        : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
-                      }`}
-                    aria-disabled={currentPage <= 1}
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </Link>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Link
-                      key={page}
-                      href={buildHref(resolvedParams, { page: page.toString() })}
-                      scroll={false}
-                      className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-semibold transition-all duration-300 ${page === currentPage
-                          ? 'bg-primary text-white shadow-md transform scale-110'
-                          : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-[#FFF1EE]'
-                        }`}
-                    >
-                      {page}
-                    </Link>
-                  ))}
-
-                  <Link
-                    href={currentPage < totalPages ? buildHref(resolvedParams, { page: (currentPage + 1).toString() }) : '#'}
-                    scroll={false}
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${currentPage < totalPages
-                        ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
-                        : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
-                      }`}
-                    aria-disabled={currentPage >= totalPages}
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </div>
-              )}
             </section>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-12 mb-8 flex justify-center items-center gap-2">
+              <Link
+                href={currentPage > 1 ? buildHref(resolvedParams, { page: (currentPage - 1).toString() }) : '#'}
+                scroll={false}
+                className={`flex items-center justify-center w-10 h-10 rounded-md border transition-all duration-300 ${currentPage > 1
+                    ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
+                    : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
+                  }`}
+                aria-disabled={currentPage <= 1}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Link
+                  key={page}
+                  href={buildHref(resolvedParams, { page: page.toString() })}
+                  scroll={false}
+                  className={`flex items-center justify-center w-10 h-10 rounded-md text-sm font-semibold transition-all duration-300 ${page === currentPage
+                      ? 'bg-primary text-white shadow-md transform scale-110'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-[#FFF1EE]'
+                    }`}
+                >
+                  {page}
+                </Link>
+              ))}
+
+              <Link
+                href={currentPage < totalPages ? buildHref(resolvedParams, { page: (currentPage + 1).toString() }) : '#'}
+                scroll={false}
+                className={`flex items-center justify-center w-10 h-10 rounded-md border transition-all duration-300 ${currentPage < totalPages
+                    ? 'border-gray-200 bg-white text-gray-600 hover:border-primary hover:text-primary shadow-sm'
+                    : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed pointer-events-none'
+                  }`}
+                aria-disabled={currentPage >= totalPages}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* 5. Social Proof */}

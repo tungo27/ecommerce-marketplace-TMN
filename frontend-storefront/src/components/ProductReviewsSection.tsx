@@ -10,6 +10,10 @@ export interface ProductReview {
   comment: string | null;
   createdAt: string;
   user: { name: string };
+  reply?: {
+    comment: string;
+    createdAt: string;
+  } | null;
 }
 
 interface EligibleOrder {
@@ -316,6 +320,14 @@ export default function ProductReviewsSection({
                 <p className="mt-3 text-sm leading-relaxed text-gray-600">
                   {review.comment}
                 </p>
+              )}
+              {review.reply && (
+                <div className="mt-4 rounded-lg bg-gray-50 p-4 border border-gray-100">
+                  <p className="text-xs font-semibold text-gray-900 mb-1">Seller Response</p>
+                  <p className="text-sm text-gray-600">
+                    {review.reply.comment}
+                  </p>
+                </div>
               )}
             </li>
           ))}
