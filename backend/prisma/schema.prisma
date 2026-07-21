@@ -33,6 +33,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum FlashSaleStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           String           @id @default(uuid())
   name         String
@@ -50,6 +56,7 @@ model User {
   AuditLog     AuditLog[]
   disputes     Dispute[]        @relation("CustomerDisputes")
   disputeMsgs  DisputeMessage[]
+  flashSales   FlashSale[]
 }
 
 model Product {
@@ -72,6 +79,7 @@ model Product {
   reviews       Review[]
   waitlists     Waitlist[]
   AuditLog      AuditLog[]
+  flashSales    FlashSale[]
 
   // Note: A GIN index named "product_fts_gin_idx" is manually managed via raw SQL migration
   // to support PostgreSQL Full-Text Search on name and description.
@@ -169,6 +177,7 @@ model Category {
   name        String    @unique
   slug        String    @unique
   description String?
+  imageUrl    String?
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -213,4 +222,20 @@ model DisputeMessage {
   sender    User     @relation(fields: [senderId], references: [id])
   message   String   @db.VarChar(1000)
   createdAt DateTime @default(now())
+}
+
+model FlashSale {
+  id                 String          @id @default(uuid())
+  productId          String
+  product            Product         @relation(fields: [productId], references: [id])
+  sellerId           String
+  seller             User            @relation(fields: [sellerId], references: [id])
+  discountPercentage Float           @db.Real
+  salePrice          Decimal         @db.Decimal(10, 2)
+  startTime          DateTime
+  endTime            DateTime
+  status             FlashSaleStatus @default(PENDING)
+  adminNote          String?         @db.VarChar(1000)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 }

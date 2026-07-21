@@ -26,8 +26,8 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
 
   const usersData: UserSeedData[] = [];
 
-  // 3 Admin users
-  for (let i = 1; i <= 3; i++) {
+  // 5 Admin users
+  for (let i = 1; i <= 5; i++) {
     usersData.push({
       name: faker.person.fullName(),
       email: `admin${i}@marketplace.com`,
@@ -37,8 +37,8 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
     });
   }
 
-  // 10 Seller users
-  for (let i = 1; i <= 10; i++) {
+  // 30 Seller users
+  for (let i = 1; i <= 30; i++) {
     usersData.push({
       name: faker.company.name(),
       email: `seller${i}@marketplace.com`,
@@ -48,8 +48,8 @@ export async function seedUsers(prisma: PrismaClient): Promise<User[]> {
     });
   }
 
-  // 50 Customer users
-  for (let i = 1; i <= 50; i++) {
+  // 200 Customer users
+  for (let i = 1; i <= 200; i++) {
     usersData.push({
       name: faker.person.fullName(),
       email: faker.internet.email({ provider: 'marketplace.com' }).toLowerCase().replace(/@/, `+cust${i}@`),

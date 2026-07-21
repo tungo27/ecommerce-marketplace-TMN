@@ -1,79 +1,6 @@
 import { PrismaClient, ProductStatus, Role } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
-const TOTAL_PRODUCTS = 50;
-
-interface ProductTemplate {
-  name: string;
-  description: string;
-  category: string;
-  imageUrl: string;
-  priceMin: number;
-  priceMax: number;
-}
-
-const PRODUCT_TEMPLATES: ProductTemplate[] = [
-  // Cosmetics (10)
-  { name: 'Intense Volumizing Mascara', description: 'Long-lasting, waterproof mascara for extreme volume and length without smudging.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp', priceMin: 15, priceMax: 30 },
-  { name: 'Eyeshadow Palette with Mirror', description: '12-color trendy eyeshadow palette with a convenient built-in makeup mirror.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp', priceMin: 25, priceMax: 50 },
-  { name: 'Oil-Control Setting Powder', description: 'Ultra-fine setting powder that controls oil all day and blurs pores perfectly.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/powder-canister/1.webp', priceMin: 20, priceMax: 40 },
-  { name: 'Ruby Red Matte Lipstick', description: 'Luxurious ruby red matte lipstick, moisturizing formula that keeps lips soft.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-lipstick/1.webp', priceMin: 18, priceMax: 35 },
-  { name: 'Classic Red Nail Polish', description: 'Classic pure red nail polish, quick-drying, long-lasting, and safe for nails.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/beauty/red-nail-polish/1.webp', priceMin: 5, priceMax: 15 },
-  { name: 'Basic Unisex Perfume', description: 'Gentle unisex fragrance with long-lasting scent from 8 to 12 hours.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp', priceMin: 100, priceMax: 200 },
-  { name: 'Mysterious Black Perfume for Women', description: 'Captivating and elegant scent, perfect for evening parties and special events.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp', priceMin: 200, priceMax: 350 },
-  { name: 'Fresh Floral Perfume for Women', description: 'Radiant jasmine and orchid scent, perfect for an active and vibrant summer.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dior-j\'adore/1.webp', priceMin: 180, priceMax: 300 },
-  { name: 'Sunlight Glamour Perfume', description: 'A perfect combination of sweet tropical fruit notes for a charming aura.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/dolce-shine-eau-de/1.webp', priceMin: 150, priceMax: 250 },
-  { name: 'Vintage Rose Perfume', description: 'Gentle, romantic fragrance extracted from classic French roses.', category: 'Cosmetics', imageUrl: 'https://cdn.dummyjson.com/product-images/fragrances/gucci-bloom-eau-de/1.webp', priceMin: 180, priceMax: 320 },
-
-  // Home Living (10)
-  { name: 'Neoclassical Oak Wood Bed', description: 'Natural oak wood bed featuring an elegant and luxurious neoclassical design.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-bed/1.webp', priceMin: 1500, priceMax: 2500 },
-  { name: 'Luxury Fabric Upholstered Sofa', description: 'Premium fabric sofa, incredibly soft and comfortable for the living room.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/annibale-colombo-sofa/1.webp', priceMin: 2000, priceMax: 3500 },
-  { name: 'African Cherry Bedside Table', description: 'Compact and convenient bedside table with sharp natural wood grain details.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/bedside-table-african-cherry/1.webp', priceMin: 200, priceMax: 400 },
-  { name: 'Premium Swivel Office Chair', description: 'Ergonomic office chair with highly comfortable molded foam padding to prevent back pain.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/knoll-saarinen-executive-conference-chair/1.webp', priceMin: 350, priceMax: 600 },
-  { name: 'Bathroom Vanity Cabinet with Mirror', description: 'Waterproof bathroom sink cabinet set paired with a smart makeup mirror.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/furniture/wooden-bathroom-sink-with-mirror/1.webp', priceMin: 400, priceMax: 700 },
-  { name: 'Artistic Decorative Swing', description: 'Relaxing swing suitable for the living room or balcony, featuring sturdy ropes.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/decoration-swing/1.webp', priceMin: 150, priceMax: 300 },
-  { name: 'Family Wall Photo Frame Set', description: 'Multi-size family photo frame combo made from premium pressed wood.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/1.webp', priceMin: 30, priceMax: 60 },
-  { name: 'Decorative Model Plant', description: 'Vivid model plant to decorate your workspace, requires zero watering.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/1.webp', priceMin: 15, priceMax: 40 },
-  { name: 'Nordic Ceramic Plant Pot', description: 'Mini ceramic plant pot featuring a tranquil Nordic glazed finish.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/1.webp', priceMin: 10, priceMax: 25 },
-  { name: 'Classic Warm Light Table Lamp', description: 'Decorative table lamp providing warm ambient light, perfect for the bedroom.', category: 'Home_Living', imageUrl: 'https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/1.webp', priceMin: 45, priceMax: 90 },
-
-  // Food (10)
-  { name: 'Imported Whole Box Apples', description: 'Crisp, sweet, thin-skinned red apples, 100% freshly imported.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/apple/1.webp', priceMin: 10, priceMax: 20 },
-  { name: 'US Beef Tenderloin for Steak', description: 'Premium US beef tenderloin with ideal marble fat patterns for perfect steaks.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/beef-steak/1.webp', priceMin: 40, priceMax: 80 },
-  { name: 'Nutritious Dry Cat Food', description: 'Premium dry food promoting comprehensive growth and a shiny coat for cats.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cat-food/1.webp', priceMin: 20, priceMax: 35 },
-  { name: 'Packaged Fresh Chicken Meat', description: 'Clean and fresh chicken drumsticks meeting food safety standards, tender and sweet.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/chicken-meat/1.webp', priceMin: 8, priceMax: 15 },
-  { name: 'Pure Sunflower Cooking Oil', description: 'Cooking oil extracted from sunflower seeds, rich in Vitamin E, good for the heart.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cooking-oil/1.webp', priceMin: 6, priceMax: 12 },
-  { name: 'Crispy Organic Green Cucumber', description: 'Organically grown cucumbers, fresh and crunchy for salads, chemical-free.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/cucumber/1.webp', priceMin: 3, priceMax: 8 },
-  { name: 'Nutritious Dry Dog Food', description: 'Provides calcium and vitamins to ensure a healthy skeletal system for your dog.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/dog-food/1.webp', priceMin: 25, priceMax: 45 },
-  { name: 'Brown Shell Fresh Eggs (10-Pack)', description: 'Eggs from green farms with rich yolks, meeting high agricultural standards.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/eggs/1.webp', priceMin: 4, priceMax: 8 },
-  { name: 'Norwegian Imported Salmon Fillet', description: 'Salmon fillet with natural fat marbling, fresh and perfect for sushi or pan-searing.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/fish-steak/1.webp', priceMin: 30, priceMax: 65 },
-  { name: 'Dalat Green Bell Pepper', description: 'Crisp and juicy green bell pepper, rich in vitamin C, excellent for salads.', category: 'Food', imageUrl: 'https://cdn.dummyjson.com/product-images/groceries/green-bell-pepper/1.webp', priceMin: 3, priceMax: 7 },
-
-  // Electronics (10)
-  { name: 'Macbook Pro 14 inch Space Grey', description: 'Apple\'s powerful M-chip laptop featuring a brilliant Liquid Retina XDR display.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/1.webp', priceMin: 3500, priceMax: 4500 },
-  { name: 'Asus Zenbook Dual Screen Laptop', description: 'Unique dual-screen technology, offering maximum support for designers and editors.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/1.webp', priceMin: 3000, priceMax: 4000 },
-  { name: 'Huawei Matebook X Pro', description: 'Ultra-thin bezels with a premium solid aluminum casing for a luxurious feel.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/1.webp', priceMin: 2500, priceMax: 3200 },
-  { name: 'Lenovo Yoga Touch Convertible', description: '360-degree convertible laptop featuring a highly sensitive and convenient touch screen.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/lenovo-yoga-920/1.webp', priceMin: 1800, priceMax: 2600 },
-  { name: 'Dell XPS 13 InfinityEdge Display', description: 'Ultra-thin business laptop with a quiet keyboard and a razor-sharp 4K display.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/laptops/new-dell-xps-13-9300-laptop/1.webp', priceMin: 2800, priceMax: 3500 },
-  { name: 'Amazon Echo Plus Smart Speaker', description: 'Alexa voice assistant integrated with powerful 360-degree surround sound.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/amazon-echo-plus/1.webp', priceMin: 150, priceMax: 250 },
-  { name: 'Apple Airpods V2 Earbuds', description: 'Compact TWS earbuds offering stable connectivity within the Apple ecosystem.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods/1.webp', priceMin: 200, priceMax: 300 },
-  { name: 'Airpods Max Silver Noise Cancelling', description: 'Ultimate audio experience with comfortable ear cushions and absolute noise cancellation.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods-max-silver/1.webp', priceMin: 800, priceMax: 1200 },
-  { name: 'AirPower Wireless Charging Pad', description: 'High-speed Qi standard charging pad, conveniently charges multiple devices at once.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/1.webp', priceMin: 50, priceMax: 100 },
-  { name: 'HomePod Mini Black Smart Assistant', description: 'Deep bass sound and smart home voice control capabilities.', category: 'Electronics', imageUrl: 'https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/1.webp', priceMin: 120, priceMax: 200 },
-
-  // Fashion (10)
-  { name: 'Men\'s Blue/Black Check Shirt', description: 'Breathable linen material with a loose fit for a comfortable wearing experience.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/blue-&-black-check-shirt/1.webp', priceMin: 25, priceMax: 40 },
-  { name: 'Aorus Gaming Men\'s T-Shirt', description: 'Patterned cotton T-shirt designed exclusively for gamers looking for a cool style.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/gigabyte-aorus-men-tshirt/1.webp', priceMin: 15, priceMax: 30 },
-  { name: 'Dynamic Plaid Check Shirt', description: 'Easy to mix and match with jeans, providing a dynamic and youthful appearance.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-plaid-shirt/1.webp', priceMin: 20, priceMax: 45 },
-  { name: 'Short Sleeve Beach Shirt', description: 'Soft, lightweight silk-like fabric with colorful patterns ideal for summer travel.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/man-short-sleeve-shirt/1.webp', priceMin: 18, priceMax: 35 },
-  { name: 'Office Striped Dress Shirt', description: 'Fitted shape that flatters the body, suitable for work or attending parties.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shirts/men-check-shirt/1.webp', priceMin: 30, priceMax: 60 },
-  { name: 'Jordan 1 High Top Red/Black', description: 'A highly sought-after, rare classic basketball sneaker edition.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-air-jordan-1-red-and-black/1.webp', priceMin: 350, priceMax: 600 },
-  { name: 'Nike Turf Football Cleats', description: 'Absolute field-gripping studded soles, supporting powerful jumps during matches.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/nike-baseball-cleats/1.webp', priceMin: 120, priceMax: 200 },
-  { name: 'Puma Assist Running Shoes', description: 'Soft foam padding with smart woven fabric covering to minimize ankle injuries.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/puma-future-rider-trainers/1.webp', priceMin: 80, priceMax: 150 },
-  { name: 'Dynamic Red-Trim Sports Sneaker', description: 'Aggressive and edgy design, featuring a 3cm elevated sole for a slight height boost.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-&-red/1.webp', priceMin: 45, priceMax: 90 },
-  { name: 'Soft & Light Exercise Sneaker', description: 'Super flexible vulcanized rubber sole, incredibly agile weighing under 300g.', category: 'Fashion', imageUrl: 'https://cdn.dummyjson.com/product-images/mens-shoes/sports-sneakers-off-white-red/1.webp', priceMin: 40, priceMax: 80 },
-];
-
 export async function seedProducts(prisma: PrismaClient, _legacySellerId?: string) {
   console.log('--- Seed products ---');
 
@@ -82,8 +9,13 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
     select: { id: true },
   });
 
-  if (sellers.length === 0) {
-    throw new Error('No SELLER accounts found. Run seedUsers before seedProducts.');
+  const customers = await prisma.user.findMany({
+    where: { role: Role.CUSTOMER },
+    select: { id: true },
+  });
+
+  if (sellers.length === 0 || customers.length === 0) {
+    throw new Error('No SELLER or CUSTOMER accounts found. Run seedUsers before seedProducts.');
   }
 
   // Clear data
@@ -94,116 +26,170 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
   await prisma.review.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.flashSale.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   console.log('--- Cleared old products and categories ---');
 
-  // Seed Categories
-  const uniqueCategoryNames = Array.from(new Set(PRODUCT_TEMPLATES.map(t => t.category)));
+  // Fetch products from DummyJSON
+  console.log('--- Fetching real products from DummyJSON ---');
+  let fetchedProducts: any[] = [];
+  try {
+    const res = await fetch('https://dummyjson.com/products?limit=150');
+    const data = await res.json();
+    fetchedProducts = data.products;
+  } catch (error) {
+    console.error('Failed to fetch from DummyJSON:', error);
+    return;
+  }
+
+  // Category Image Mapping
+  const CATEGORY_IMAGE_MAP: Record<string, string> = {
+    electronics: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=300&auto=format&fit=crop',
+    fashion: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=300&auto=format&fit=crop',
+    smartphones: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=300&auto=format&fit=crop',
+    laptops: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=300&auto=format&fit=crop',
+    fragrances: 'https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=300&auto=format&fit=crop',
+    skincare: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=300&auto=format&fit=crop',
+    groceries: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop',
+    'home-decoration': 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=300&auto=format&fit=crop',
+    furniture: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=300&auto=format&fit=crop',
+    tops: 'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?q=80&w=300&auto=format&fit=crop',
+    'womens-dresses': 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
+    'womens-shoes': 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=300&auto=format&fit=crop',
+    'mens-shirts': 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=300&auto=format&fit=crop',
+    'mens-shoes': 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=300&auto=format&fit=crop',
+    'mens-watches': 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=300&auto=format&fit=crop',
+    'womens-watches': 'https://images.unsplash.com/photo-1508656937048-985160df6463?q=80&w=300&auto=format&fit=crop',
+    'womens-bags': 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?q=80&w=300&auto=format&fit=crop',
+    'womens-jewellery': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=300&auto=format&fit=crop',
+    sunglasses: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=300&auto=format&fit=crop',
+    automotive: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=300&auto=format&fit=crop',
+    motorcycle: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=300&auto=format&fit=crop',
+    lighting: 'https://images.unsplash.com/photo-1513506003901-1e6a229e9d15?q=80&w=300&auto=format&fit=crop',
+    beauty: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=300&auto=format&fit=crop',
+  };
+
+  const uniqueCategoryNames = Array.from(new Set(fetchedProducts.map((p: any) => p.category)));
   const categoryMap = new Map<string, string>();
   for (const name of uniqueCategoryNames) {
+    const formattedName = name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    
+    // Find matching image url
+    const key = name.toLowerCase();
+    const imageUrl = CATEGORY_IMAGE_MAP[key] || 'https://images.unsplash.com/photo-1472851294502-8a8bef1cf152?q=80&w=300&auto=format&fit=crop';
+    
     const category = await prisma.category.create({
       data: {
-        name,
-        slug: name.toLowerCase().replace(/_/g, '-'),
-        description: `Category for ${name}`
-      }
+        name: formattedName,
+        slug: name,
+        description: `Category for ${formattedName}`,
+        imageUrl,
+      },
     });
     categoryMap.set(name, category.id);
   }
   console.log(`--- Seeded ${categoryMap.size} categories ---`);
 
   let createdCount = 0;
+  console.log('--- Seeding Products, Orders, and Reviews ---');
 
-  for (let i = 0; i < TOTAL_PRODUCTS; i++) {
-    const template = PRODUCT_TEMPLATES[i];
+  for (let i = 0; i < fetchedProducts.length; i++) {
+    const item = fetchedProducts[i];
     const seller = sellers[i % sellers.length];
-    const price = faker.number.int({ min: template.priceMin, max: template.priceMax }) * 10000;
-    const stock = faker.number.int({ min: 0, max: 200 });
-    const categoryId = categoryMap.get(template.category)!;
+    const categoryId = categoryMap.get(item.category)!;
 
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
-        name: template.name,
-        description: template.description,
-        price,
+        name: item.title,
+        description: item.description,
+        price: Math.min(99999999, Math.max(10, Math.round(item.price * 25000))), // Cap at 99 million
         categoryId,
-        stock,
-        images: [template.imageUrl],
+        stock: item.stock || faker.number.int({ min: 10, max: 200 }),
+        images: item.images && item.images.length > 0 ? item.images : [item.thumbnail],
         status: ProductStatus.Published,
         sellerId: seller.id,
       },
     });
-
     createdCount++;
-  }
-  
-  const firstProduct = await prisma.product.findFirst({
-    where: { status: ProductStatus.Published },
-    orderBy: { createdAt: 'asc' }
-  });
 
-  if (firstProduct) {
-    console.log('--- Seeding 4 authentic English Reviews for the first product ---');
-    const customers = await prisma.user.findMany({
-      where: { role: Role.CUSTOMER },
-      take: 4,
-    });
-
-    const mockReviewTexts = [
-      "Absolutely love this product! The quality exceeded my expectations and delivery was super fast. Highly recommended!",
-      "Great value for the price. I've been using it for a week now and it works exactly as described. Very satisfied.",
-      "Good quality overall. The packaging was a bit dented, but the item itself was in perfect condition.",
-      "Amazing shopping experience! Customer service was very helpful and the product is stunning."
-    ];
-
+    // Generate 3-8 reviews for this product
+    const numReviews = faker.number.int({ min: 3, max: 8 });
     let totalRating = 0;
 
-    for (let i = 0; i < customers.length; i++) {
-      const customer = customers[i];
-      const rating = i === 2 ? 4 : 5; // one 4-star, three 5-star
+    for (let r = 0; r < numReviews; r++) {
+      const customer = faker.helpers.arrayElement(customers);
+      const rating = faker.number.int({ min: 3, max: 5 }); // mostly positive
       totalRating += rating;
 
-      // 1. Create dummy order
+      // 1. Order
       const order = await prisma.order.create({
         data: {
           userId: customer.id,
-          totalAmount: firstProduct.price,
+          totalAmount: product.price,
           shippingAddress: faker.location.streetAddress(),
           phoneNumber: faker.phone.number(),
           paymentMethod: 'COD',
           status: 'DELIVERED',
-        }
+        },
       });
 
-      // 2. Create order item
+      // 2. OrderItem
       await prisma.orderItem.create({
         data: {
           orderId: order.id,
-          productId: firstProduct.id,
+          productId: product.id,
           quantity: 1,
-          price: firstProduct.price,
-        }
+          price: product.price,
+        },
       });
 
-      // 3. Create review
-      await prisma.review.create({
+      // 3. Review
+      const comments = [
+        "Absolutely love this product! Highly recommended.",
+        "Great value for the price. Works exactly as described.",
+        "Good quality overall, fast shipping.",
+        "Amazing experience! Customer service was very helpful.",
+        "It's decent, but could be slightly better.",
+        "Very satisfied with my purchase.",
+        "Exactly what I was looking for. Fits perfectly.",
+        "The material is fantastic, really premium feel."
+      ];
+      
+      const review = await prisma.review.create({
         data: {
           rating,
-          comment: mockReviewTexts[i],
-          productId: firstProduct.id,
+          comment: faker.helpers.arrayElement(comments),
+          productId: product.id,
           userId: customer.id,
           orderId: order.id,
-        }
+        },
       });
+
+      // 4. Randomly reply to some reviews (Seller Reply)
+      if (faker.datatype.boolean()) {
+        const replies = [
+          "Thank you for your feedback! We are glad you like it.",
+          "We appreciate your purchase and your review.",
+          "Thanks for choosing our store! Enjoy!",
+        ];
+        await prisma.reviewReply.create({
+          data: {
+            reviewId: review.id,
+            comment: faker.helpers.arrayElement(replies),
+          },
+        });
+      }
     }
 
-    // Update product average rating
-    await prisma.product.update({
-      where: { id: firstProduct.id },
-      data: { averageRating: totalRating / customers.length }
-    });
+    // Update average rating
+    if (numReviews > 0) {
+      await prisma.product.update({
+        where: { id: product.id },
+        data: { averageRating: totalRating / numReviews },
+      });
+    }
   }
 
-  console.log(`seedProducts done. Created: ${createdCount}. Distributed across ${sellers.length} seller(s).`);
+  console.log(`seedProducts done. Created: ${createdCount} products with thousands of orders & reviews. Distributed across ${sellers.length} sellers and ${customers.length} customers.`);
 }
