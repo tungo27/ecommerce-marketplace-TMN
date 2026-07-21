@@ -104,6 +104,8 @@ export default function FlashSale({ flashSales = [] }: FlashSaleProps) {
         productId: product.id,
         name: product.name,
         price: salePrice,
+        originalPrice: Number(product.price) || 0,
+        isFlashSale: true,
         images: product.images || [],
         stock: product.stock,
       },

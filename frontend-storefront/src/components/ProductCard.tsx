@@ -46,6 +46,8 @@ export default function ProductCard({ product, flashSale }: ProductCardProps) {
         productId: product.id,
         name: product.name,
         price: displayPrice,
+        originalPrice: originalPrice,
+        isFlashSale: isFlashSale,
         images: product.images || [],
         stock: product.stock,
       },

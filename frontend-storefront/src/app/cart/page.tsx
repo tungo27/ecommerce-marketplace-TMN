@@ -409,9 +409,16 @@ export default function CartPage() {
                                     )}
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-gray-800">
-                                      {getLocalizedText(item.name)}
-                                    </p>
+                                    <div className="flex flex-col gap-1 items-start">
+                                      {item.isFlashSale && (
+                                        <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">
+                                          ⚡ Flash Sale
+                                        </span>
+                                      )}
+                                      <p className="line-clamp-2 text-sm font-semibold leading-snug text-gray-800">
+                                        {getLocalizedText(item.name)}
+                                      </p>
+                                    </div>
                                     {/* Hiển thị đơn giá trên mobile */}
                                     <p className="mt-1 text-xs text-gray-500 sm:hidden">
                                       {item.price.toLocaleString('vi-VN')} VND
@@ -422,10 +429,17 @@ export default function CartPage() {
 
                               {/* Đơn giá (ẩn trên mobile nhỏ) */}
                               <td className="py-5 px-4 text-center hidden sm:table-cell">
-                                <span className="text-sm font-semibold text-gray-700">
-                                  {item.price.toLocaleString('vi-VN')}
-                                  <span className="text-xs text-gray-400"> VND</span>
-                                </span>
+                                <div className="flex flex-col items-center justify-center">
+                                  <span className={`text-sm font-semibold ${item.isFlashSale ? 'text-[#FF4742]' : 'text-gray-700'}`}>
+                                    {item.price.toLocaleString('vi-VN')}
+                                    <span className="text-xs text-gray-400"> VND</span>
+                                  </span>
+                                  {item.isFlashSale && item.originalPrice && (
+                                    <span className="text-[11px] font-medium text-gray-400 line-through mt-0.5">
+                                      {item.originalPrice.toLocaleString('vi-VN')} VND
+                                    </span>
+                                  )}
+                                </div>
                               </td>
 
                               {/* Số lượng */}

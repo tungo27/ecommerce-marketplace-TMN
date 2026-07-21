@@ -10,6 +10,8 @@ type ProductDetailActionsProps = {
     id: string;
     name: string;
     price: string | number;
+    originalPrice?: number;
+    isFlashSale?: boolean;
     stock: number;
     images?: string[];
   };
@@ -31,6 +33,8 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
         productId: product.id,
         name: product.name,
         price: Number(product.price),
+        originalPrice: product.originalPrice,
+        isFlashSale: product.isFlashSale,
         images: product.images || [],
         stock: product.stock,
       },

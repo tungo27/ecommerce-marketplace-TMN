@@ -13,6 +13,8 @@ export interface CartItem {
   productId: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  isFlashSale?: boolean;
   images: string[];
   quantity: number;
   stock: number;
@@ -27,6 +29,8 @@ export interface GuestCartItem {
   productId: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  isFlashSale?: boolean;
   images: string[];
   quantity: number;
   stock: number;
@@ -319,6 +323,8 @@ export const useCart = create<CartState>((set, get) => ({
             productId: product.productId,
             name: product.name,
             price: product.price,
+            originalPrice: product.originalPrice,
+            isFlashSale: product.isFlashSale,
             images: product.images,
             quantity,
             stock: product.stock,
