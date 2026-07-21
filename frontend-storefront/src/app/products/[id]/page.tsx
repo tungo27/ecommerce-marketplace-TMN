@@ -1,8 +1,8 @@
 import Header from '@/components/Header';
-import Image from 'next/image';
 import Link from 'next/link';
 import ProductDetailActions from '@/components/ProductDetailActions';
 import ProductReviewsSection from '@/components/ProductReviewsSection';
+import ProductImageGallery from '@/components/ProductImageGallery';
 
 async function fetchProduct(id: string) {
   try {
@@ -75,16 +75,24 @@ export default async function ProductDetailPage({
     );
   }
 
+  const activeFlashSale = product.flashSales?.[0];
+  const isFlashSale = !!activeFlashSale;
   // Prisma Decimal arrives as a string — cast strictly before any arithmetic
   const numericPrice = Number(product.price) || 0;
-  const originalPrice = numericPrice * 1.15; // Simulated original price
+  const originalPrice = numericPrice;
+  const displayPrice = isFlashSale ? Number(activeFlashSale.salePrice) : numericPrice;
+
+  // Cập nhật product object để truyền vào ProductDetailActions
+  const productForActions = {
+    ...product,
+    price: displayPrice,
+    originalPrice,
+    isFlashSale,
+  };
 
   // VND currency formatter using the standard Intl API
   const formatVND = (value: number): string =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  const imageUrl =
-    product.images?.[0] ||
-    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80';
 
   const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
 
@@ -138,32 +146,13 @@ export default async function ProductDetailPage({
 
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-0 lg:gap-12">
             
-            {/* Left: Image Gallery */}
-            <div className="flex flex-col gap-4">
-              <div className="relative aspect-square w-full overflow-hidden rounded-none lg:rounded-xl bg-gray-50 lg:bg-gray-100 border-b lg:border border-gray-100 lg:shadow-inner">
-                <div className="absolute left-4 top-4 z-10 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white shadow-md">
-                  -15% OFF
-                </div>
-                {/* priority prop boosts LCP by eagerly loading the hero image */}
-                <Image
-                  src={imageUrl}
-                  alt={getLocalizedText(product.name)}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-contain lg:object-cover mix-blend-multiply lg:mix-blend-normal"
-                />
-              </div>
-              {product.images && product.images.length > 1 && (
-                <div className="flex gap-4 overflow-x-auto pb-2 px-4 lg:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {product.images.map((img: string, idx: number) => (
-                    <button key={idx} className={`relative h-20 w-20 lg:h-24 lg:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 ${idx === 0 ? 'border-primary' : 'border-transparent'} bg-gray-100 transition hover:border-primary/50`}>
-                      <Image src={img} alt={`${getLocalizedText(product.name)} ${idx + 1}`} fill sizes="120px" className="object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Left: Image Gallery - Component Client để xử lý tương tác chuyển ảnh */}
+            <ProductImageGallery
+              images={product.images || []}
+              productName={getLocalizedText(product.name)}
+              isFlashSale={isFlashSale}
+              discountPercentage={activeFlashSale?.discountPercentage}
+            />
 
             {/* Right: Product Info */}
             <div className="flex flex-col p-4 lg:p-0">
@@ -205,11 +194,13 @@ export default async function ProductDetailPage({
 
               <div className="mt-2 lg:mt-6 flex flex-wrap items-end gap-3 lg:gap-4 border-b border-gray-100 pb-4 lg:pb-6">
                 <span className="text-3xl lg:text-4xl font-black tracking-tight text-primary">
-                  {formatVND(numericPrice)}
+                  {formatVND(displayPrice)}
                 </span>
-                <span className="mb-1 text-base lg:text-lg font-medium text-gray-400 line-through">
-                  {formatVND(originalPrice)}
-                </span>
+                {isFlashSale && (
+                  <span className="mb-1 text-base lg:text-lg font-medium text-gray-400 line-through">
+                    {formatVND(originalPrice)}
+                  </span>
+                )}
               </div>
 
               <div className="mt-4 lg:mt-6">
@@ -223,7 +214,7 @@ export default async function ProductDetailPage({
                 </div>
               </div>
 
-              <ProductDetailActions product={product} />
+              <ProductDetailActions product={productForActions} />
               
               {/* Trust badges */}
               <div className="mt-8 grid grid-cols-2 gap-3 lg:gap-4 border-t border-gray-100 pt-6 sm:grid-cols-4">
