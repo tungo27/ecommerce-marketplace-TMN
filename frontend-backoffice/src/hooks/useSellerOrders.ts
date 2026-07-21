@@ -28,7 +28,7 @@ export interface Order {
   shippingAddress: string;
   phoneNumber: string;
   paymentMethod: string;
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'CANCELLATION_REQUESTED';
   createdAt: string;
   customer: Customer;
   items: OrderItem[];
@@ -69,6 +69,25 @@ export const useSellerOrders = () => {
     }
   };
 
+  const handleCancellationRequest = async (orderId: string, approve: boolean) => {
+    try {
+      await apiClient.patch(`/orders/seller/${orderId}/cancellation`, { approve });
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId
+            ? { ...order, status: approve ? 'CANCELLED' : (order.status as Order['status']) }
+            : order
+        )
+      );
+      // Refresh to get the actual restored status from server
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to process cancellation request';
+      setError(msg);
+      return false;
+    }
+  };
+
   return {
     orders,
     total,
@@ -76,5 +95,6 @@ export const useSellerOrders = () => {
     error,
     fetchOrders,
     updateOrderStatus,
+    handleCancellationRequest,
   };
 };

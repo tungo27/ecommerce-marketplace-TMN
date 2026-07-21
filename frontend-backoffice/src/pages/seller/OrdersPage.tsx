@@ -20,12 +20,13 @@ import {
 } from '@mui/material';
 import { useSellerOrders, type Order } from '../../hooks/useSellerOrders';
 
-const statusMap: Record<Order['status'], { label: string; color: 'warning' | 'info' | 'primary' | 'success' | 'error' }> = {
+const statusMap: Record<Order['status'], { label: string; color: 'warning' | 'info' | 'primary' | 'success' | 'error' | 'default' }> = {
   PENDING: { label: 'Pending', color: 'warning' },
   CONFIRMED: { label: 'Confirmed', color: 'info' },
   SHIPPED: { label: 'Shipped', color: 'primary' },
   DELIVERED: { label: 'Delivered', color: 'success' },
   CANCELLED: { label: 'Cancelled', color: 'error' },
+  CANCELLATION_REQUESTED: { label: 'Cancel Requested', color: 'warning' },
 };
 
 const getNextStatus = (current: Order['status']): Order['status'] | null => {
@@ -49,7 +50,7 @@ const getActionLabel = (next: Order['status'] | null): string => {
 };
 
 export const OrdersPage: React.FC = () => {
-  const { orders, total, loading, error, fetchOrders, updateOrderStatus } = useSellerOrders();
+  const { orders, total, loading, error, fetchOrders, updateOrderStatus, handleCancellationRequest } = useSellerOrders();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
@@ -80,6 +81,20 @@ export const OrdersPage: React.FC = () => {
       setToast({ open: true, message: `Status updated to ${statusMap[nextStatus].label}`, severity: 'success' });
     } else {
       setToast({ open: true, message: 'Failed to update status', severity: 'error' });
+    }
+  };
+
+  const handleCancellationDecision = async (orderId: string, approve: boolean) => {
+    const success = await handleCancellationRequest(orderId, approve);
+    if (success) {
+      setToast({
+        open: true,
+        message: approve ? 'Cancellation approved. Order has been cancelled.' : 'Cancellation rejected. Order restored.',
+        severity: 'success',
+      });
+      fetchOrders(page + 1, rowsPerPage); // refresh to get actual server status
+    } else {
+      setToast({ open: true, message: 'Failed to process cancellation request.', severity: 'error' });
     }
   };
 
@@ -117,6 +132,7 @@ export const OrdersPage: React.FC = () => {
             <MenuItem value="SHIPPED">Shipped</MenuItem>
             <MenuItem value="DELIVERED">Delivered</MenuItem>
             <MenuItem value="CANCELLED">Cancelled</MenuItem>
+            <MenuItem value="CANCELLATION_REQUESTED">Cancel Requested</MenuItem>
           </Select>
         </Box>
       </Paper>
@@ -194,7 +210,42 @@ export const OrdersPage: React.FC = () => {
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1, justifyContent: 'center' }}>
-                        {nextStatus && (
+                        {/* Cancel Request: show Approve/Reject buttons */}
+                        {order.status === 'CANCELLATION_REQUESTED' && (
+                          <>
+                            <Button
+                              variant="contained"
+                              disableElevation
+                              size="small"
+                              onClick={() => handleCancellationDecision(order.id, true)}
+                              sx={{
+                                bgcolor: '#DC2626',
+                                color: 'white',
+                                textTransform: 'none',
+                                fontWeight: 'bold',
+                                '&:hover': { bgcolor: '#B91C1C' },
+                              }}
+                            >
+                              Approve Cancel
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => handleCancellationDecision(order.id, false)}
+                              sx={{
+                                borderColor: '#16A34A',
+                                color: '#16A34A',
+                                textTransform: 'none',
+                                fontWeight: 'bold',
+                                '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' },
+                              }}
+                            >
+                              Reject Cancel
+                            </Button>
+                          </>
+                        )}
+                        {/* Normal orders: advance status */}
+                        {order.status !== 'CANCELLATION_REQUESTED' && nextStatus && (
                           <Button
                             variant="contained"
                             disableElevation
@@ -205,15 +256,13 @@ export const OrdersPage: React.FC = () => {
                               color: 'white',
                               textTransform: 'none',
                               fontWeight: 'bold',
-                              '&:hover': {
-                                bgcolor: '#E63E39',
-                              },
+                              '&:hover': { bgcolor: '#E63E39' },
                             }}
                           >
                             {actionLabel}
                           </Button>
                         )}
-                        {order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                        {order.status !== 'CANCELLATION_REQUESTED' && order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                           <Button
                             variant="outlined"
                             size="small"
@@ -226,10 +275,7 @@ export const OrdersPage: React.FC = () => {
                               borderColor: '#E5E7EB',
                               color: '#111827',
                               textTransform: 'none',
-                              '&:hover': {
-                                bgcolor: '#F9FAFB',
-                                borderColor: '#D1D5DB'
-                              },
+                              '&:hover': { bgcolor: '#F9FAFB', borderColor: '#D1D5DB' },
                             }}
                           >
                             Cancel
