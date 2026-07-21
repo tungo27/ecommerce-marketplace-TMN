@@ -193,11 +193,36 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   // Hero product lookup if admin chose a product instead of a URL
   let heroImage = storefrontConfig?.heroImage || '';
-  if (storefrontConfig?.heroProductId && !heroImage) {
-    const heroProductInList = products.find((p: any) => p.id === storefrontConfig.heroProductId);
-    if (heroProductInList?.images?.[0]) {
-      heroImage = heroProductInList.images[0];
+  let heroProduct = products.length > 0 ? products[0] : undefined;
+  let heroFlashSale = undefined;
+
+  if (storefrontConfig?.heroProductId) {
+    let p = products.find((p: any) => p.id === storefrontConfig.heroProductId);
+    if (!p) {
+      try {
+        const normalizeApiBaseUrl = (value?: string) => {
+          const raw = (value || 'http://localhost:4000').trim().replace(/\/+$/, '');
+          return raw.endsWith('/api') ? raw : `${raw}/api`;
+        };
+        const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+        const pRes = await fetch(`${apiBaseUrl}/products/${storefrontConfig.heroProductId}`, { cache: 'no-store' });
+        if (pRes.ok) {
+           const json = await pRes.json();
+           p = json.data || json;
+        }
+      } catch (e) {}
     }
+    if (p) {
+      heroProduct = p;
+      if (!heroImage && p.images?.[0]) {
+        heroImage = p.images[0];
+      }
+    }
+  }
+
+  // Get flash sale for the hero product
+  if (heroProduct) {
+    heroFlashSale = flashSalesMap[heroProduct.id] || (heroProduct.flashSales?.length > 0 ? heroProduct.flashSales[0] : undefined);
   }
   const showcaseCategories = storefrontConfig?.featuredCategoryIds?.length
     ? fetchedCategories.filter((c: any) => storefrontConfig.featuredCategoryIds.includes(c.id))
@@ -242,9 +267,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <>
             {/* 1. Hero Banner */}
             <HeroBanner 
-              product={products.length > 0 ? products[0] : undefined} 
+              product={heroProduct} 
               heroImage={heroImage} 
               heroProductId={storefrontConfig?.heroProductId} 
+              flashSale={heroFlashSale}
             />
 
             {/* 2. Category Showcase */}

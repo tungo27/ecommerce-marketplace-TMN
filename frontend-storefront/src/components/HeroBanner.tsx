@@ -4,9 +4,24 @@ interface HeroBannerProps {
   product?: any;
   heroImage?: string;
   heroProductId?: string;
+  flashSale?: any;
 }
 
-export default function HeroBanner({ product, heroImage, heroProductId }: HeroBannerProps) {
+export default function HeroBanner({ product, heroImage, heroProductId, flashSale }: HeroBannerProps) {
+  const isCustomHero = !!heroProductId && !!product;
+  const title = isCustomHero ? product.name : "Mega Summer Sale";
+  const description = isCustomHero && product.description 
+    ? (product.description.length > 150 ? product.description.substring(0, 150) + "..." : product.description)
+    : "Thousands of authentic products are waiting for you — electronics, fashion, cosmetics, and groceries. Shop now before they run out!";
+  
+  const discountLabel = flashSale?.discountPercentage 
+    ? `${flashSale.discountPercentage}% OFF` 
+    : "Up To 50% Off";
+    
+  const showPrice = isCustomHero && flashSale;
+  const salePrice = flashSale?.salePrice;
+  const originalPrice = product?.price;
+
   return (
     <section className="relative overflow-hidden rounded-2xl bg-primary text-white shadow-xl">
       {/* Decorative blobs */}
@@ -17,17 +32,28 @@ export default function HeroBanner({ product, heroImage, heroProductId }: HeroBa
         {/* Left content */}
         <div className="flex-1 text-center md:text-left">
           <span className="inline-block rounded-full bg-white/20 px-4 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
-            Summer Deals
+            {isCustomHero ? 'Hero Deal' : 'Summer Deals'}
           </span>
-          <h2 className="mt-5 text-4xl font-black uppercase leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Mega Summer Sale
+          <h2 className="mt-5 text-4xl font-black uppercase leading-tight tracking-tight sm:text-5xl lg:text-6xl line-clamp-2">
+            {title}
             <br />
-            <span className="text-yellow-200">Up To 50% Off</span>
+            <span className="text-yellow-200">{discountLabel}</span>
           </h2>
           <p className="mt-4 max-w-xl text-base text-white/90 sm:text-lg">
-            Thousands of authentic products are waiting for you — electronics, fashion, cosmetics, and groceries.
-            Shop now before they run out!
+            {description}
           </p>
+          
+          {showPrice && (
+            <div className="mt-4 flex items-center justify-center gap-3 md:justify-start">
+              <span className="text-3xl font-bold text-yellow-200">
+                {salePrice?.toLocaleString('vi-VN')} đ
+              </span>
+              <span className="text-lg text-white/70 line-through">
+                {originalPrice?.toLocaleString('vi-VN')} đ
+              </span>
+            </div>
+          )}
+
           <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
             <Link
               href={heroProductId ? `/products/${heroProductId}` : product ? `/products/${product.id}` : '/?category=Electronics'}
@@ -42,25 +68,27 @@ export default function HeroBanner({ product, heroImage, heroProductId }: HeroBa
           </div>
 
           {/* Stats row */}
-          <div className="mt-10 flex flex-wrap justify-center gap-8 md:justify-start">
-            {[
-              { value: '50+', label: 'Products' },
-              { value: '10+', label: 'Sellers' },
-              { value: '4.9★', label: 'Rating' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center md:text-left">
-                <p className="text-2xl font-black">{stat.value}</p>
-                <p className="text-xs text-white/75 uppercase tracking-wide">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+          {!isCustomHero && (
+            <div className="mt-10 flex flex-wrap justify-center gap-8 md:justify-start">
+              {[
+                { value: '50+', label: 'Products' },
+                { value: '10+', label: 'Sellers' },
+                { value: '4.9★', label: 'Rating' },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center md:text-left">
+                  <p className="text-2xl font-black">{stat.value}</p>
+                  <p className="text-xs text-white/75 uppercase tracking-wide">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right image */}
         <div className="relative hidden md:block md:w-64 lg:w-80">
           <div className="absolute -top-4 -right-4 z-10 rounded-2xl bg-red-500 px-4 py-2 text-center shadow-xl">
             <p className="text-xs font-semibold text-white/80">Save up to</p>
-            <p className="text-3xl font-black text-white leading-none">50%</p>
+            <p className="text-3xl font-black text-white leading-none">{flashSale?.discountPercentage || 50}%</p>
           </div>
           <img
             src={heroImage || product?.images?.[0] || "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop"}
