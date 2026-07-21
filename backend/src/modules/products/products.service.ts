@@ -203,6 +203,13 @@ export class ProductsService {
         seller: {
           select: { name: true },
         },
+        flashSales: {
+          where: {
+            status: 'APPROVED',
+            startTime: { lte: new Date() },
+            endTime: { gte: new Date() },
+          },
+        },
       },
     });
 

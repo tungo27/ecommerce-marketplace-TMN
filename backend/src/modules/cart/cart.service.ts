@@ -17,6 +17,8 @@ export interface CartItem {
   productId: string;
   name: any;
   price: number;
+  originalPrice?: number;
+  isFlashSale?: boolean;
   images: string[];
   quantity: number;
   stock: number;
@@ -115,15 +117,74 @@ export class CartService {
   }
 
   /**
+   * Đồng bộ lại danh sách CartItem với database để cập nhật giá (bao gồm Flash Sale) và tồn kho.
+   */
+  private async syncCartItemsWithDB(items: CartItem[]): Promise<CartItem[]> {
+    if (items.length === 0) return [];
+
+    const productIds = items.map((item) => item.productId);
+    const now = new Date();
+
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        flashSales: {
+          where: {
+            status: 'APPROVED',
+            startTime: { lte: now },
+            endTime: { gte: now },
+          },
+        },
+      },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    const syncedItems: CartItem[] = [];
+
+    for (const item of items) {
+      const product = productMap.get(item.productId);
+      if (!product || product.status !== 'Published') {
+        continue; // Bỏ qua sản phẩm không tồn tại hoặc đã bị ẩn
+      }
+
+      const activeFlashSale = product.flashSales[0];
+      const originalPrice = Number(product.price);
+      let currentPrice = originalPrice;
+      let isFlashSale = false;
+
+      if (activeFlashSale) {
+        currentPrice = Number(activeFlashSale.salePrice);
+        isFlashSale = true;
+      }
+
+      // Giới hạn quantity theo tồn kho hiện tại
+      const validQuantity = Math.min(item.quantity, product.stock);
+      if (validQuantity <= 0) continue;
+
+      syncedItems.push({
+        productId: product.id,
+        name: product.name,
+        price: currentPrice,
+        originalPrice,
+        isFlashSale,
+        images: product.images,
+        quantity: validQuantity,
+        stock: product.stock,
+      });
+    }
+
+    return syncedItems;
+  }
+
+  /**
    * Thêm hoặc cập nhật sản phẩm trong giỏ hàng.
    *
    * Logic:
    *  1. Kiểm tra quantity hợp lệ (>= 1).
-   *  2. Truy vấn DB lấy thông tin sản phẩm và tồn kho.
-   *  3. Đọc giỏ hàng hiện tại từ Redis.
-   *  4. Nếu sản phẩm đã có trong giỏ: tổng số lượng = cũ + mới thêm.
-   *     Nếu chưa có: số lượng = mới thêm.
-   *  5. So sánh tổng số lượng với tồn kho.
+   *  2. Đọc giỏ hàng hiện tại từ Redis.
+   *  3. Tính toán số lượng mới.
+   *  4. Cập nhật mảng items.
+   *  5. Đồng bộ lại với DB (cập nhật giá Flash Sale, giới hạn tồn kho).
    *  6. Ghi lại giỏ hàng vào Redis.
    *  7. Trả về CartResponse đầy đủ.
    *
@@ -140,76 +201,49 @@ export class CartService {
       );
     }
 
-    // Bước 2: Truy vấn DB để lấy thông tin và tồn kho sản phẩm
+    // Bước 2: Truy vấn DB để lấy thông tin tồn kho
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        images: true,
-        stock: true,
-        status: true,
-      },
+      select: { stock: true, status: true },
     });
 
     if (!product) {
-      throw new NotFoundException(
-        `Product with ID "${productId}" does not exist.`,
-      );
+      throw new NotFoundException(`Product with ID "${productId}" does not exist.`);
     }
 
-    // Kiểm tra trạng thái sản phẩm - chỉ cho phép thêm sản phẩm Published
     if (product.status !== 'Published') {
-      throw new BadRequestException(
-        'This product is currently unavailable to add to cart.',
-      );
+      throw new BadRequestException('This product is currently unavailable to add to cart.');
     }
 
     // Bước 3: Đọc giỏ hàng hiện tại từ Redis
-    const currentItems = await this.readCartFromRedis(userId);
+    let currentItems = await this.readCartFromRedis(userId);
 
     // Bước 4: Tính toán số lượng mới
-    const existingItemIndex = currentItems.findIndex(
-      (item) => item.productId === productId,
-    );
-
-    const currentQuantityInCart =
-      existingItemIndex !== -1 ? currentItems[existingItemIndex].quantity : 0;
-
+    const existingItemIndex = currentItems.findIndex((item) => item.productId === productId);
+    const currentQuantityInCart = existingItemIndex !== -1 ? currentItems[existingItemIndex].quantity : 0;
     const newTotalQuantity = currentQuantityInCart + (quantity || 0);
 
     // Bước 5: Kiểm tra tồn kho
     if (newTotalQuantity > product.stock) {
-      throw new BadRequestException(
-        'Requested quantity exceeds available stock',
-      );
+      throw new BadRequestException('Requested quantity exceeds available stock');
     }
 
-    // Bước 6: Cập nhật hoặc thêm mới item vào giỏ hàng
-    const productPrice = Number(product.price);
-
+    // Bước 6: Thêm tạm vào giỏ hàng trước khi đồng bộ
     if (existingItemIndex !== -1) {
-      // Cập nhật quantity và đảm bảo thông tin sản phẩm luôn mới nhất
-      currentItems[existingItemIndex] = {
-        ...currentItems[existingItemIndex],
-        quantity: newTotalQuantity,
-        name: product.name,
-        price: productPrice,
-        images: product.images,
-        stock: product.stock,
-      };
+      currentItems[existingItemIndex].quantity = newTotalQuantity;
     } else {
-      // Thêm mới item
       currentItems.push({
-        productId: product.id,
-        name: product.name,
-        price: productPrice,
-        images: product.images,
+        productId,
+        name: {}, // Will be synced
+        price: 0, // Will be synced
+        images: [],
         quantity: quantity || 0,
         stock: product.stock,
       });
     }
+
+    // Đồng bộ lại tất cả giá trị (bao gồm Flash Sale) từ DB
+    currentItems = await this.syncCartItemsWithDB(currentItems);
 
     // Bước 7: Ghi lại giỏ hàng vào Redis
     await this.writeCartToRedis(userId, currentItems);
@@ -222,14 +256,11 @@ export class CartService {
     return this.buildCartResponse(currentItems);
   }
 
-  /**
-   * Lấy toàn bộ giỏ hàng của user từ Redis.
-   * Được gọi khi user vào trang cart hoặc cần đồng bộ state.
-   *
-   * @param userId - ID của người dùng đã đăng nhập.
-   */
   async getCart(userId: string): Promise<CartResponse> {
-    const items = await this.readCartFromRedis(userId);
+    let items = await this.readCartFromRedis(userId);
+    // Luôn đồng bộ lại giỏ hàng khi lấy để cập nhật giá flash sale mới nhất
+    items = await this.syncCartItemsWithDB(items);
+    await this.writeCartToRedis(userId, items);
     return this.buildCartResponse(items);
   }
 
@@ -281,37 +312,28 @@ export class CartService {
     // Lấy thông tin tồn kho từ DB để validate
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
-      select: { stock: true, name: true, price: true, images: true },
+      select: { stock: true },
     });
 
     if (!product) {
-      throw new NotFoundException(
-        `Product with ID "${productId}" does not exist.`,
-      );
+      throw new NotFoundException(`Product with ID "${productId}" does not exist.`);
     }
 
     if (newQuantity > product.stock) {
-      throw new BadRequestException(
-        'Requested quantity exceeds available stock',
-      );
+      throw new BadRequestException('Requested quantity exceeds available stock');
     }
 
-    const currentItems = await this.readCartFromRedis(userId);
-    const itemIndex = currentItems.findIndex(
-      (item) => item.productId === productId,
-    );
+    let currentItems = await this.readCartFromRedis(userId);
+    const itemIndex = currentItems.findIndex((item) => item.productId === productId);
 
     if (itemIndex === -1) {
-      throw new NotFoundException(
-        `Product with ID "${productId}" is not in your cart.`,
-      );
+      throw new NotFoundException(`Product with ID "${productId}" is not in your cart.`);
     }
 
-    currentItems[itemIndex] = {
-      ...currentItems[itemIndex],
-      quantity: newQuantity,
-      stock: product.stock,
-    };
+    currentItems[itemIndex].quantity = newQuantity;
+
+    // Đồng bộ lại tất cả giá trị từ DB
+    currentItems = await this.syncCartItemsWithDB(currentItems);
 
     await this.writeCartToRedis(userId, currentItems);
 
@@ -349,70 +371,27 @@ export class CartService {
     guestItems: Array<{ productId: string; quantity: number }>,
   ): Promise<CartResponse> {
     // Đọc giỏ hàng hiện tại của user từ Redis (nếu có)
-    const userItems = await this.readCartFromRedis(userId);
+    let userItems = await this.readCartFromRedis(userId);
 
-    // Lấy thông tin tất cả sản phẩm trong guest cart từ DB (batch query)
-    const productIds = guestItems.map((item) => item.productId);
-    const products = await this.prisma.product.findMany({
-      where: {
-        id: { in: productIds },
-        status: 'Published',
-      },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        images: true,
-        stock: true,
-      },
-    });
-
-    const productMap = new Map(products.map((p) => [p.id, p]));
-
-    // Merge từng guest item vào user cart
+    // Thêm các item của guest vào user cart
     for (const guestItem of guestItems) {
-      const product = productMap.get(guestItem.productId);
-
-      // Bỏ qua sản phẩm không tồn tại hoặc không Published
-      if (!product) continue;
-
-      const existingIndex = userItems.findIndex(
-        (item) => item.productId === guestItem.productId,
-      );
-
-      const currentQty =
-        existingIndex !== -1 ? userItems[existingIndex].quantity : 0;
-
-      // Tổng số lượng sau merge, bị giới hạn bởi tồn kho
-      const mergedQty = Math.min(
-        currentQty + (guestItem.quantity || 0),
-        product.stock,
-      );
-
-      if (mergedQty <= 0) continue;
-
-      const productPrice = Number(product.price);
-
+      const existingIndex = userItems.findIndex((item) => item.productId === guestItem.productId);
       if (existingIndex !== -1) {
-        userItems[existingIndex] = {
-          ...userItems[existingIndex],
-          quantity: mergedQty,
-          name: product.name,
-          price: productPrice,
-          images: product.images,
-          stock: product.stock,
-        };
+        userItems[existingIndex].quantity += guestItem.quantity;
       } else {
         userItems.push({
-          productId: product.id,
-          name: product.name,
-          price: productPrice,
-          images: product.images,
-          quantity: mergedQty,
-          stock: product.stock,
+          productId: guestItem.productId,
+          name: {},
+          price: 0,
+          images: [],
+          quantity: guestItem.quantity,
+          stock: 0,
         });
       }
     }
+
+    // Đồng bộ toàn bộ với DB để cập nhật gộp, check stock và giá Flash Sale
+    userItems = await this.syncCartItemsWithDB(userItems);
 
     await this.writeCartToRedis(userId, userItems);
 

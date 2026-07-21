@@ -31,6 +31,7 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+  CANCELLATION_REQUESTED
 }
 
 enum FlashSaleStatus {
@@ -94,6 +95,7 @@ model Order {
   phoneNumber     String
   paymentMethod   String // "COD" or "BANK_TRANSFER"
   status          OrderStatus   @default(PENDING)
+  adminNote       String?       @db.VarChar(500) // Used to store cancel request metadata
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   items           OrderItem[]
