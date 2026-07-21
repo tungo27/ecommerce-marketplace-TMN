@@ -120,7 +120,7 @@ export const ProductModerationPage: React.FC = () => {
               ) : data?.products?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6, color: '#9CA3AF' }}>
-                    No pending products 🎉
+                    No pending products.
                   </TableCell>
                 </TableRow>
               ) : (

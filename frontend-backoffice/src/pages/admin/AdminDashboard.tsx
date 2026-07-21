@@ -69,14 +69,47 @@ const KpiCard: React.FC<{
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    adminApi.getStats()
-      .then(setStats)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [data, categoriesData] = await Promise.all([
+          adminApi.getStats(),
+          adminApi.getCategories().catch(() => []) // Gracefully handle if categories fail
+        ]);
+        
+        setStats(data);
+
+        // Build a map of category id -> name, and also slug -> name
+        const map: Record<string, string> = {};
+        categoriesData.forEach((cat: any) => {
+          map[cat.id] = cat.name;
+          map[cat.slug] = cat.name;
+          map[cat.name] = cat.name; // just in case the API already returns names
+        });
+        setCategoryMap(map);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  const formatCategory = (categoryValue: string) => {
+    // If it's found in the map, use the mapped name.
+    if (categoryMap[categoryValue]) {
+      return categoryMap[categoryValue];
+    }
+    // Fallback formatting: replace underscores/hyphens and capitalize
+    return categoryValue
+      .replace(/[_\-]/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -193,10 +226,10 @@ export const AdminDashboard: React.FC = () => {
                   <XAxis
                     dataKey="category"
                     tick={{ fontSize: 12, fill: '#6B7280' }}
-                    tickFormatter={(v) => v.replace('_', ' ')}
+                    tickFormatter={formatCategory}
                   />
                   <YAxis tick={{ fontSize: 12, fill: '#6B7280' }} allowDecimals={false} />
-                  <Tooltip />
+                  <Tooltip labelFormatter={formatCategory} />
                   <Bar dataKey="count" fill={CATEGORY_COLOR} radius={[4, 4, 0, 0]} name="Products" />
                 </BarChart>
               </ResponsiveContainer>
