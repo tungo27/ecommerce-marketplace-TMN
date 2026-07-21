@@ -325,4 +325,86 @@ export class OrdersService {
     this.logger.log(`Order ${orderId} status updated to ${newStatus} by seller ${sellerId}`);
     return updatedOrder;
   }
+
+  /**
+   * Customer requests cancellation — moves order to CANCELLATION_REQUESTED.
+   * The previous status is stored in adminNote so seller can revert on rejection.
+   */
+  async requestCancellation(orderId: string, userId: string) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, userId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found or you do not have access.');
+    }
+
+    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException(
+        'Cancellation can only be requested for orders in Pending or Confirmed status.',
+      );
+    }
+
+    const previousStatus = order.status; // store to allow revert on reject
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: OrderStatus.CANCELLATION_REQUESTED,
+        adminNote: `CANCEL_REQUEST_FROM:${previousStatus}`,
+      },
+    });
+
+    this.logger.log(`Order ${orderId} cancellation requested by customer ${userId}`);
+    return updated;
+  }
+
+  /**
+   * Seller approves or rejects a customer's cancellation request.
+   * Approve → CANCELLED
+   * Reject  → restore previous status (encoded in adminNote)
+   */
+  async handleCancellationRequest(orderId: string, sellerId: string, approve: boolean) {
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        status: OrderStatus.CANCELLATION_REQUESTED,
+        items: { some: { product: { sellerId } } },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        'Order not found, not in Cancellation Requested status, or you do not have access.',
+      );
+    }
+
+    let newStatus: OrderStatus;
+    let newNote: string;
+
+    if (approve) {
+      newStatus = OrderStatus.CANCELLED;
+      newNote = 'Cancellation approved by seller.';
+    } else {
+      // Parse previous status from adminNote
+      const match = order.adminNote?.match(/^CANCEL_REQUEST_FROM:(.+)$/);
+      const prev = match?.[1] as OrderStatus | undefined;
+      if (!prev || !(prev in OrderStatus)) {
+        // Fallback to CONFIRMED if we can't parse
+        newStatus = OrderStatus.CONFIRMED;
+      } else {
+        newStatus = prev;
+      }
+      newNote = `Cancellation rejected by seller. Order restored to ${newStatus}.`;
+    }
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: newStatus, adminNote: newNote },
+    });
+
+    this.logger.log(
+      `Order ${orderId} cancellation ${approve ? 'approved' : 'rejected'} by seller ${sellerId}. New status: ${newStatus}`,
+    );
+    return updated;
+  }
 }

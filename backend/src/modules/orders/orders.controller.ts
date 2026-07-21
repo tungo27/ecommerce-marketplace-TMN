@@ -8,6 +8,12 @@ import { UpdateOrderStatusDto } from './dtos/update-order-status.dto';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/guards/roles.decorator';
 import { GetUser } from '../../common/decorators/get-user.decorator';
+import { IsBoolean } from 'class-validator';
+
+class CancellationDecisionDto {
+  @IsBoolean()
+  approve!: boolean;
+}
 
 @Controller('orders')
 export class OrdersController {
@@ -73,6 +79,38 @@ export class OrdersController {
     return {
       message: 'Order status updated successfully',
       data: updatedOrder,
+    };
+  }
+
+  @Patch(':orderId/cancel')
+  @UseGuards(AuthGuard('jwt'))
+  async requestCancellation(
+    @GetUser() user: any,
+    @Param('orderId') orderId: string,
+  ) {
+    const result = await this.ordersService.requestCancellation(orderId, user.id);
+    return {
+      message: 'Cancellation request submitted. Awaiting seller approval.',
+      data: result,
+    };
+  }
+
+  @Patch('seller/:orderId/cancellation')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SELLER)
+  async handleCancellationRequest(
+    @GetUser() user: any,
+    @Param('orderId') orderId: string,
+    @Body() body: CancellationDecisionDto,
+  ) {
+    const result = await this.ordersService.handleCancellationRequest(
+      orderId,
+      user.id,
+      body.approve,
+    );
+    return {
+      message: body.approve ? 'Cancellation approved.' : 'Cancellation rejected.',
+      data: result,
     };
   }
 }
