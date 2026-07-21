@@ -23,10 +23,12 @@ import { SellerLayout } from './layouts/SellerLayout';
 import { AnalyticsPage } from './pages/seller/AnalyticsPage';
 import { StoreProfile } from './pages/seller/StoreProfile';
 import { Settings } from './pages/seller/Settings';
+import { FlashSaleManagement } from './pages/seller/FlashSaleManagement';
 
 import { CategoryManagement } from './pages/admin/CategoryManagement';
 import { StorefrontManagement } from './pages/admin/StorefrontManagement';
 import { DisputeManagement } from './pages/admin/DisputeManagement';
+import { FlashSaleModeration } from './pages/admin/FlashSaleModeration';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -48,6 +50,7 @@ export const router = createBrowserRouter([
           { path: '/seller/products/:id/edit', element: <EditProduct /> },
           { path: '/seller/orders', element: <OrdersPage /> },
           { path: '/seller/reviews', element: <ReviewsPage /> },
+          { path: '/seller/flash-sales', element: <FlashSaleManagement /> },
           { path: '/seller/analytics', element: <AnalyticsPage /> },
           { path: '/seller/profile', element: <StoreProfile /> },
           { path: '/seller/settings', element: <Settings /> },
@@ -67,6 +70,7 @@ export const router = createBrowserRouter([
           { path: '/admin/moderation', element: <ProductModerationPage /> },
           { path: '/admin/categories', element: <CategoryManagement /> },
           { path: '/admin/storefront', element: <StorefrontManagement /> },
+          { path: '/admin/flash-sales', element: <FlashSaleModeration /> },
           { path: '/admin/disputes', element: <DisputeManagement /> },
           { path: '/admin/audit-logs', element: <AuditLogPage /> },
           { path: '/admin/users', element: <UserManagement /> },

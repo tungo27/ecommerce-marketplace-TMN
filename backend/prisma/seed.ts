@@ -3,6 +3,7 @@ import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { seedProducts } from './seeds/product.seed';
 import { seedUsers } from './seeds/user.seed';
+import { seedFlashSales } from './seeds/flash-sale.seed';
 
 const prisma = new PrismaClient();
 
@@ -42,6 +43,9 @@ async function main() {
 
   // 3. Seed products — sellers are fetched internally by seedProducts
   await seedProducts(prisma);
+
+  // 4. Seed flash sales for published products
+  await seedFlashSales(prisma);
 
   const [userCount, productCount, publicProductCount] = await Promise.all([
     prisma.user.count(),

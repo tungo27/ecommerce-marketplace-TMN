@@ -10,6 +10,7 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import InsightsIcon from '@mui/icons-material/Insights';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const DRAWER_WIDTH = 260;
 const HEADER_HEIGHT = 72;
@@ -32,6 +33,7 @@ export const SellerLayout: React.FC = () => {
     { text: 'Products', path: '/seller/products', icon: <InventoryIcon /> },
     { text: 'Orders', path: '/seller/orders', icon: <ShoppingCartIcon /> },
     { text: 'Reviews', path: '/seller/reviews', icon: <RateReviewIcon /> },
+    { text: 'Flash Sales', path: '/seller/flash-sales', icon: <LocalOfferIcon /> },
     { text: 'Analytics', path: '/seller/analytics', icon: <InsightsIcon /> },
     { text: 'Store Profile', path: '/seller/profile', icon: <StorefrontIcon /> },
     { text: 'Settings', path: '/seller/settings', icon: <SettingsIcon /> },

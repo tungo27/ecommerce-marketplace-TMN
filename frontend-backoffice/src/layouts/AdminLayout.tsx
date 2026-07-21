@@ -18,6 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import CategoryIcon from '@mui/icons-material/Category';
 import WebIcon from '@mui/icons-material/Web';
 import GavelIcon from '@mui/icons-material/Gavel';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const DRAWER_WIDTH = 260;
 const HEADER_HEIGHT = 72;
@@ -27,6 +28,7 @@ const menuItems = [
   { text: 'Product Moderation', path: '/admin/moderation', icon: <FactCheckIcon /> },
   { text: 'Categories', path: '/admin/categories', icon: <CategoryIcon /> },
   { text: 'Storefront', path: '/admin/storefront', icon: <WebIcon /> },
+  { text: 'Flash Sales', path: '/admin/flash-sales', icon: <LocalOfferIcon /> },
   { text: 'Disputes', path: '/admin/disputes', icon: <GavelIcon /> },
   { text: 'Audit Log', path: '/admin/audit-logs', icon: <HistoryIcon /> },
   { text: 'User Management', path: '/admin/users', icon: <PeopleIcon /> },
