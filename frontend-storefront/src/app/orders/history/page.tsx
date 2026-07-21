@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Header from '@/components/Header';
 
 const TABS = [
@@ -13,6 +12,8 @@ const TABS = [
   { label: 'Confirmed', value: 'CONFIRMED' },
   { label: 'Shipping', value: 'SHIPPED' },
   { label: 'Delivered', value: 'DELIVERED' },
+  { label: 'Cancel Requested', value: 'CANCELLATION_REQUESTED' },
+  { label: 'Cancelled', value: 'CANCELLED' },
 ];
 
 export default function OrderHistoryPage() {
@@ -21,6 +22,7 @@ export default function OrderHistoryPage() {
   const [activeTab, setActiveTab] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [requestingId, setRequestingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isHydrated && user === null) {
@@ -40,16 +42,11 @@ export default function OrderHistoryPage() {
       const token = localStorage.getItem('accessToken');
       const query = activeTab ? `?status=${activeTab}` : '';
       const response = await fetch(`http://localhost:4000/api/orders/my-orders${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setOrders(data.data.items);
-      } else {
-        console.error('Failed to fetch orders');
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -58,14 +55,33 @@ export default function OrderHistoryPage() {
     }
   };
 
-  const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(Number(amount));
+  const handleRequestCancellation = async (orderId: string) => {
+    if (!confirm('Are you sure you want to request cancellation for this order? The seller will need to approve it.')) return;
+    setRequestingId(orderId);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`http://localhost:4000/api/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        await fetchOrders();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Failed to request cancellation. Please try again.');
+      }
+    } catch {
+      alert('An error occurred. Please try again.');
+    } finally {
+      setRequestingId(null);
+    }
   };
 
-  const getLocalizedText = (text: any) => typeof text === 'string' ? text : (text?.en || text?.vi || '');
+  const formatCurrency = (amount: string | number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(amount));
+
+  const getLocalizedText = (text: any) =>
+    typeof text === 'string' ? text : (text?.en || text?.vi || '');
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -77,6 +93,8 @@ export default function OrderHistoryPage() {
         return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 border border-purple-200">Shipping</span>;
       case 'DELIVERED':
         return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">Delivered</span>;
+      case 'CANCELLATION_REQUESTED':
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-200">⏳ Cancel Requested</span>;
       case 'CANCELLED':
         return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">Cancelled</span>;
       default:
@@ -100,7 +118,6 @@ export default function OrderHistoryPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            {/* Back Link */}
             <div className="mt-4">
               <Link
                 href="/"
@@ -112,9 +129,7 @@ export default function OrderHistoryPage() {
                 Continue Shopping
               </Link>
             </div>
-            <h1 className="text-2xl text-[#FF4742] font-extrabold tracking-tight">
-              Order History
-            </h1>
+            <h1 className="text-2xl text-[#FF4742] font-extrabold tracking-tight">Order History</h1>
           </div>
         </div>
 
@@ -181,9 +196,7 @@ export default function OrderHistoryPage() {
                       <p className="font-bold text-[#FF4742]">{formatCurrency(order.totalPrice)}</p>
                     </div>
                   </div>
-                  <div>
-                    {getStatusBadge(order.status)}
-                  </div>
+                  <div>{getStatusBadge(order.status)}</div>
                 </div>
 
                 <div className="p-5 sm:p-6">
@@ -226,6 +239,44 @@ export default function OrderHistoryPage() {
                       </li>
                     ))}
                   </ul>
+
+                  {/* Cancel request section */}
+                  {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
+                    <div className="mt-5 pt-4 border-t border-gray-100 flex justify-end">
+                      <button
+                        onClick={() => handleRequestCancellation(order.orderId)}
+                        disabled={requestingId === order.orderId}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {requestingId === order.orderId ? (
+                          <>
+                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                            Requesting...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Request Cancellation
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Awaiting seller approval info */}
+                  {order.status === 'CANCELLATION_REQUESTED' && (
+                    <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-end gap-2">
+                      <svg className="h-4 w-4 text-orange-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-orange-600 font-medium">Awaiting seller approval for cancellation</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
