@@ -95,6 +95,7 @@ export class ReviewsService {
         user: {
           select: { name: true },
         },
+        reply: true,
       },
     });
   }

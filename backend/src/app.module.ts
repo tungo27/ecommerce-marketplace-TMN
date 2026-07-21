@@ -18,13 +18,14 @@ import { AdminModule } from './modules/admin/admin.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
+import { FlashSalesModule } from './modules/flash-sales/flash-sales.module';
 
 @Module({
   imports: [
     // Tích hợp Rate Limiting (giới hạn 100 request/phút trên toàn hệ thống)
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 100,
+      limit: 1000,
     }]),
     // Tích hợp Cache với Redis cho Performance
     CacheModule.registerAsync({
@@ -50,6 +51,7 @@ import { DisputesModule } from './modules/disputes/disputes.module';
     CategoriesModule,
     CmsModule,
     DisputesModule,
+    FlashSalesModule,
   ],
   controllers: [AppController],
   providers: [

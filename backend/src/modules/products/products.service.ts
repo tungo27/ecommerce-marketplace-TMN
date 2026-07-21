@@ -47,40 +47,65 @@ export class ProductsService {
     'giay': ['shoe', 'sneaker', 'boot', 'sandal', 'slipper', 'loafer', 'heel', 'footwear'],
     'dep':  ['sandal', 'slipper', 'flipflop'],
     // Clothing — single-word keys
-    'ao':   ['shirt', 'blouse', 'hoodie', 'sweater', 'polo', 'tshirt', 'jacket'],
+    'ao':   ['shirt', 'blouse', 'hoodie', 'sweater', 'polo', 'tshirt', 'jacket', 'top', 'dress'],
     'quan': ['pant', 'trouser', 'jeans', 'shorts', 'legging'],
     'vay':  ['dress', 'skirt'],
-    // Clothing — multi-word phrases (normalized, no diacritics)
+    // Clothing — multi-word phrases
     'ao khoac': ['jacket', 'coat', 'hoodie', 'cardigan'],
     'ao phong':  ['tshirt', 'polo'],
     // Electronics
     'dien thoai': ['phone', 'smartphone', 'mobile', 'iphone', 'android'],
     'may tinh':   ['computer', 'laptop', 'desktop', 'notebook', 'macbook'],
     'tai nghe':   ['headphone', 'earphone', 'earbuds', 'headset'],
-    // Cosmetics
+    // Cosmetics & Beauty
     'son':       ['lipstick', 'lipgloss', 'lipbalm'],
-    'kem':       ['cream', 'lotion', 'moisturizer', 'sunscreen', 'serum'],
-    'phan':      ['powder', 'foundation', 'blush', 'eyeshadow'],
-    'nuoc hoa':  ['perfume', 'cologne', 'fragrance'],
-    // Food
+    'kem':       ['cream', 'lotion', 'moisturizer', 'sunscreen', 'serum', 'skincare'],
+    'phan':      ['powder', 'foundation', 'blush', 'eyeshadow', 'makeup'],
+    'nuoc hoa':  ['perfume', 'cologne', 'fragrance', 'scent'],
+    'trang diem':['makeup', 'beauty', 'cosmetics', 'mascara'],
+    'lam dep':   ['beauty', 'skincare', 'cosmetics'],
+    // Food & Groceries
     'ca phe': ['coffee'],
     'tra':    ['tea'],
     'banh':   ['cake', 'cookie', 'bread', 'biscuit', 'snack'],
-    // Home & Living
+    'thuc pham': ['food', 'grocery', 'groceries', 'snack'],
+    'trai cay':  ['fruit', 'apple', 'banana', 'orange', 'grocery', 'groceries'],
+    'hoa qua':   ['fruit', 'apple', 'banana', 'orange'],
+    'rau':       ['vegetable', 'veg', 'salad', 'grocery'],
+    'thit':      ['meat', 'beef', 'chicken', 'pork', 'grocery'],
+    'sua':       ['milk', 'dairy', 'cheese'],
+    // Home & Living (Furniture)
     'ghe': ['chair', 'sofa', 'couch', 'stool', 'bench'],
     'ban': ['table', 'desk'],
     'den': ['lamp', 'lighting', 'bulb'],
+    'noi that': ['furniture', 'decor', 'home', 'sofa', 'bed', 'cabinet', 'chair', 'table'],
+    'giuong': ['bed', 'mattress'],
+    'tu': ['cabinet', 'wardrobe', 'closet', 'shelf'],
+    'trang tri': ['decoration', 'decor', 'art', 'frame'],
     // Sports
-    'the thao': ['sport', 'fitness', 'gym', 'athletic', 'exercise'],
-    'bong da':  ['football', 'soccer'],
-    'bong ro':  ['basketball'],
+    'the thao': ['sport', 'fitness', 'gym', 'athletic', 'exercise', 'sports'],
+    'bong da':  ['football', 'soccer', 'ball'],
+    'bong ro':  ['basketball', 'ball'],
+    'cau long': ['badminton', 'racket', 'shuttlecock'],
+    'vot':      ['racket', 'tennis', 'badminton'],
     // Bags & Wallets
-    'tui': ['bag', 'backpack', 'handbag', 'purse'],
+    'tui': ['bag', 'backpack', 'handbag', 'purse', 'tote'],
     'vi':  ['wallet', 'purse'],
     // Watches & Jewelry
-    'dong ho': ['watch', 'clock'],
+    'dong ho': ['watch', 'clock', 'smartwatch'],
     'nhan':    ['ring', 'jewelry'],
     'vong':    ['bracelet', 'necklace', 'bangle'],
+    'trang suc': ['jewelry', 'ring', 'necklace', 'bracelet', 'earring'],
+    // Vehicles
+    'xe':      ['car', 'motorcycle', 'vehicle', 'automotive', 'bike'],
+    'xe dap':  ['bike', 'bicycle'],
+    'xe may':  ['motorcycle', 'scooter', 'motorbike'],
+    'o to':    ['car', 'auto', 'automotive'],
+    'xe hoi':  ['car', 'auto', 'automotive'],
+    // Accessories
+    'kinh':    ['glasses', 'sunglasses', 'eyewear'],
+    'mat kinh':['sunglasses', 'glasses'],
+    'kinh ram':['sunglasses'],
   };
 
   // ---------------------------------------------------------------------------
