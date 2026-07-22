@@ -12,6 +12,23 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: marketplace-pgbouncer
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: root
+      DB_HOST: postgres-db
+      DB_NAME: ecommerce_TMN_db
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 20
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "6432:5432"
+    depends_on:
+      - postgres-db
+
   redis-cache:
     image: redis:7-alpine
     container_name: marketplace-redis
