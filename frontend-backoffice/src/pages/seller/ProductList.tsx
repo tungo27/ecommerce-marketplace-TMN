@@ -316,7 +316,7 @@ export const ProductList: React.FC = () => {
       {isDrawerOpen &&
         createPortal(
           <div className="fixed inset-0 z-[1300] overflow-hidden">
-            <div className="absolute inset-0 bg-slate-900/25 transition-opacity" onClick={() => setIsDrawerOpen(false)} />
+            <div className="absolute inset-0 bg-slate-900/25 transition-opacity" onClick={() => setIsDrawerOpen(false)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsDrawerOpen(false); }} role="button" tabIndex={0} aria-label="Close drawer" />
 
             <div className="fixed inset-y-0 right-0 z-[1301] max-w-full flex">
               <div className="w-full w-screen max-w-md lg:max-w-xl flex flex-col bg-white shadow-2xl h-full slide-in-right transform transition-all duration-300">

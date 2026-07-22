@@ -87,7 +87,7 @@ async function fetchProducts(resolvedParams: SearchParams) {
 
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
     const response = await fetch(`${apiBaseUrl}/products?${params.toString()}`, {
-      cache: 'no-store',
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) return { products: [], meta: { total: 0 } };
@@ -107,7 +107,7 @@ async function fetchReviews(productId: string) {
     };
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
     const response = await fetch(`${apiBaseUrl}/products/${productId}/reviews`, {
-      cache: 'no-store',
+      next: { revalidate: 30 },
     });
     if (!response.ok) return [];
     const data = await response.json();
@@ -124,7 +124,7 @@ async function fetchStorefrontConfig() {
       return raw.endsWith('/api') ? raw : `${raw}/api`;
     };
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
-    const response = await fetch(`${apiBaseUrl}/cms/storefront`, { cache: 'no-store' });
+    const response = await fetch(`${apiBaseUrl}/cms/storefront`, { next: { revalidate: 30 } });
     if (!response.ok) return null;
     return await response.json();
   } catch {
@@ -139,7 +139,7 @@ async function fetchCategories() {
       return raw.endsWith('/api') ? raw : `${raw}/api`;
     };
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
-    const response = await fetch(`${apiBaseUrl}/categories`, { cache: 'no-store' });
+    const response = await fetch(`${apiBaseUrl}/categories`, { next: { revalidate: 30 } });
     if (!response.ok) return [];
     return await response.json();
   } catch {
@@ -154,7 +154,7 @@ async function fetchActiveFlashSales() {
       return raw.endsWith('/api') ? raw : `${raw}/api`;
     };
     const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
-    const response = await fetch(`${apiBaseUrl}/flash-sales/active`, { cache: 'no-store' });
+    const response = await fetch(`${apiBaseUrl}/flash-sales/active`, { next: { revalidate: 30 } });
     if (!response.ok) return [];
     const result = await response.json();
     return result.data || result || [];
@@ -205,7 +205,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           return raw.endsWith('/api') ? raw : `${raw}/api`;
         };
         const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
-        const pRes = await fetch(`${apiBaseUrl}/products/${storefrontConfig.heroProductId}`, { cache: 'no-store' });
+        const pRes = await fetch(`${apiBaseUrl}/products/${storefrontConfig.heroProductId}`, { next: { revalidate: 30 } });
         if (pRes.ok) {
            const json = await pRes.json();
            p = json.data || json;
