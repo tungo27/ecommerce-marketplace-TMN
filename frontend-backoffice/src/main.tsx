@@ -1,9 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider, CssBaseline } from '@mui/material'
 import * as Sentry from '@sentry/react'
-import { theme } from './theme'
 import App from './App.tsx'
 import './index.css'
 
@@ -20,11 +17,6 @@ Sentry.init({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
+    <App />
   </StrictMode>,
 )
