@@ -2,9 +2,21 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, HttpAdapterHost, BaseExceptionFilter } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as Sentry from '@sentry/nestjs';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || 'https://dummy@sentry.io/123',
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
+
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { WinstonModule } from 'nest-winston';
@@ -12,6 +24,10 @@ import { winstonConfig } from './common/logger/winston.config';
 
 if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL =
+    'postgresql://postgres:root@localhost:6432/ecommerce_TMN_db?schema=public&pgbouncer=true';
+}
+if (!process.env.DIRECT_URL) {
+  process.env.DIRECT_URL =
     'postgresql://postgres:root@localhost:5432/ecommerce_TMN_db?schema=public';
 }
 
@@ -23,6 +39,8 @@ async function bootstrap() {
 
   // Tăng cường bảo mật HTTP headers (NFR Security)
   app.use(helmet());
+
+  // Sentry.setupNestErrorHandler(app, new BaseExceptionFilter(app.getHttpAdapter()));
 
   // Bắt mọi exception và format bằng Tiếng Anh (NFR Error Handling & Logging)
   app.useGlobalFilters(new GlobalExceptionFilter());
