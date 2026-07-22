@@ -158,10 +158,10 @@ export const OrdersPage: React.FC = () => {
               <TableCell sx={{ fontWeight: 'bold' }}>Order ID</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Products</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', width: '35%' }}>Products</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Total</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>Actions</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center', width: '260px' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -192,7 +192,19 @@ export const OrdersPage: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {order.items.map((item, idx) => (
-                        <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
+                        <Typography 
+                          key={idx} 
+                          variant="body2" 
+                          sx={{ 
+                            mb: 0.5, 
+                            display: '-webkit-box', 
+                            WebkitLineClamp: 2, 
+                            WebkitBoxOrient: 'vertical', 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis',
+                            wordBreak: 'break-word'
+                          }}
+                        >
                           • {getLocalizedText(item.product.name)} (x{item.quantity})
                         </Typography>
                       ))}
@@ -223,6 +235,8 @@ export const OrdersPage: React.FC = () => {
                                 color: 'white',
                                 textTransform: 'none',
                                 fontWeight: 'bold',
+                                width: '120px',
+                                whiteSpace: 'nowrap',
                                 '&:hover': { bgcolor: '#B91C1C' },
                               }}
                             >
@@ -237,6 +251,8 @@ export const OrdersPage: React.FC = () => {
                                 color: '#16A34A',
                                 textTransform: 'none',
                                 fontWeight: 'bold',
+                                width: '120px',
+                                whiteSpace: 'nowrap',
                                 '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' },
                               }}
                             >
@@ -256,6 +272,8 @@ export const OrdersPage: React.FC = () => {
                               color: 'white',
                               textTransform: 'none',
                               fontWeight: 'bold',
+                              width: '120px',
+                              whiteSpace: 'nowrap',
                               '&:hover': { bgcolor: '#E63E39' },
                             }}
                           >
@@ -275,6 +293,8 @@ export const OrdersPage: React.FC = () => {
                               borderColor: '#E5E7EB',
                               color: '#111827',
                               textTransform: 'none',
+                              width: '80px',
+                              whiteSpace: 'nowrap',
                               '&:hover': { bgcolor: '#F9FAFB', borderColor: '#D1D5DB' },
                             }}
                           >
