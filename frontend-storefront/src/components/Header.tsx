@@ -46,13 +46,13 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
     debounceRef.current = setTimeout(() => {
       // Build new URL
       const current = new URLSearchParams(Array.from(searchParams.entries()));
-      
+
       if (val.trim()) {
         current.set('search', val);
       } else {
         current.delete('search');
       }
-      
+
       // Always reset page to 1 when searching
       current.set('page', '1');
 
@@ -60,7 +60,7 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
       const basePath = searchAction && searchAction.split('?')[0] ? searchAction.split('?')[0] : '/';
       const searchStr = current.toString();
       const newUrl = searchStr ? `${basePath}?${searchStr}` : basePath;
-      
+
       startTransition(() => {
         router.push(newUrl, { scroll: false });
       });
@@ -77,10 +77,10 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
   return (
     <header className="sticky top-0 z-50 border-b-4 border-[#F05545] bg-[#FF4742] text-white shadow-md">
       <div className="mx-auto flex flex-wrap lg:flex-nowrap lg:h-16 max-w-[1600px] items-center justify-between lg:justify-start gap-4 px-4 py-3 lg:py-0">
-        
+
         {/* Logo and Hamburger */}
         <div className="flex items-center gap-3 shrink-0">
-          <button 
+          <button
             className="lg:hidden flex flex-col justify-center gap-1 p-1"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -95,9 +95,9 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
 
         {/* Mobile Cart Icon */}
         <div className="lg:hidden flex items-center shrink-0">
-           <Link href="/cart" className="text-white">
-             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-           </Link>
+          <Link href="/cart" className="text-white">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          </Link>
         </div>
 
         {/* Search Bar */}
@@ -113,7 +113,7 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
           <input type="hidden" name="category" value={currentCategory || ''} />
           <input type="hidden" name="minPrice" value={currentMinPrice || ''} />
           <input type="hidden" name="maxPrice" value={currentMaxPrice || ''} />
-          
+
           <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-2">
             {isPending && (
               <svg className="h-5 w-5 animate-spin text-[#E63E39]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -233,13 +233,13 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
       {/* Mobile Menu Overlay & Drawer */}
       <div className={`lg:hidden fixed inset-0 z-[100] transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
         {/* Overlay backdrop */}
-        <div 
-          className="absolute inset-0 bg-black/50" 
+        <div
+          className="absolute inset-0 bg-black/50"
           onClick={() => setMobileMenuOpen(false)}
         ></div>
-        
+
         {/* Drawer sliding in from left */}
-        <div 
+        <div
           className={`absolute top-0 left-0 bottom-0 flex w-4/5 max-w-sm flex-col bg-white shadow-xl transition-transform duration-300 ease-out transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           {/* Header of Drawer */}
@@ -249,7 +249,7 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          
+
           {/* Drawer Links */}
           <div className="px-4 py-6 flex-1 overflow-y-auto bg-gray-50 text-gray-900" suppressHydrationWarning>
             {!isMounted ? (

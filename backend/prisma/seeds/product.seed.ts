@@ -29,7 +29,8 @@ export async function seedProducts(prisma: PrismaClient, _legacySellerId?: strin
   await prisma.flashSale.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
-  console.log('--- Cleared old products and categories ---');
+  await prisma.storefrontConfig.deleteMany();
+  console.log('--- Cleared old products, categories, and storefront configs ---');
 
   // Fetch products from DummyJSON
   console.log('--- Fetching real products from DummyJSON ---');

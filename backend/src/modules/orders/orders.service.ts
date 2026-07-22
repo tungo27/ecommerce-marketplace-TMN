@@ -164,32 +164,48 @@ export class OrdersService {
             }
           }
 
-          // 4. Khởi tạo record Order và OrderItem
-          const order = await tx.order.create({
-            data: {
-              userId,
-              totalAmount: cart.totalCartPrice,
-              shippingAddress,
-              phoneNumber,
-              paymentMethod,
-              status: 'PENDING',
-              items: {
-                create: cart.items.map((item) => ({
-                  productId: item.productId,
-                  quantity: item.quantity,
-                  price: item.price,
-                })),
-              },
-            },
-          });
+          // 4. Group items by sellerId
+          const itemsBySeller = new Map<string, typeof cart.items>();
+          for (const item of cart.items) {
+            const product = products.find((p) => p.id === item.productId)!;
+            if (!itemsBySeller.has(product.sellerId)) {
+              itemsBySeller.set(product.sellerId, []);
+            }
+            itemsBySeller.get(product.sellerId)!.push(item);
+          }
 
-          return order;
+          // 5. Create Order records for each seller
+          const createdOrders: any[] = [];
+          for (const [sellerId, sellerItems] of itemsBySeller.entries()) {
+            const orderTotal = sellerItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            
+            const order = await tx.order.create({
+              data: {
+                userId,
+                totalAmount: orderTotal,
+                shippingAddress,
+                phoneNumber,
+                paymentMethod,
+                status: 'PENDING',
+                items: {
+                  create: sellerItems.map((item) => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                  })),
+                },
+              },
+            });
+            createdOrders.push(order);
+          }
+
+          return createdOrders;
         });
 
         // 5. Xóa giỏ hàng sau khi checkout thành công (ngoài scope transaction)
         await this.cartService.clearCart(userId);
 
-        this.logger.log(`Order ${result.id} created successfully for user ${userId}`);
+        this.logger.log(`Orders ${result.map(o => o.id).join(', ')} created successfully for user ${userId}`);
         return result;
       } catch (error) {
         if (error instanceof Error && error.message === 'OPTIMISTIC_LOCK_CONFLICT') {

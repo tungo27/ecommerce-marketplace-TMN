@@ -157,13 +157,20 @@ model Waitlist {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  adminId   String
-  admin     User     @relation(fields: [adminId], references: [id])
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  action    String
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  adminId     String
+  admin       User     @relation(fields: [adminId], references: [id])
+  
+  action      String
+  targetType  String   // e.g. "USER", "PRODUCT", "ORDER", "REVIEW", "CATEGORY", "STOREFRONT", "FLASH_SALE", "DISPUTE"
+  targetId    String?  // The UUID of the target entity (optional)
+  details     Json?    // Additional info (e.g. reason for ban, names)
+
+  // Keep productId for backwards compatibility in existing codebase, but make it optional
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
 
 model ReviewReply {

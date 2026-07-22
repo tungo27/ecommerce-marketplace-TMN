@@ -13,7 +13,7 @@ function App() {
     <ThemeProvider theme={sellerTheme}>
       <CssBaseline />
       <RouterProvider router={router} />
-      
+
       {/* Toast thông báo toàn cục (NFR UX) */}
       <Snackbar
         open={open}

@@ -406,7 +406,8 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
       this.prismaService.auditLog.create({
         data: {
           adminId,
-          productId,
+          targetType: 'PRODUCT',
+          targetId: productId,
           action,
         },
       }),

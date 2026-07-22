@@ -44,7 +44,7 @@ export const AuditLogPage: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: '#F9FAFB' }}>
-                {['Timestamp', 'Admin', 'Action', 'Product', 'Product ID'].map((h) => (
+                {['Timestamp', 'Admin', 'Action', 'Target Type', 'Target ID', 'Details'].map((h) => (
                   <TableCell key={h} sx={{ fontWeight: 700, color: '#374151', fontSize: '0.8rem', borderBottom: '1px solid #E5E7EB' }}>
                     {h}
                   </TableCell>
@@ -54,13 +54,13 @@ export const AuditLogPage: React.FC = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6 }}>
                     <CircularProgress size={28} sx={{ color: '#2563EB' }} />
                   </TableCell>
                 </TableRow>
               ) : data?.logs?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6, color: '#9CA3AF' }}>
+                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6, color: '#9CA3AF' }}>
                     No audit logs yet
                   </TableCell>
                 </TableRow>
@@ -90,11 +90,14 @@ export const AuditLogPage: React.FC = () => {
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 500, color: '#374151', fontSize: '0.875rem' }}>
-                      {log.product?.name ?? '—'}
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem' }}>
+                      {log.targetType}
                     </TableCell>
                     <TableCell sx={{ color: '#9CA3AF', fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                      {log.productId.slice(0, 8)}…
+                      {log.targetId ? (log.targetId.length > 8 ? log.targetId.slice(0, 8) + '…' : log.targetId) : '—'}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.8rem', color: '#4B5563', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={log.details ? JSON.stringify(log.details) : ''}>
+                      {log.details ? JSON.stringify(log.details) : '—'}
                     </TableCell>
                   </TableRow>
                 ))

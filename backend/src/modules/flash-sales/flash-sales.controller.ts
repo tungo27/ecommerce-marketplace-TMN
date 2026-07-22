@@ -44,9 +44,10 @@ export class FlashSalesController {
   @Roles('ADMIN')
   @Patch('admin/:id')
   async updateFlashSaleStatus(
+    @Request() req: any,
     @Param('id') id: string,
     @Body() dto: UpdateFlashSaleStatusDto,
   ) {
-    return this.flashSalesService.updateFlashSaleStatus(id, dto);
+    return this.flashSalesService.updateFlashSaleStatus(req.user.id, id, dto);
   }
 }

@@ -76,10 +76,11 @@ export class AdminController {
 
   @Patch('users/:id/ban')
   toggleUserBan(
+    @Req() req: { user: { id: string } },
     @Param('id') userId: string,
     @Body('isActive') isActive: boolean,
   ) {
-    return this.adminService.toggleUserBan(userId, isActive);
+    return this.adminService.toggleUserBan(req.user.id, userId, isActive);
   }
 
   @Get('sellers/:id/profile')
@@ -94,8 +95,11 @@ export class AdminController {
   }
 
   @Patch('orders/:id/force-cancel')
-  forceCancelOrder(@Param('id') orderId: string) {
-    return this.adminService.forceCancelOrder(orderId);
+  forceCancelOrder(
+    @Req() req: { user: { id: string } },
+    @Param('id') orderId: string,
+  ) {
+    return this.adminService.forceCancelOrder(req.user.id, orderId);
   }
 
   // ----- TRANSACTION MANAGEMENT -----
@@ -111,7 +115,10 @@ export class AdminController {
   }
 
   @Patch('reviews/:id/toggle-hide')
-  toggleReviewVisibility(@Param('id') reviewId: string) {
-    return this.adminService.toggleReviewVisibility(reviewId);
+  toggleReviewVisibility(
+    @Req() req: { user: { id: string } },
+    @Param('id') reviewId: string,
+  ) {
+    return this.adminService.toggleReviewVisibility(req.user.id, reviewId);
   }
 }

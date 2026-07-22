@@ -73,12 +73,12 @@ export const SellerLayout: React.FC = () => {
             Seller Portal
           </Typography>
         </Box>
-        
+
         <List sx={{ px: 2, pt: 2, flex: 1 }}>
           {menuItems.map((item) => {
             const isActive = location.pathname.startsWith(item.path) &&
-                             (item.path !== '/seller/dashboard' || location.pathname === '/seller/dashboard');
-                             
+              (item.path !== '/seller/dashboard' || location.pathname === '/seller/dashboard');
+
             return (
               <ListItem disablePadding sx={{ mb: 1 }} key={item.text}>
                 <ListItemButton
@@ -99,7 +99,7 @@ export const SellerLayout: React.FC = () => {
                   <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText 
+                  <ListItemText
                     primary={
                       <Typography sx={{ fontWeight: isActive ? 700 : 500 }}>
                         {item.text}
@@ -111,7 +111,7 @@ export const SellerLayout: React.FC = () => {
             );
           })}
         </List>
-        
+
         <Box sx={{ p: 2, borderTop: '1px solid #E5E7EB' }}>
           <ListItem disablePadding>
             <ListItemButton
@@ -140,11 +140,11 @@ export const SellerLayout: React.FC = () => {
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
         {/* Header */}
-        <AppBar 
-          position="sticky" 
+        <AppBar
+          position="sticky"
           elevation={0}
-          sx={{ 
-            bgcolor: '#FFFFFF', 
+          sx={{
+            bgcolor: '#FFFFFF',
             borderBottom: '1px solid #E5E7EB',
             color: '#111827',
           }}

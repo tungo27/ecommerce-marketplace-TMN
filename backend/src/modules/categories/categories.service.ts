@@ -25,7 +25,7 @@ export class CategoriesService {
     });
   }
 
-  async create(dto: CreateCategoryDto) {
+  async create(adminId: string, dto: CreateCategoryDto) {
     const existing = await this.prisma.category.findUnique({
       where: { slug: dto.slug }
     });
@@ -33,12 +33,22 @@ export class CategoriesService {
       throw new ConflictException('Category with this slug already exists');
     }
 
-    return this.prisma.category.create({
-      data: dto
-    });
+    const [category] = await this.prisma.$transaction([
+      this.prisma.category.create({ data: dto }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'CATEGORY',
+          targetId: dto.slug,
+          action: 'CREATE_CATEGORY',
+          details: { categoryName: dto.name },
+        }
+      })
+    ]);
+    return category;
   }
 
-  async update(id: string, dto: UpdateCategoryDto) {
+  async update(adminId: string, id: string, dto: UpdateCategoryDto) {
     const existing = await this.prisma.category.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException('Category not found');
@@ -53,13 +63,25 @@ export class CategoriesService {
       }
     }
 
-    return this.prisma.category.update({
-      where: { id },
-      data: dto
-    });
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.category.update({
+        where: { id },
+        data: dto
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'CATEGORY',
+          targetId: id,
+          action: 'UPDATE_CATEGORY',
+          details: { updates: dto as any },
+        }
+      })
+    ]);
+    return updated;
   }
 
-  async remove(id: string) {
+  async remove(adminId: string, id: string) {
     const existing = await this.prisma.category.findUnique({
       where: { id },
       include: { _count: { select: { products: true } } }
@@ -73,8 +95,20 @@ export class CategoriesService {
       throw new ConflictException('Cannot delete category with associated products');
     }
 
-    return this.prisma.category.delete({
-      where: { id }
-    });
+    const [deleted] = await this.prisma.$transaction([
+      this.prisma.category.delete({
+        where: { id }
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'CATEGORY',
+          targetId: id,
+          action: 'DELETE_CATEGORY',
+          details: { categoryName: existing.name },
+        }
+      })
+    ]);
+    return deleted;
   }
 }

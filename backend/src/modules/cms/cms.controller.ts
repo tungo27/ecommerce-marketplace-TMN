@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { CmsService } from './cms.service';
 import { UpdateStorefrontDto } from './dtos/update-storefront.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -18,7 +18,7 @@ export class CmsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @Patch('storefront')
-  updateStorefrontConfig(@Body() dto: UpdateStorefrontDto) {
-    return this.cmsService.updateStorefrontConfig(dto);
+  updateStorefrontConfig(@Req() req: { user: { id: string } }, @Body() dto: UpdateStorefrontDto) {
+    return this.cmsService.updateStorefrontConfig(req.user.id, dto);
   }
 }

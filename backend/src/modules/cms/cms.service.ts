@@ -27,7 +27,7 @@ export class CmsService {
     return config.value;
   }
 
-  async updateStorefrontConfig(dto: UpdateStorefrontDto) {
+  async updateStorefrontConfig(adminId: string, dto: UpdateStorefrontDto) {
     // Automatically create a 50% flash sale for the hero product if selected
     if (dto.heroProductId) {
       const product = await this.prisma.product.findUnique({
@@ -81,15 +81,25 @@ export class CmsService {
       return newConfig.value;
     }
 
-    const updatedConfig = await this.prisma.storefrontConfig.update({
-      where: { id: config.id },
-      data: {
-        value: {
-          ...(config.value as any),
-          ...dto,
+    const [updatedConfig] = await this.prisma.$transaction([
+      this.prisma.storefrontConfig.update({
+        where: { id: config.id },
+        data: {
+          value: {
+            ...(config.value as any),
+            ...dto,
+          }
         }
-      }
-    });
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'STOREFRONT',
+          action: 'UPDATE_STOREFRONT_CONFIG',
+          details: { updates: dto as any },
+        }
+      })
+    ]);
 
     return updatedConfig.value;
   }

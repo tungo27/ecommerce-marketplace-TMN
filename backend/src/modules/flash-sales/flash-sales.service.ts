@@ -58,17 +58,30 @@ export class FlashSalesService {
     });
   }
 
-  async updateFlashSaleStatus(id: string, dto: UpdateFlashSaleStatusDto) {
+  async updateFlashSaleStatus(adminId: string, id: string, dto: UpdateFlashSaleStatusDto) {
     const flashSale = await this.prisma.flashSale.findUnique({ where: { id } });
     if (!flashSale) throw new NotFoundException('Flash sale not found');
 
-    return this.prisma.flashSale.update({
-      where: { id },
-      data: {
-        status: dto.status,
-        adminNote: dto.adminNote,
-      },
-    });
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.flashSale.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          adminNote: dto.adminNote,
+        },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'FLASH_SALE',
+          targetId: id,
+          action: 'UPDATE_FLASH_SALE_STATUS',
+          details: { newStatus: dto.status, note: dto.adminNote },
+        }
+      })
+    ]);
+
+    return updated;
   }
 
   async getActiveFlashSales() {

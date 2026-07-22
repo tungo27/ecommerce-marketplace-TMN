@@ -3,8 +3,7 @@ import {
   Box, Typography, Paper, TextField, Button, Alert, CircularProgress,
   MenuItem, Select, FormControl, Chip, OutlinedInput, Stack,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemAvatar, ListItemText, Avatar, InputAdornment,
-  ToggleButtonGroup, ToggleButton
+  List, ListItem, ListItemAvatar, ListItemText, Avatar, InputAdornment
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { adminApi } from '../../hooks/useAdminApi';
@@ -132,13 +131,11 @@ export const StorefrontManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [heroMode, setHeroMode] = useState<'url' | 'product'>('url');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const [categories, setCategories] = useState<any[]>([]);
   const [config, setConfig] = useState({
-    theme: 'light',
     heroImage: '',
     heroProductId: '',
     announcement: '',
@@ -155,14 +152,12 @@ export const StorefrontManagement: React.FC = () => {
       setCategories(catData);
       if (configData && Object.keys(configData).length > 0) {
         const loaded = {
-          theme: configData.theme || 'light',
           heroImage: configData.heroImage || '',
           heroProductId: configData.heroProductId || '',
           announcement: configData.announcement || '',
           featuredCategoryIds: configData.featuredCategoryIds || [],
         };
         setConfig(loaded);
-        if (loaded.heroProductId) setHeroMode('product');
       }
     } catch (e: any) {
       setMessage({ type: 'error', text: e.message || 'Failed to load configuration.' });
@@ -200,13 +195,6 @@ export const StorefrontManagement: React.FC = () => {
   const handleSelectProduct = (product: Product) => {
     setSelectedProduct(product);
     setConfig({ ...config, heroProductId: product.id, heroImage: product.images?.[0] || '' });
-  };
-
-  const handleHeroModeChange = (_: any, mode: 'url' | 'product') => {
-    if (!mode) return;
-    setHeroMode(mode);
-    if (mode === 'url') { setConfig({ ...config, heroProductId: '' }); setSelectedProduct(null); }
-    else { setConfig({ ...config, heroImage: '' }); }
   };
 
   return (
@@ -271,34 +259,8 @@ export const StorefrontManagement: React.FC = () => {
           {/* Hero Banner */}
           <Section
             title="Hero Banner"
-            description="The large image displayed at the top of the homepage. Use a direct image URL or pick a product from the store."
+            description="The large image displayed at the top of the homepage. Pick a product from the store."
           >
-            <ToggleButtonGroup
-              value={heroMode}
-              exclusive
-              onChange={handleHeroModeChange}
-              size="small"
-              sx={{ mb: 2 }}
-            >
-              <ToggleButton value="url" sx={{ textTransform: 'none', px: 2, '&.Mui-selected': { bgcolor: '#DBEAFE', color: '#1D4ED8', fontWeight: 700 } }}>
-                Image URL
-              </ToggleButton>
-              <ToggleButton value="product" sx={{ textTransform: 'none', px: 2, '&.Mui-selected': { bgcolor: '#DBEAFE', color: '#1D4ED8', fontWeight: 700 } }}>
-                Pick a Product
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            {heroMode === 'url' ? (
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="https://example.com/banner.jpg"
-                value={config.heroImage}
-                onChange={(e) => setConfig({ ...config, heroImage: e.target.value, heroProductId: '' })}
-                sx={{ bgcolor: '#F9FAFB' }}
-                helperText="Enter a public image URL to use as the banner."
-              />
-            ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Button
                   variant="outlined"
@@ -313,7 +275,6 @@ export const StorefrontManagement: React.FC = () => {
                   </Typography>
                 )}
               </Box>
-            )}
 
             {config.heroImage && (
               <Box sx={{ mt: 2, borderRadius: 2, overflow: 'hidden', height: 200, border: '1px solid #E5E7EB', bgcolor: '#F3F4F6' }}>
@@ -379,23 +340,6 @@ export const StorefrontManagement: React.FC = () => {
                 ? 'Showing the first 5 categories by default.'
                 : `${config.featuredCategoryIds.length} categor${config.featuredCategoryIds.length > 1 ? 'ies' : 'y'} selected.`}
             </Typography>
-          </Section>
-
-          {/* Theme */}
-          <Section
-            title="Theme"
-            description="Switch the storefront between light and dark mode."
-          >
-            <FormControl sx={{ minWidth: 200 }}>
-              <Select
-                value={config.theme}
-                onChange={(e) => setConfig({ ...config, theme: e.target.value })}
-                sx={{ bgcolor: '#F9FAFB' }}
-              >
-                <MenuItem value="light">Light</MenuItem>
-                <MenuItem value="dark">Dark</MenuItem>
-              </Select>
-            </FormControl>
           </Section>
 
         </Stack>

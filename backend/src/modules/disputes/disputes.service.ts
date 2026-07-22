@@ -97,18 +97,31 @@ export class DisputesService {
     });
   }
 
-  async updateStatus(id: string, dto: UpdateDisputeDto) {
+  async updateStatus(adminId: string, id: string, dto: UpdateDisputeDto) {
     const dispute = await this.prisma.dispute.findUnique({ where: { id } });
     if (!dispute) {
       throw new NotFoundException('Dispute not found');
     }
 
-    return this.prisma.dispute.update({
-      where: { id },
-      data: {
-        status: dto.status,
-        resolvedAt: (dto.status === 'RESOLVED_REFUND' || dto.status === 'RESOLVED_REJECT') ? new Date() : null
-      }
-    });
+    const [updatedDispute] = await this.prisma.$transaction([
+      this.prisma.dispute.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          resolvedAt: (dto.status === 'RESOLVED_REFUND' || dto.status === 'RESOLVED_REJECT') ? new Date() : null
+        }
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'DISPUTE',
+          targetId: id,
+          action: 'UPDATE_DISPUTE_STATUS',
+          details: { newStatus: dto.status },
+        }
+      })
+    ]);
+
+    return updatedDispute;
   }
 }

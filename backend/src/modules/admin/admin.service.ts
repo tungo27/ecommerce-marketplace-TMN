@@ -138,8 +138,10 @@ export class AdminService {
       this.prisma.auditLog.create({
         data: {
           adminId,
-          productId,
+          targetType: 'PRODUCT',
+          targetId: productId,
           action: 'FORCE_HIDE',
+          details: { reason: 'Force hidden by admin' },
         },
       }),
     ]);
@@ -180,14 +182,27 @@ export class AdminService {
     return { users, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
   }
 
-  async toggleUserBan(userId: string, isActive: boolean) {
+  async toggleUserBan(adminId: string, userId: string, isActive: boolean) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { isActive },
-      select: { id: true, name: true, email: true, role: true, isActive: true },
-    });
+    
+    const [updatedUser] = await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { isActive },
+        select: { id: true, name: true, email: true, role: true, isActive: true },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'USER',
+          targetId: userId,
+          action: isActive ? 'UNBAN_USER' : 'BAN_USER',
+          details: { userEmail: user.email },
+        },
+      }),
+    ]);
+    return updatedUser;
   }
 
   async getSellerProfile(sellerId: string) {
@@ -253,7 +268,7 @@ export class AdminService {
     return { orders, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
   }
 
-  async forceCancelOrder(orderId: string) {
+  async forceCancelOrder(adminId: string, orderId: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Order not found');
     if (order.status === 'DELIVERED') {
@@ -278,6 +293,15 @@ export class AdminService {
           status: 'PENDING',
         },
       }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'ORDER',
+          targetId: orderId,
+          action: 'FORCE_CANCEL_ORDER',
+          details: { orderAmount: order.totalAmount },
+        }
+      })
     ]);
 
     return updatedOrder;
@@ -342,14 +366,25 @@ export class AdminService {
     return { reviews, meta: { total, totalPages: Math.ceil(total / limit), currentPage: page, limit } };
   }
 
-  async toggleReviewVisibility(reviewId: string) {
+  async toggleReviewVisibility(adminId: string, reviewId: string) {
     const review = await this.prisma.review.findUnique({ where: { id: reviewId } });
     if (!review) throw new NotFoundException('Review not found');
 
-    return this.prisma.review.update({
-      where: { id: reviewId },
-      data: { isHidden: !review.isHidden },
-      select: { id: true, isHidden: true },
-    });
+    const [updatedReview] = await this.prisma.$transaction([
+      this.prisma.review.update({
+        where: { id: reviewId },
+        data: { isHidden: !review.isHidden },
+        select: { id: true, isHidden: true },
+      }),
+      this.prisma.auditLog.create({
+        data: {
+          adminId,
+          targetType: 'REVIEW',
+          targetId: reviewId,
+          action: !review.isHidden ? 'HIDE_REVIEW' : 'SHOW_REVIEW',
+        }
+      })
+    ]);
+    return updatedReview;
   }
 }

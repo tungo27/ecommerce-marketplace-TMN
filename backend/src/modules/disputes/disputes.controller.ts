@@ -35,7 +35,7 @@ export class DisputesController {
 
   @Roles(Role.ADMIN)
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateDisputeDto) {
-    return this.disputesService.updateStatus(id, dto);
+  updateStatus(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateDisputeDto) {
+    return this.disputesService.updateStatus(req.user.id, id, dto);
   }
 }
