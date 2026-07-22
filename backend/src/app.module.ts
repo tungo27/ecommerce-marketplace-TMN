@@ -19,13 +19,15 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { FlashSalesModule } from './modules/flash-sales/flash-sales.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
+    HealthModule,
     // Tích hợp Rate Limiting (giới hạn 100 request/phút trên toàn hệ thống)
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 1000,
+      limit: 300, // 300 requests/minute - balanced between DDoS protection and normal browsing
     }]),
     // Tích hợp Cache với Redis cho Performance
     CacheModule.registerAsync({
