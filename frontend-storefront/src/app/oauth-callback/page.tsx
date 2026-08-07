@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 
 function OAuthCallbackContent() {
   const searchParams = useSearchParams();
@@ -43,6 +44,11 @@ function OAuthCallbackContent() {
         
         localStorage.setItem('user', JSON.stringify(user));
         setUser(user);
+        
+        // Sync guest cart to user cart
+        useCart.getState().syncGuestCartAfterLogin().catch(err => {
+          console.error('Failed to sync guest cart:', err);
+        });
       } catch (e) {
         console.error('Failed to parse JWT token', e);
       }

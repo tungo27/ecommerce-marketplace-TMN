@@ -77,7 +77,7 @@ export class AdminService {
       this.prisma.auditLog.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
         include: {
           admin: { select: { name: true, email: true } },
           product: { select: { name: true } },

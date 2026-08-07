@@ -90,7 +90,6 @@ async function bootstrap() {
             } else if (cleanMessage.includes('must be a number') || cleanMessage.includes('must be an integer')) {
               cleanMessage = 'Must be a numeric value';
             } else {
-              // Viết hoa chữ cái đầu tiên
               cleanMessage = cleanMessage.charAt(0).toUpperCase() + cleanMessage.slice(1);
             }
             

@@ -1,4 +1,3 @@
-// ĐÂY LÀ FILE MẪU CHO AI. KHÔNG ĐƯỢC CHỈNH SỬA.
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from '../../src/modules/products/products.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
@@ -7,7 +6,6 @@ describe('ProductsService', () => {
   let service: ProductsService;
   let prisma: PrismaService;
 
-  // Tạo mock object mô phỏng các API của Prisma Client
   const mockPrismaService = {
     product: {
       findMany: jest.fn(),

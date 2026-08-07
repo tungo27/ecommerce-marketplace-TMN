@@ -38,7 +38,7 @@ export interface CartResponse {
  *
  * Chiến lược lưu trữ:
  *  - Key Redis: `cart:{userId}` (string, dạng JSON)
- *  - TTL: 7 ngày (604800 giây) - gia hạn mỗi lần có thao tác
+ *  - 7 ngày (604800 giây) - gia hạn mỗi lần có thao tác
  *
  * Lưu ý: RedisService được inject thông qua DI token 'REDIS_CLIENT'.
  * Trong môi trường thực tế, đây là instance của ioredis.Redis hoặc class wrapper.
@@ -137,7 +137,7 @@ export class CartService {
         },
       },
     });
-
+    
     const productMap = new Map(products.map((p) => [p.id, p]));
     const syncedItems: CartItem[] = [];
 
