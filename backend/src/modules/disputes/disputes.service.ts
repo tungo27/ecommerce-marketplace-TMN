@@ -2,9 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDisputeDto } from './dtos/create-dispute.dto';
 import { AddDisputeMessageDto } from './dtos/add-dispute-message.dto';
-import { UpdateDisputeDto } from './dtos/update-dispute.dto';
-import { Role } from '@prisma/client';
+import { UpdateDisputeDto, UpdateDisputeStatus } from './dtos/update-dispute.dto';
+import { Role, ChatStatus } from '@prisma/client';
 
+/**
+ * DisputesService now maps to the OrderChat/OrderChatMessage schema.
+ * The old Dispute/DisputeMessage tables were replaced in migration
+ * 20260811041100_add_order_chat_product_reports.
+ */
 @Injectable()
 export class DisputesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -18,27 +23,26 @@ export class DisputesService {
       throw new NotFoundException('Order not found or does not belong to you');
     }
 
-    const existingDispute = await this.prisma.dispute.findUnique({
+    const existingChat = await this.prisma.orderChat.findUnique({
       where: { orderId: dto.orderId }
     });
 
-    if (existingDispute) {
-      throw new BadRequestException('A dispute already exists for this order');
+    if (existingChat) {
+      throw new BadRequestException('A support chat already exists for this order');
     }
 
-    return this.prisma.dispute.create({
+    return this.prisma.orderChat.create({
       data: {
         orderId: dto.orderId,
         customerId: userId,
-        reason: dto.reason,
-        description: dto.description
+        status: ChatStatus.OPEN,
       }
     });
   }
 
   async findAll(userId: string, role: Role) {
     if (role === Role.ADMIN) {
-      return this.prisma.dispute.findMany({
+      return this.prisma.orderChat.findMany({
         include: {
           customer: { select: { id: true, name: true, email: true } },
           order: { select: { id: true, totalAmount: true, status: true } }
@@ -47,7 +51,7 @@ export class DisputesService {
       });
     }
 
-    return this.prisma.dispute.findMany({
+    return this.prisma.orderChat.findMany({
       where: { customerId: userId },
       include: {
         order: { select: { id: true, totalAmount: true, status: true } }
@@ -57,7 +61,7 @@ export class DisputesService {
   }
 
   async findOne(id: string, userId: string, role: Role) {
-    const dispute = await this.prisma.dispute.findUnique({
+    const chat = await this.prisma.orderChat.findUnique({
       where: { id },
       include: {
         customer: { select: { id: true, name: true, email: true } },
@@ -71,23 +75,23 @@ export class DisputesService {
       }
     });
 
-    if (!dispute) {
-      throw new NotFoundException('Dispute not found');
+    if (!chat) {
+      throw new NotFoundException('Dispute/chat not found');
     }
 
-    if (role !== Role.ADMIN && dispute.customerId !== userId) {
-      throw new NotFoundException('Dispute not found');
+    if (role !== Role.ADMIN && chat.customerId !== userId) {
+      throw new NotFoundException('Dispute/chat not found');
     }
 
-    return dispute;
+    return chat;
   }
 
   async addMessage(id: string, userId: string, role: Role, dto: AddDisputeMessageDto) {
-    const dispute = await this.findOne(id, userId, role);
+    const chat = await this.findOne(id, userId, role);
 
-    return this.prisma.disputeMessage.create({
+    return this.prisma.orderChatMessage.create({
       data: {
-        disputeId: dispute.id,
+        chatId: chat.id,
         senderId: userId,
         message: dto.message
       },
@@ -98,18 +102,22 @@ export class DisputesService {
   }
 
   async updateStatus(adminId: string, id: string, dto: UpdateDisputeDto) {
-    const dispute = await this.prisma.dispute.findUnique({ where: { id } });
-    if (!dispute) {
-      throw new NotFoundException('Dispute not found');
+    const chat = await this.prisma.orderChat.findUnique({ where: { id } });
+    if (!chat) {
+      throw new NotFoundException('Dispute/chat not found');
     }
 
-    const [updatedDispute] = await this.prisma.$transaction([
-      this.prisma.dispute.update({
+    // Map legacy dispute statuses to ChatStatus
+    const newChatStatus =
+      dto.status === UpdateDisputeStatus.RESOLVED_REFUND ||
+      dto.status === UpdateDisputeStatus.RESOLVED_REJECT
+        ? ChatStatus.CLOSED
+        : ChatStatus.OPEN;
+
+    const [updatedChat] = await this.prisma.$transaction([
+      this.prisma.orderChat.update({
         where: { id },
-        data: {
-          status: dto.status,
-          resolvedAt: (dto.status === 'RESOLVED_REFUND' || dto.status === 'RESOLVED_REJECT') ? new Date() : null
-        }
+        data: { status: newChatStatus },
       }),
       this.prisma.auditLog.create({
         data: {
@@ -122,6 +130,6 @@ export class DisputesService {
       })
     ]);
 
-    return updatedDispute;
+    return updatedChat;
   }
 }

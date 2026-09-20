@@ -20,6 +20,8 @@ import { CmsModule } from './modules/cms/cms.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { FlashSalesModule } from './modules/flash-sales/flash-sales.module';
 import { HealthModule } from './health/health.module';
+import { ChatsModule } from './modules/chats/chats.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { HealthModule } from './health/health.module';
     CmsModule,
     DisputesModule,
     FlashSalesModule,
+    ChatsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

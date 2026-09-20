@@ -4,8 +4,11 @@ import * as Sentry from '@sentry/react'
 import App from './App.tsx'
 import './index.css'
 
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
+
 Sentry.init({
-  dsn: "https://dummy@sentry.io/123",
+  dsn: SENTRY_DSN || '',
+  enabled: !!SENTRY_DSN,
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),

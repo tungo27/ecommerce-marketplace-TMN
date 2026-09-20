@@ -41,6 +41,17 @@ enum FlashSaleStatus {
   REJECTED
 }
 
+enum ChatStatus {
+  OPEN
+  CLOSED
+}
+
+enum ProductReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           String           @id @default(uuid())
   name         String
@@ -54,11 +65,12 @@ model User {
   products     Product[]
   orders       Order[]
   reviews      Review[]
-  waitlists    Waitlist[]
-  AuditLog     AuditLog[]
-  disputes     Dispute[]        @relation("CustomerDisputes")
-  disputeMsgs  DisputeMessage[]
-  flashSales   FlashSale[]
+  waitlists       Waitlist[]
+  AuditLog        AuditLog[]
+  flashSales      FlashSale[]
+  orderChats      OrderChat[]
+  chatMessages    OrderChatMessage[]
+  productReports  ProductReport[]
 }
 
 model Product {
@@ -82,6 +94,7 @@ model Product {
   waitlists     Waitlist[]
   AuditLog      AuditLog[]
   flashSales    FlashSale[]
+  productReports ProductReport[]
 
   // Note: A GIN index named "product_fts_gin_idx" is manually managed via raw SQL migration
   // to support PostgreSQL Full-Text Search on name and description.
@@ -102,7 +115,7 @@ model Order {
   items           OrderItem[]
   transactions    Transaction[]
   reviews         Review[]
-  Dispute         Dispute?
+  orderChat       OrderChat?
 
   @@index([userId, createdAt])
 }
@@ -202,36 +215,42 @@ model StorefrontConfig {
   updatedAt DateTime @updatedAt
 }
 
-enum DisputeStatus {
-  OPEN
-  IN_REVIEW
-  RESOLVED_REFUND
-  RESOLVED_REJECT
+model OrderChat {
+  id         String             @id @default(uuid())
+  orderId    String             @unique
+  order      Order              @relation(fields: [orderId], references: [id])
+  customerId String
+  customer   User               @relation(fields: [customerId], references: [id])
+  status     ChatStatus         @default(OPEN)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  messages   OrderChatMessage[]
 }
 
-model Dispute {
-  id          String           @id @default(uuid())
-  orderId     String           @unique
-  order       Order            @relation(fields: [orderId], references: [id])
-  customerId  String
-  customer    User             @relation("CustomerDisputes", fields: [customerId], references: [id])
-  reason      String
-  description String
-  status      DisputeStatus    @default(OPEN)
-  resolvedAt  DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  messages    DisputeMessage[]
-}
-
-model DisputeMessage {
-  id        String   @id @default(uuid())
-  disputeId String
-  dispute   Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+model OrderChatMessage {
+  id        String    @id @default(uuid())
+  chatId    String
+  chat      OrderChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
   senderId  String
-  sender    User     @relation(fields: [senderId], references: [id])
-  message   String   @db.VarChar(1000)
-  createdAt DateTime @default(now())
+  sender    User      @relation(fields: [senderId], references: [id])
+  message   String    @db.VarChar(1000)
+  createdAt DateTime  @default(now())
+}
+
+model ProductReport {
+  id          String               @id @default(uuid())
+  productId   String
+  product     Product              @relation(fields: [productId], references: [id])
+  reporterId  String
+  reporter    User                 @relation(fields: [reporterId], references: [id])
+  reason      String               @db.VarChar(100)
+  description String               @db.VarChar(2000)
+  status      ProductReportStatus  @default(PENDING)
+  adminNote   String?              @db.VarChar(500)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@unique([productId, reporterId])
 }
 
 model FlashSale {

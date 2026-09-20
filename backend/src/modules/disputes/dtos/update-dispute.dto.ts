@@ -1,8 +1,14 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { DisputeStatus } from '@prisma/client';
+
+export enum UpdateDisputeStatus {
+  OPEN = 'OPEN',
+  IN_REVIEW = 'IN_REVIEW',
+  RESOLVED_REFUND = 'RESOLVED_REFUND',
+  RESOLVED_REJECT = 'RESOLVED_REJECT',
+}
 
 export class UpdateDisputeDto {
-  @IsEnum(DisputeStatus)
+  @IsEnum(UpdateDisputeStatus)
   @IsNotEmpty()
-  status!: DisputeStatus;
+  status!: UpdateDisputeStatus;
 }
