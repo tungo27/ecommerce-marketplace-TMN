@@ -48,11 +48,15 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   // Cấu hình CORS an toàn từ biến môi trường
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
+    : [
+        process.env.FRONTEND_URL || 'http://localhost:3000',
+        process.env.BACKOFFICE_URL || 'http://localhost:3001',
+      ];
+
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-      process.env.BACKOFFICE_URL || 'http://localhost:3001'
-    ],
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Accept, Authorization',
@@ -113,7 +117,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   console.log(`[Backend] NestJS API is ready at: http://localhost:${port}`);
   console.log(

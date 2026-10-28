@@ -25,34 +25,45 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
     {
       provide: REDIS_CLIENT,
       useFactory: (): Redis => {
-        const client = new Redis({
-          host: process.env.REDIS_HOST || 'localhost',
-          port: parseInt(process.env.REDIS_PORT || '6379', 10),
-          password: process.env.REDIS_PASSWORD || undefined,
-          db: parseInt(process.env.REDIS_DB || '0', 10),
-          // Tự động reconnect khi mất kết nối
-          retryStrategy: (times: number) => {
-            if (times > 10) {
-              // Sau 10 lần thử, ngừng reconnect
-              return null;
-            }
-            // Tăng dần thời gian chờ: 50ms, 100ms, 200ms, ... (tối đa 3000ms)
-            return Math.min(times * 50, 3000);
-          },
-          // Timeout cho mỗi lệnh (10 giây)
-          commandTimeout: 10000,
-          // Số lần retry tối đa cho mỗi lệnh khi kết nối thất bại
-          maxRetriesPerRequest: 3,
-          // Bật lazy connect để không block startup nếu Redis chưa sẵn sàng
-          lazyConnect: false,
-          // Tên kết nối để debug
-          connectionName: 'ecommerce-cart',
-          // Enable TLS trong production
-          tls:
-            process.env.REDIS_TLS === 'true'
-              ? { rejectUnauthorized: true }
-              : undefined,
-        });
+        const client = process.env.REDIS_URL
+          ? new Redis(process.env.REDIS_URL, {
+              retryStrategy: (times: number) => {
+                if (times > 10) return null;
+                return Math.min(times * 50, 3000);
+              },
+              commandTimeout: 10000,
+              maxRetriesPerRequest: 3,
+              lazyConnect: false,
+              connectionName: 'ecommerce-cart',
+            })
+          : new Redis({
+              host: process.env.REDIS_HOST || 'localhost',
+              port: parseInt(process.env.REDIS_PORT || '6379', 10),
+              password: process.env.REDIS_PASSWORD || undefined,
+              db: parseInt(process.env.REDIS_DB || '0', 10),
+              // Tự động reconnect khi mất kết nối
+              retryStrategy: (times: number) => {
+                if (times > 10) {
+                  // Sau 10 lần thử, ngừng reconnect
+                  return null;
+                }
+                // Tăng dần thời gian chờ: 50ms, 100ms, 200ms, ... (tối đa 3000ms)
+                return Math.min(times * 50, 3000);
+              },
+              // Timeout cho mỗi lệnh (10 giây)
+              commandTimeout: 10000,
+              // Số lần retry tối đa cho mỗi lệnh khi kết nối thất bại
+              maxRetriesPerRequest: 3,
+              // Bật lazy connect để không block startup nếu Redis chưa sẵn sàng
+              lazyConnect: false,
+              // Tên kết nối để debug
+              connectionName: 'ecommerce-cart',
+              // Enable TLS trong production
+              tls:
+                process.env.REDIS_TLS === 'true'
+                  ? { rejectUnauthorized: true }
+                  : undefined,
+            });
 
         client.on('connect', () => {
           console.log('[RedisModule] Đã kết nối thành công đến Redis server.');
