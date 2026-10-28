@@ -172,4 +172,17 @@ export const adminApi = {
       headers: getHeaders(),
       body: JSON.stringify({ status }),
     }).then(handleResponse),
+
+  // Product Report Moderation
+  getReports: () =>
+    fetch(`${API_BASE}/reports`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
+
+  reviewReport: (id: string, data: { status: 'APPROVED' | 'REJECTED'; adminNote?: string }) =>
+    fetch(`${API_BASE}/reports/${id}/review`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
 };

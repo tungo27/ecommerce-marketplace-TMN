@@ -100,7 +100,10 @@ export const AdminDashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  const formatCategory = (categoryValue: string) => {
+  const formatCategory = (categoryValue: any): string => {
+    if (!categoryValue || typeof categoryValue !== 'string') {
+      return String(categoryValue ?? '');
+    }
     // If it's found in the map, use the mapped name.
     if (categoryMap[categoryValue]) {
       return categoryMap[categoryValue];
