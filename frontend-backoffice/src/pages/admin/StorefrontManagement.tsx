@@ -7,8 +7,9 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { adminApi } from '../../hooks/useAdminApi';
+import { API_BASE_URL } from '../../utils/api';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = API_BASE_URL;
 
 interface Product {
   id: string;

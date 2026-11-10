@@ -121,4 +121,12 @@ async function bootstrap() {
   );
 }
 
+process.on('unhandledRejection', (reason) => {
+  console.error('[Process] Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[Process] Uncaught Exception:', err.message);
+});
+
 void bootstrap();

@@ -35,11 +35,24 @@ import { ReportsModule } from './modules/reports/reports.module';
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => {
-        const store = await redisStore({
-          url: process.env.REDIS_URL || 'redis://localhost:6379',
-          ttl: 5000,
-        });
-        return { store } as any;
+        try {
+          const store = await redisStore({
+            url: process.env.REDIS_URL || 'redis://localhost:6379',
+            ttl: 5000,
+            pingInterval: 60000,
+            socket: {
+              keepAlive: 30000,
+              reconnectStrategy: (retries: number) => Math.min(retries * 200, 5000),
+            },
+          });
+          store.client.on('error', (err: Error) => {
+            console.error('[CacheModule] Redis client error:', err.message);
+          });
+          return { store } as any;
+        } catch (err: any) {
+          console.warn('[CacheModule] Redis unavailable, falling back to memory cache:', err?.message);
+          return { ttl: 5000 };
+        }
       },
     }),
     PrismaModule,

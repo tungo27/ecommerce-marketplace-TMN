@@ -5,7 +5,7 @@ const normalizeApiBaseUrl = (value?: string) => {
   return raw.endsWith('/api') ? raw : `${raw}/api`;
 };
 
-const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -31,8 +31,9 @@ apiClient.interceptors.response.use(
       // Clear token and user data
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      // Redirect to login (assuming backoffice uses /seller/login or similar)
-      window.location.href = '/seller/login';
+      // Redirect to appropriate login page based on current route
+      const isAdminRoute = window.location.pathname.startsWith('/admin');
+      window.location.href = isAdminRoute ? '/admin/login' : '/seller/login';
     }
     return Promise.reject(error);
   }

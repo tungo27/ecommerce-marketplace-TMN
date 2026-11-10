@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+import { API_BASE_URL } from '../utils/api';
+
+const API_BASE = API_BASE_URL;
 
 const getHeaders = () => {
   const token = localStorage.getItem('accessToken');
@@ -9,6 +11,12 @@ const getHeaders = () => {
 };
 
 const handleResponse = async (res: Response) => {
+  if (res.status === 401) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    window.location.href = '/admin/login';
+    throw new Error('Session expired. Please log in again.');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message || 'Request failed');

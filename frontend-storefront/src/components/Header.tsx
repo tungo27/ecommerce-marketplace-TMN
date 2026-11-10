@@ -177,6 +177,13 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
                   <img
                     src={(user as any).picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`}
                     alt="Avatar"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const fallback = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`;
+                      if (e.currentTarget.src !== fallback) {
+                        e.currentTarget.src = fallback;
+                      }
+                    }}
                     className="w-8 h-8 rounded-full object-cover border border-white"
                   />
                   <span className="font-semibold">{user.name}</span>
@@ -266,6 +273,13 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
                   <img
                     src={(user as any).picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`}
                     alt="Avatar"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const fallback = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || 'User')}&backgroundColor=FF4742&textColor=ffffff`;
+                      if (e.currentTarget.src !== fallback) {
+                        e.currentTarget.src = fallback;
+                      }
+                    }}
                     className="w-12 h-12 rounded-full object-cover border border-gray-200"
                   />
                   <div className="flex-1 min-w-0">

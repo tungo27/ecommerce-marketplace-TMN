@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Chip, CircularProgress, Rating, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { createPortal } from 'react-dom';
+import { API_BASE_URL } from '../utils/api';
 
 const STATUS_COLORS: Record<string, 'warning' | 'success' | 'error' | 'default'> = {
   Pending: 'warning',
@@ -22,7 +23,7 @@ export const ProductPreviewDrawer: React.FC<ProductPreviewDrawerProps> = ({ open
   const [loading, setLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+  const API_BASE = API_BASE_URL;
   const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
