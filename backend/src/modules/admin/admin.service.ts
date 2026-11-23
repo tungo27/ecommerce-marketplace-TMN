@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheInvalidationService } from '../../common/cache/cache-invalidation.service';
 import { QueryUsersDto } from './dtos/query-users.dto';
 import { QueryOrdersDto } from './dtos/query-orders.dto';
 import { QueryTransactionsDto } from './dtos/query-transactions.dto';
@@ -12,7 +13,10 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cacheInvalidationService: CacheInvalidationService,
+  ) {}
 
   // ---------------------------------------------------------------------------
   // 1. DASHBOARD STATS
@@ -385,6 +389,24 @@ export class AdminService {
         }
       })
     ]);
+
+    // Hidden reviews must not influence the public product rating, so the
+    // average is recalculated whenever a review is hidden or shown again.
+    await this.recalculateProductRating(review.productId);
+    await this.cacheInvalidationService.invalidateProductCaches(review.productId);
+
     return updatedReview;
+  }
+
+  private async recalculateProductRating(productId: string): Promise<void> {
+    const ratingResult = await this.prisma.review.aggregate({
+      where: { productId, isHidden: false },
+      _avg: { rating: true },
+    });
+
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: { averageRating: ratingResult._avg.rating ?? 0 },
+    });
   }
 }

@@ -8,6 +8,7 @@ import {
 import { OrderStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
+import { SHIPPING_FEE } from '../../common/constants/pricing.constants';
 import { CreateOrderDto } from './dtos/create-order.dto';
 import { GetOrdersDto } from './dtos/get-orders.dto';
 import { Prisma } from '@prisma/client';
@@ -174,11 +175,18 @@ export class OrdersService {
             itemsBySeller.get(product.sellerId)!.push(item);
           }
 
-          // 5. Create Order records for each seller
+          // 5. Create Order records for each seller.
+          // The shipping fee is a checkout-level charge: apply it only once even
+          // when the cart is split into multiple seller orders, so that the sum
+          // of order totals always equals cart subtotal + shipping fee.
           const createdOrders: any[] = [];
+          let shippingFeeApplied = false;
           for (const [sellerId, sellerItems] of itemsBySeller.entries()) {
-            const orderTotal = sellerItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-            
+            const itemsTotal = sellerItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            const orderShippingFee = shippingFeeApplied ? 0 : SHIPPING_FEE;
+            shippingFeeApplied = true;
+            const orderTotal = Math.round((itemsTotal + orderShippingFee) * 100) / 100;
+
             const order = await tx.order.create({
               data: {
                 userId,

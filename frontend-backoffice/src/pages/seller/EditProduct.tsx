@@ -20,13 +20,14 @@ import {
   Typography,
 } from '@mui/material';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
+import { useCategories } from '../../hooks/useCategories';
 
 interface ProductDetail {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: string;
+  categoryId: string;
   stock: number;
   status: string;
   images: string[];
@@ -38,15 +39,14 @@ interface ImageItem {
   file?: File;
 }
 
-const categories = ['Electronics', 'Fashion', 'Home_Living', 'Cosmetics', 'Food'];
-
 export const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Electronics');
+  const [categoryId, setCategoryId] = useState('');
   const [stock, setStock] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -68,7 +68,7 @@ export const EditProduct: React.FC = () => {
         setName(response.data.name);
         setDescription(response.data.description);
         setPrice(response.data.price.toString());
-        setCategory(response.data.category);
+        setCategoryId(response.data.categoryId);
         setStock(response.data.stock.toString());
         setImageItems((response.data.images ?? []).map((imageUrl) => ({ type: 'existing' as const, url: imageUrl })));
       } catch (err: any) {
@@ -139,6 +139,10 @@ export const EditProduct: React.FC = () => {
       setError('Stock must be a non-negative integer');
       return;
     }
+    if (!categoryId) {
+      setError('Category is required');
+      return;
+    }
 
     try {
       setIsSaving(true);
@@ -146,7 +150,7 @@ export const EditProduct: React.FC = () => {
       formData.append('name', name.trim());
       formData.append('description', description.trim());
       formData.append('price', priceValue.toString());
-      formData.append('category', category);
+      formData.append('categoryId', categoryId);
       formData.append('stock', stockValue.toString());
 
       imageItems
@@ -261,20 +265,21 @@ export const EditProduct: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <FormControl fullWidth size="small">
+                  <FormControl fullWidth size="small" disabled={isLoadingCategories}>
                     <InputLabel id="edit-category-label" required>Category</InputLabel>
                     <Select
                       labelId="edit-category-label"
-                      value={category}
+                      value={categoryId}
                       label="Category"
-                      onChange={(event) => setCategory(event.target.value as string)}
+                      onChange={(event) => setCategoryId(event.target.value as string)}
                     >
                       {categories.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option === 'Home_Living' ? 'Home & Living' : option}
+                        <MenuItem key={option.id} value={option.id}>
+                          {option.name}
                         </MenuItem>
                       ))}
                     </Select>
+                    {categoriesError ? <Typography color="error" variant="caption">{categoriesError}</Typography> : null}
                   </FormControl>
                 </Stack>
               </Box>

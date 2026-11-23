@@ -68,7 +68,7 @@ function HeaderContent({ searchAction, currentSearch, currentCategory, currentMi
   }, [router, searchParams, searchAction]);
 
   const handleLogout = () => {
-    useCart.setState({ items: [], totalCartPrice: 0, totalItems: 0 });
+    useCart.setState({ items: [], totalCartPrice: 0, shippingFee: 0, grandTotal: 0, totalItems: 0 });
     logout();
     setDropdownOpen(false);
     router.push('/login');

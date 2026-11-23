@@ -228,7 +228,7 @@ function EmptyCart() {
 // Main Cart Page
 
 export default function CartPage() {
-  const { items, totalCartPrice, totalItems, isLoading, toast, removeItem, clearCart, hideToast } =
+  const { items, totalCartPrice, shippingFee, grandTotal, totalItems, isLoading, toast, removeItem, clearCart, hideToast } =
     useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -536,7 +536,11 @@ export default function CartPage() {
                       </div>
                       <div className="mt-2 flex justify-between text-sm">
                         <span className="text-gray-600">Shipping</span>
-                        <span className="font-semibold text-emerald-600">Free</span>
+                        <span className="font-semibold text-gray-700">
+                          {shippingFee > 0
+                            ? `${shippingFee.toLocaleString('vi-VN')} VND`
+                            : 'Free'}
+                        </span>
                       </div>
                     </div>
 
@@ -547,7 +551,7 @@ export default function CartPage() {
                           Total
                         </span>
                         <span className="text-xl font-extrabold text-[#FF4742]">
-                          {totalCartPrice.toLocaleString('vi-VN')}
+                          {grandTotal.toLocaleString('vi-VN')}
                           <span className="text-sm font-bold"> VND</span>
                         </span>
                       </div>

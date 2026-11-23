@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateCartDto } from './dtos/update-cart.dto';
 import { REDIS_CLIENT } from '../../redis/redis.module';
+import { SHIPPING_FEE } from '../../common/constants/pricing.constants';
 import type { Redis } from 'ioredis';
 
 /**
@@ -29,7 +30,12 @@ export interface CartItem {
  */
 export interface CartResponse {
   items: Array<CartItem & { subtotal: number }>;
+  /** Sum of all item subtotals (goods only). */
   totalCartPrice: number;
+  /** Flat shipping fee, charged once per checkout. 0 when the cart is empty. */
+  shippingFee: number;
+  /** totalCartPrice + shippingFee — the amount persisted on the order. */
+  grandTotal: number;
   totalItems: number;
 }
 
@@ -108,10 +114,14 @@ export class CartService {
     );
 
     const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const roundedSubtotal = Math.round(totalCartPrice * 100) / 100;
+    const shippingFee = enrichedItems.length > 0 ? SHIPPING_FEE : 0;
 
     return {
       items: enrichedItems,
-      totalCartPrice: Math.round(totalCartPrice * 100) / 100,
+      totalCartPrice: roundedSubtotal,
+      shippingFee,
+      grandTotal: Math.round((roundedSubtotal + shippingFee) * 100) / 100,
       totalItems,
     };
   }

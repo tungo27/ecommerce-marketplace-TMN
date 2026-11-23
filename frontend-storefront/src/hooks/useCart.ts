@@ -42,8 +42,12 @@ export interface GuestCartItem {
 interface CartState {
   // Danh sách items hiện tại trong giỏ hàng
   items: CartItem[];
-  // Tổng tiền toàn bộ giỏ
+  // Tổng tiền hàng (chưa gồm phí vận chuyển)
   totalCartPrice: number;
+  // Phí vận chuyển cố định cho mỗi lần checkout (0 khi giỏ trống)
+  shippingFee: number;
+  // totalCartPrice + shippingFee
+  grandTotal: number;
   // Tổng số lượng tất cả items
   totalItems: number;
   // Trạng thái loading cho các thao tác async
@@ -135,6 +139,14 @@ interface CartState {
 const GUEST_CART_KEY = 'guest_cart';
 
 /**
+ * Must stay in sync with `SHIPPING_FEE` in
+ * `backend/src/common/constants/pricing.constants.ts`.
+ * Authenticated carts get this value from the API; guests need it locally so
+ * the cart summary matches the amount charged at checkout.
+ */
+export const DEFAULT_SHIPPING_FEE = 30000;
+
+/**
  * Đọc guest cart từ LocalStorage. Trả về mảng rỗng nếu không có hoặc lỗi parse.
  */
 function readGuestCartFromStorage(): GuestCartItem[] {
@@ -177,6 +189,8 @@ function clearGuestCartFromStorage(): void {
  */
 function calculateTotals(items: CartItem[]): {
   totalCartPrice: number;
+  shippingFee: number;
+  grandTotal: number;
   totalItems: number;
 } {
   const totalCartPrice = items.reduce(
@@ -184,8 +198,12 @@ function calculateTotals(items: CartItem[]): {
     0,
   );
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const roundedSubtotal = Math.round(totalCartPrice * 100) / 100;
+  const shippingFee = items.length > 0 ? DEFAULT_SHIPPING_FEE : 0;
   return {
-    totalCartPrice: Math.round(totalCartPrice * 100) / 100,
+    totalCartPrice: roundedSubtotal,
+    shippingFee,
+    grandTotal: Math.round((roundedSubtotal + shippingFee) * 100) / 100,
     totalItems,
   };
 }
@@ -205,6 +223,8 @@ function toCartItems(guestItems: GuestCartItem[]): CartItem[] {
 export const useCart = create<CartState>((set, get) => ({
   items: [],
   totalCartPrice: 0,
+  shippingFee: 0,
+  grandTotal: 0,
   totalItems: 0,
   isLoading: false,
   toast: null,
@@ -237,11 +257,13 @@ export const useCart = create<CartState>((set, get) => ({
         const response = await apiClient.get<{
           items: CartItem[];
           totalCartPrice: number;
+          shippingFee: number;
+          grandTotal: number;
           totalItems: number;
         }>('/cart');
 
-        const { items, totalCartPrice, totalItems } = response.data;
-        set({ items, totalCartPrice, totalItems });
+        const { items, totalCartPrice, shippingFee, grandTotal, totalItems } = response.data;
+        set({ items, totalCartPrice, shippingFee, grandTotal, totalItems });
       } else {
         // Guest: đọc từ LocalStorage
         const guestItems = readGuestCartFromStorage();
@@ -269,6 +291,8 @@ export const useCart = create<CartState>((set, get) => ({
         const response = await apiClient.post<{
           items: CartItem[];
           totalCartPrice: number;
+          shippingFee: number;
+          grandTotal: number;
           totalItems: number;
           requiresLocalStorage?: boolean;
         }>('/cart/update', {
@@ -286,6 +310,8 @@ export const useCart = create<CartState>((set, get) => ({
         set({
           items: data.items,
           totalCartPrice: data.totalCartPrice,
+          shippingFee: data.shippingFee,
+          grandTotal: data.grandTotal,
           totalItems: data.totalItems,
         });
         const productName = typeof product.name === 'string' ? product.name : ((product.name as any)?.en || (product.name as any)?.vi || 'Product');
@@ -372,11 +398,13 @@ export const useCart = create<CartState>((set, get) => ({
         const response = await apiClient.patch<{
           items: CartItem[];
           totalCartPrice: number;
+          shippingFee: number;
+          grandTotal: number;
           totalItems: number;
         }>(`/cart/${productId}`, { quantity: newQuantity });
 
-        const { items, totalCartPrice, totalItems } = response.data;
-        set({ items, totalCartPrice, totalItems });
+        const { items, totalCartPrice, shippingFee, grandTotal, totalItems } = response.data;
+        set({ items, totalCartPrice, shippingFee, grandTotal, totalItems });
       } else {
         // Guest: cập nhật LocalStorage
         const currentGuestItems = readGuestCartFromStorage();
@@ -425,11 +453,13 @@ export const useCart = create<CartState>((set, get) => ({
         const response = await apiClient.delete<{
           items: CartItem[];
           totalCartPrice: number;
+          shippingFee: number;
+          grandTotal: number;
           totalItems: number;
         }>(`/cart/${productId}`);
 
-        const { items, totalCartPrice, totalItems } = response.data;
-        set({ items, totalCartPrice, totalItems });
+        const { items, totalCartPrice, shippingFee, grandTotal, totalItems } = response.data;
+        set({ items, totalCartPrice, shippingFee, grandTotal, totalItems });
       } else {
         // Guest: cập nhật LocalStorage
         const currentGuestItems = readGuestCartFromStorage();
@@ -475,15 +505,17 @@ export const useCart = create<CartState>((set, get) => ({
       const response = await apiClient.post<{
         items: CartItem[];
         totalCartPrice: number;
+        shippingFee: number;
+        grandTotal: number;
         totalItems: number;
       }>('/cart/sync', { items: syncPayload });
 
-      const { items, totalCartPrice, totalItems } = response.data;
+      const { items, totalCartPrice, shippingFee, grandTotal, totalItems } = response.data;
 
       // Xóa guest cart khỏi LocalStorage sau khi sync thành công
       clearGuestCartFromStorage();
 
-      set({ items, totalCartPrice, totalItems });
+      set({ items, totalCartPrice, shippingFee, grandTotal, totalItems });
       get().showToast(
         `Synced ${guestItems.length} items from guest cart to your account!`,
         'success',
@@ -512,7 +544,7 @@ export const useCart = create<CartState>((set, get) => ({
       }
       // Dù là user hay guest, xóa cả LocalStorage
       clearGuestCartFromStorage();
-      set({ items: [], totalCartPrice: 0, totalItems: 0 });
+      set({ items: [], totalCartPrice: 0, shippingFee: 0, grandTotal: 0, totalItems: 0 });
       get().showToast('Cart cleared.', 'info');
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;

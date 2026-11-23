@@ -21,9 +21,8 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalCartPrice, clearCart, showToast } = useCart();
+  const { items, totalCartPrice, shippingFee, grandTotal, clearCart, showToast } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const SHIPPING_FEE = 30000;
 
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -114,11 +113,11 @@ export default function CheckoutPage() {
               </div>
               <div className="mt-2 flex justify-between text-gray-600">
                 <span>Shipping fee</span>
-                <span>{SHIPPING_FEE.toLocaleString()} VND</span>
+                <span>{shippingFee.toLocaleString()} VND</span>
               </div>
               <div className="mt-4 flex justify-between border-t border-gray-100 pt-4 text-lg font-bold text-gray-900">
                 <span>Total</span>
-                <span className="text-[#FF4742]">{(totalCartPrice + SHIPPING_FEE).toLocaleString()} VND</span>
+                <span className="text-[#FF4742]">{grandTotal.toLocaleString()} VND</span>
               </div>
 
               <button

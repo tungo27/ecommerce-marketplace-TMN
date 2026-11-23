@@ -1,5 +1,5 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ProductStatus } from '@prisma/client';
+import { ProductStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UploadService } from '../../upload/upload.service';
 import { CreateProductDto } from './dtos/create-product.dto';
@@ -257,7 +257,13 @@ export class ProductsService {
     });
   }
 
-async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProductDto) {
+async updateSellerProduct(
+    sellerId: string,
+    productId: string,
+    dto: UpdateProductDto,
+    files: Express.Multer.File[] = [],
+    existingImages: string[] = [],
+  ) {
     const product = await this.prismaService.product.findUnique({
       where: { id: productId },
       include: {
@@ -286,7 +292,7 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
       (dto.price !== undefined && dto.price !== currentPrice) ||
       (dto.categoryId !== undefined && dto.categoryId !== product.categoryId);
 
-    const updateData: any = {
+    const updateData: Prisma.ProductUncheckedUpdateInput = {
       description: dto.description !== undefined ? dto.description.trim() : product.description,
       stock: dto.stock !== undefined ? dto.stock : product.stock,
     };
@@ -299,6 +305,24 @@ async updateSellerProduct(sellerId: string, productId: string, dto: UpdateProduc
     }
     if (dto.categoryId !== undefined) {
       updateData.categoryId = dto.categoryId;
+    }
+
+    // Only keep existing images that actually belong to this product so a
+    // client cannot inject arbitrary URLs, then append newly uploaded files.
+    const currentImages = product.images ?? [];
+    const keptImages = [...new Set(existingImages)].filter((url) =>
+      currentImages.includes(url),
+    );
+    const uploadedImageUrls = await Promise.all(
+      files.map((file) => this.uploadService.uploadImage(file)),
+    );
+    const nextImages = [...new Set([...keptImages, ...uploadedImageUrls])];
+
+    if (files.length > 0 || existingImages.length > 0) {
+      if (nextImages.length === 0) {
+        throw new BadRequestException('At least one image is required');
+      }
+      updateData.images = nextImages;
     }
 
     if (coreFieldsChanged) {

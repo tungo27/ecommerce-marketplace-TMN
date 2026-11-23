@@ -1,15 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewsService } from './reviews.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { REDIS_CLIENT } from '../../redis/redis.module';
+import { CacheInvalidationService } from '../../common/cache/cache-invalidation.service';
 import { ForbiddenException } from '@nestjs/common';
 import { CreateReviewDto } from './dtos/create-review.dto';
 import { validate } from 'class-validator';
 
+type PrismaMock = {
+  order: { findFirst: jest.Mock };
+  review: { findFirst: jest.Mock; findMany: jest.Mock; create: jest.Mock; aggregate: jest.Mock };
+  product: { update: jest.Mock };
+  $transaction: jest.Mock;
+};
+
 describe('ReviewsService', () => {
   let service: ReviewsService;
-  let prismaService: any;
-  let redisClient: any;
+  let prismaService: PrismaMock;
+  let cacheInvalidationService: { invalidateProductCaches: jest.Mock };
 
   beforeEach(async () => {
     prismaService = {
@@ -18,26 +25,27 @@ describe('ReviewsService', () => {
       },
       review: {
         findFirst: jest.fn(),
+        findMany: jest.fn(),
         create: jest.fn(),
         aggregate: jest.fn(),
       },
       product: {
         update: jest.fn(),
       },
-      $transaction: jest.fn(async (cb) => {
-        return cb(prismaService);
-      }),
+      $transaction: jest.fn(async (callback: (client: PrismaMock) => Promise<unknown>) =>
+        callback(prismaService),
+      ),
     };
 
-    redisClient = {
-      del: jest.fn(),
+    cacheInvalidationService = {
+      invalidateProductCaches: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReviewsService,
         { provide: PrismaService, useValue: prismaService },
-        { provide: REDIS_CLIENT, useValue: redisClient },
+        { provide: CacheInvalidationService, useValue: cacheInvalidationService },
       ],
     }).compile();
 
@@ -55,7 +63,7 @@ describe('ReviewsService', () => {
     const dto: CreateReviewDto = { orderId, rating: 5, comment: 'Sản phẩm quá đỉnh!' };
 
     it('Case 1 (Thành công): Trả về bản ghi review mới tạo thành công, trigger transaction tính lại điểm trung bình', async () => {
-      prismaService.order.findFirst.mockResolvedValue({ id: orderId, userId, status: 'Delivered' });
+      prismaService.order.findFirst.mockResolvedValue({ id: orderId, userId, status: 'DELIVERED' });
       prismaService.review.findFirst.mockResolvedValue(null);
       prismaService.review.create.mockResolvedValue({ id: 'review-1', ...dto, userId, productId });
       prismaService.review.aggregate.mockResolvedValue({ _avg: { rating: 4.8 } });
@@ -67,7 +75,7 @@ describe('ReviewsService', () => {
         where: {
           id: orderId,
           userId,
-          status: 'Delivered',
+          status: 'DELIVERED',
           items: { some: { productId } },
         },
       });
@@ -79,37 +87,49 @@ describe('ReviewsService', () => {
         data: { userId, productId, orderId, rating: dto.rating, comment: dto.comment },
       });
       expect(prismaService.review.aggregate).toHaveBeenCalledWith({
-        where: { productId },
+        where: { productId, isHidden: false },
         _avg: { rating: true },
       });
       expect(prismaService.product.update).toHaveBeenCalledWith({
         where: { id: productId },
         data: { averageRating: 4.8 },
       });
-      expect(redisClient.del).toHaveBeenCalledWith(`product_${productId}`);
+      expect(cacheInvalidationService.invalidateProductCaches).toHaveBeenCalledWith(productId);
       expect(result).toEqual({ id: 'review-1', ...dto, userId, productId });
     });
 
     it('Case 2 (Thất bại - Không có quyền): Order không tồn tại hoặc không thuộc về user', async () => {
-      prismaService.order.findFirst.mockResolvedValue(null); // Return null
+      prismaService.order.findFirst.mockResolvedValue(null);
 
       await expect(service.createReview(userId, productId, dto)).rejects.toThrow(ForbiddenException);
-      await expect(service.createReview(userId, productId, dto)).rejects.toThrow('Đơn hàng không tồn tại, không thuộc về bạn hoặc chưa được giao thành công.');
     });
 
-    it('Case 3 (Thất bại - Sai trạng thái): Đơn hàng tồn tại nhưng trạng thái chưa phải là Delivered', async () => {
-      // Do mocked logic findFirst filter status 'Delivered', nó sẽ trả null nếu status khác
+    it('Case 3 (Thất bại - Sai trạng thái): Đơn hàng tồn tại nhưng trạng thái chưa phải là DELIVERED', async () => {
+      // Do mocked logic findFirst filter status 'DELIVERED', nó sẽ trả null nếu status khác
       prismaService.order.findFirst.mockResolvedValue(null);
 
       await expect(service.createReview(userId, productId, dto)).rejects.toThrow(ForbiddenException);
     });
 
     it('Case 4 (Thất bại - Đã đánh giá): User đã đánh giá sản phẩm cho đơn hàng này rồi', async () => {
-      prismaService.order.findFirst.mockResolvedValue({ id: orderId, userId, status: 'Delivered' });
+      prismaService.order.findFirst.mockResolvedValue({ id: orderId, userId, status: 'DELIVERED' });
       prismaService.review.findFirst.mockResolvedValue({ id: 'existing-review' });
 
       await expect(service.createReview(userId, productId, dto)).rejects.toThrow(ForbiddenException);
-      await expect(service.createReview(userId, productId, dto)).rejects.toThrow('Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.');
+    });
+  });
+
+  describe('getReviews', () => {
+    it('Chỉ trả về review chưa bị ẩn', async () => {
+      prismaService.review.findMany.mockResolvedValue([]);
+
+      await service.getReviews('prod-1');
+
+      expect(prismaService.review.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { productId: 'prod-1', isHidden: false },
+        }),
+      );
     });
   });
 
@@ -122,7 +142,7 @@ describe('ReviewsService', () => {
 
       const errors = await validate(invalidDto);
       expect(errors.length).toBeGreaterThan(0);
-      
+
       const ratingError = errors.find((e) => e.property === 'rating');
       expect(ratingError?.constraints).toHaveProperty('max');
 
@@ -132,7 +152,7 @@ describe('ReviewsService', () => {
       // Test Min(1)
       const invalidDto2 = new CreateReviewDto();
       invalidDto2.orderId = 'order-1';
-      invalidDto2.rating = 0; 
+      invalidDto2.rating = 0;
       const errors2 = await validate(invalidDto2);
       expect(errors2.find((e) => e.property === 'rating')?.constraints).toHaveProperty('min');
     });

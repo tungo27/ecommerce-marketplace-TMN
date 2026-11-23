@@ -1,14 +1,13 @@
-import { ForbiddenException, Injectable, Inject } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheInvalidationService } from '../../common/cache/cache-invalidation.service';
 import { CreateReviewDto } from './dtos/create-review.dto';
-import { REDIS_CLIENT } from '../../redis/redis.module';
-import Redis from 'ioredis';
 
 @Injectable()
 export class ReviewsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(REDIS_CLIENT) private readonly redisClient: Redis,
+    private readonly cacheInvalidationService: CacheInvalidationService,
   ) {}
 
   async createReview(userId: string, productId: string, dto: CreateReviewDto) {
@@ -45,7 +44,7 @@ export class ReviewsService {
       throw new ForbiddenException('You have already reviewed this product for this order.');
     }
 
-    // 3. Transaction: Chèn Review mới + Tính averageRating + Update Product
+    // 3. Transaction: Chèn Review mới + Tính averageRating (chỉ review hiển thị) + Update Product
     const result = await this.prisma.$transaction(async (prisma) => {
       const newReview = await prisma.review.create({
         data: {
@@ -60,6 +59,7 @@ export class ReviewsService {
       const avgResult = await prisma.review.aggregate({
         where: {
           productId: productId,
+          isHidden: false,
         },
         _avg: {
           rating: true,
@@ -78,18 +78,19 @@ export class ReviewsService {
       return newReview;
     });
 
-    // Xóa cache Redis liên quan đến product nếu có
-    if (this.redisClient) {
-        await this.redisClient.del(`product_${productId}`);
-        await this.redisClient.del('products_list');
-    }
+    // Xóa cache của product detail + danh sách sản phẩm để điểm đánh giá mới
+    // được hiển thị ngay lập tức.
+    await this.cacheInvalidationService.invalidateProductCaches(productId);
 
     return result;
   }
 
   async getReviews(productId: string) {
     return this.prisma.review.findMany({
-      where: { productId },
+      where: {
+        productId,
+        isHidden: false,
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         user: {

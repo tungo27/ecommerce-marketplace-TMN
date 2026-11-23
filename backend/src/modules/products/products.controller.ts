@@ -39,6 +39,10 @@ interface MulterFile {
   path?: string;
 }
 
+interface UpdateSellerProductBody extends UpdateProductDto {
+  existingImages?: string | string[];
+}
+
 @Controller()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -84,10 +88,12 @@ export class ProductsController {
   @Put('seller/products/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SELLER')
+  @UseInterceptors(FilesInterceptor('images', 5))
   async updateSellerProduct(
     @Req() req: { user: { id: string } },
     @Param('id') id: string,
-    @Body() body: UpdateProductDto,
+    @Body() body: UpdateSellerProductBody,
+    @UploadedFiles() files: MulterFile[],
   ) {
     const dto = plainToInstance(UpdateProductDto, body, { enableImplicitConversion: true });
     const validationErrors = await validate(dto, { skipMissingProperties: true });
@@ -97,7 +103,33 @@ export class ProductsController {
       throw new BadRequestException(constraints);
     }
 
-    return this.productsService.updateSellerProduct(req.user.id, id, dto);
+    const uploadedFiles = files ?? [];
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxFileSize = 5 * 1024 * 1024;
+
+    for (const file of uploadedFiles) {
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException('Only JPG, PNG, and WEBP image files are allowed');
+      }
+      if (file.size > maxFileSize) {
+        throw new BadRequestException('Each image must be smaller than 5MB');
+      }
+    }
+
+    const rawExistingImages = body.existingImages;
+    const existingImages = Array.isArray(rawExistingImages)
+      ? rawExistingImages
+      : typeof rawExistingImages === 'string' && rawExistingImages.trim() !== ''
+        ? [rawExistingImages]
+        : [];
+
+    return this.productsService.updateSellerProduct(
+      req.user.id,
+      id,
+      dto,
+      uploadedFiles,
+      existingImages,
+    );
   }
 
   @Patch('seller/products/:id/status')

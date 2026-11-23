@@ -34,6 +34,8 @@ export const useAuth = create<AuthStore>((set) => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('user');
         localStorage.removeItem('accessToken');
+        document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+        document.cookie = 'userCookie=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
       }
       set({ user: null });
     },

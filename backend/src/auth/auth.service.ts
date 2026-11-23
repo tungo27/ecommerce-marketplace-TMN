@@ -59,6 +59,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException(
+        'Account is disabled. Please contact support.',
+      );
+    }
+
     if (!user.passwordHash) {
       throw new UnauthorizedException('This account was registered via Google. Please log in with Google.');
     }
@@ -92,6 +98,12 @@ export class AuthService {
     });
 
     if (user) {
+      if (!user.isActive) {
+        throw new UnauthorizedException(
+          'Account is disabled. Please contact support.',
+        );
+      }
+
       if (!user.googleId) {
         user = await this.prisma.user.update({
           where: { email },

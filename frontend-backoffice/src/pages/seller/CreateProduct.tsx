@@ -20,30 +20,24 @@ import {
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../utils/api';
+import { useCategories } from '../../hooks/useCategories';
 
 interface FormErrors {
   name?: string;
   description?: string;
   price?: string;
-  category?: string;
+  categoryId?: string;
   stock?: string;
   images?: string;
 }
 
-const categories = [
-  { label: 'Electronics', value: 'Electronics' },
-  { label: 'Fashion', value: 'Fashion' },
-  { label: 'Home & Living', value: 'Home_Living' },
-  { label: 'Cosmetics', value: 'Cosmetics' },
-  { label: 'Food', value: 'Food' },
-];
-
 export const CreateProduct: React.FC = () => {
   const navigate = useNavigate();
+  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Electronics');
+  const [categoryId, setCategoryId] = useState('');
   const [stock, setStock] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -53,8 +47,8 @@ export const CreateProduct: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSubmit = useMemo(() => {
-    return name.trim() && description.trim() && price && category && stock && images.length > 0;
-  }, [category, description, images.length, name, price, stock]);
+    return name.trim() && description.trim() && price && categoryId && stock && images.length > 0;
+  }, [categoryId, description, images.length, name, price, stock]);
 
   const validate = () => {
     const nextErrors: FormErrors = {};
@@ -78,8 +72,8 @@ export const CreateProduct: React.FC = () => {
       nextErrors.price = 'Price must be greater than 0.';
     }
 
-    if (!category) {
-      nextErrors.category = 'Category is required.';
+    if (!categoryId) {
+      nextErrors.categoryId = 'Category is required.';
     }
 
     const stockValue = Number(stock);
@@ -157,7 +151,7 @@ export const CreateProduct: React.FC = () => {
     formData.append('name', name.trim());
     formData.append('description', description.trim());
     formData.append('price', price);
-    formData.append('category', category);
+    formData.append('categoryId', categoryId);
     formData.append('stock', stock);
 
     images.forEach((image) => {
@@ -285,24 +279,25 @@ export const CreateProduct: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <FormControl fullWidth error={Boolean(errors.category)}>
+                  <FormControl fullWidth error={Boolean(errors.categoryId)} disabled={isLoadingCategories}>
                     <InputLabel id="category-select-label" required>Category</InputLabel>
                     <Select
                       labelId="category-select-label"
-                      value={category}
+                      value={categoryId}
                       label="Category"
                       onChange={(event) => {
-                        setCategory(event.target.value as string);
-                        setErrors((current) => ({ ...current, category: undefined }));
+                        setCategoryId(event.target.value as string);
+                        setErrors((current) => ({ ...current, categoryId: undefined }));
                       }}
                     >
                       {categories.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
+                        <MenuItem key={option.id} value={option.id}>
+                          {option.name}
                         </MenuItem>
                       ))}
                     </Select>
-                    {errors.category ? <Typography color="error" variant="caption">{errors.category}</Typography> : null}
+                    {errors.categoryId ? <Typography color="error" variant="caption">{errors.categoryId}</Typography> : null}
+                    {categoriesError ? <Typography color="error" variant="caption">{categoriesError}</Typography> : null}
                   </FormControl>
                 </Stack>
               </Box>
