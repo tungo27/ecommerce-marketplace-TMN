@@ -18,12 +18,6 @@ export default function DisputesPage() {
     }
   }, [user, isHydrated, router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchDisputes();
-    }
-  }, [user]);
-
   const fetchDisputes = async () => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -40,6 +34,12 @@ export default function DisputesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchDisputes();
+    }
+  }, [user]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -81,7 +81,7 @@ export default function DisputesPage() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Disputes</h3>
             <p className="text-gray-500 mb-8 max-w-md mx-auto">
-              You haven't filed any disputes. If you have an issue with an order, you can file a dispute from your Order History.
+              You haven&apos;t filed any disputes. If you have an issue with an order, you can file a dispute from your Order History.
             </p>
             <Link
               href="/orders/history"

@@ -52,21 +52,21 @@ export const FlashSaleModeration: React.FC = () => {
 
   const showToast = (message: string, severity: 'success' | 'error') => setToast({ open: true, message, severity });
 
-  useEffect(() => {
-    fetchFlashSales();
-  }, []);
-
   const fetchFlashSales = async () => {
     try {
       setLoading(true);
       const res = await apiClient.get('/flash-sales/admin');
       setFlashSales(res.data.data || res.data || []);
-    } catch (error) {
+    } catch {
       showToast('Failed to load flash sales', 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchFlashSales();
+  }, []);
 
   const handleApprove = async (id: string) => {
     try {
@@ -162,7 +162,6 @@ export const FlashSaleModeration: React.FC = () => {
         <DialogTitle>Reject Flash Sale</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             margin="dense"
             label="Reason for rejection"
             type="text"

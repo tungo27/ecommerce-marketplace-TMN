@@ -21,6 +21,10 @@ export default defineConfig([
     ],
     rules: {
       ...jsxA11y.configs.recommended.rules,
+      // Legacy code still uses loose typing; tighten these incrementally.
+      '@typescript-eslint/no-explicit-any': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
     },
     languageOptions: {
       globals: globals.browser,

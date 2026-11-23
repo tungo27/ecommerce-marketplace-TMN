@@ -57,10 +57,6 @@ export const FlashSaleManagement: React.FC = () => {
   const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const showToast = (message: string, severity: 'success' | 'error') => setToast({ open: true, message, severity });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const [productsRes, flashSalesRes] = await Promise.all([
@@ -69,10 +65,14 @@ export const FlashSaleManagement: React.FC = () => {
       ]);
       setProducts(productsRes.data.data?.items || productsRes.data.data || productsRes.data || []);
       setFlashSales(flashSalesRes.data.data || flashSalesRes.data || []);
-    } catch (error) {
+    } catch {
       showToast('Failed to load data', 'error');
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -181,7 +181,7 @@ export class OrdersService {
           // of order totals always equals cart subtotal + shipping fee.
           const createdOrders: any[] = [];
           let shippingFeeApplied = false;
-          for (const [sellerId, sellerItems] of itemsBySeller.entries()) {
+          for (const sellerItems of itemsBySeller.values()) {
             const itemsTotal = sellerItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
             const orderShippingFee = shippingFeeApplied ? 0 : SHIPPING_FEE;
             shippingFeeApplied = true;

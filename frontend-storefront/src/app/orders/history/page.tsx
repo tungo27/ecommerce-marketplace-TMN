@@ -30,12 +30,6 @@ export default function OrderHistoryPage() {
     }
   }, [user, isHydrated, router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [activeTab, user]);
-
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -54,6 +48,12 @@ export default function OrderHistoryPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [activeTab, user]);
 
   const handleRequestCancellation = async (orderId: string) => {
     if (!confirm('Are you sure you want to request cancellation for this order? The seller will need to approve it.')) return;

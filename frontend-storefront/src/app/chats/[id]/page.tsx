@@ -25,6 +25,28 @@ export default function ChatPage() {
     if (isHydrated && !user) router.push('/login');
   }, [user, isHydrated, router]);
 
+  const scrollToBottom = () => {
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const fetchChatDetails = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`http://localhost:4000/api/chats/${chatId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChat(data);
+        setMessages(data.messages || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user && chatId) {
       fetchChatDetails();
@@ -54,28 +76,6 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const scrollToBottom = () => {
-    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-  };
-
-  const fetchChatDetails = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      const res = await fetch(`http://localhost:4000/api/chats/${chatId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setChat(data);
-        setMessages(data.messages || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

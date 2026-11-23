@@ -131,7 +131,6 @@ export const CategoryManagement: React.FC = () => {
         <DialogTitle>{isEditing ? 'Edit Category' : 'New Category'}</DialogTitle>
         <DialogContent dividers>
           <TextField
-            autoFocus
             margin="dense"
             label="Name"
             fullWidth

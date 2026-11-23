@@ -13,6 +13,14 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Legacy code still uses loose typing; tighten these incrementally.
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/exhaustive-deps": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

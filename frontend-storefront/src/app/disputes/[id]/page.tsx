@@ -27,6 +27,30 @@ export default function DisputeChatPage() {
     }
   }, [user, isHydrated, router]);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const fetchDisputeDetails = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`http://localhost:4000/api/disputes/${disputeId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDispute(data);
+        setMessages(data.messages || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dispute', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user && disputeId) {
       fetchDisputeDetails();
@@ -61,30 +85,6 @@ export default function DisputeChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
-  const fetchDisputeDetails = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      const res = await fetch(`http://localhost:4000/api/disputes/${disputeId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setDispute(data);
-        setMessages(data.messages || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch dispute', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +160,7 @@ export default function DisputeChatPage() {
 
             {/* Initial description */}
             <div className="px-6 py-4 bg-red-50/50 border-b border-red-50">
-              <p className="text-sm text-gray-700 italic">"{dispute.description}"</p>
+              <p className="text-sm text-gray-700 italic">&quot;{dispute.description}&quot;</p>
             </div>
 
             {/* Chat Messages */}

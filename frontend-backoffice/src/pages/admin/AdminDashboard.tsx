@@ -113,7 +113,7 @@ export const AdminDashboard: React.FC = () => {
     }
     // Fallback formatting: replace underscores/hyphens and capitalize
     return value
-      .replace(/[_\-]/g, ' ')
+      .replace(/[_-]/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 

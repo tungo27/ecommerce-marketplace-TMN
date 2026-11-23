@@ -239,7 +239,6 @@ export class ProductsService {
     });
 
     return products.map(product => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { AuditLog, ...rest } = product;
       return {
         ...rest,

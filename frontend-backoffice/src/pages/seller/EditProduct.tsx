@@ -316,7 +316,7 @@ export const EditProduct: React.FC = () => {
                         {imageItems.map((item, index) => (
                           <Box key={`${item.type}-${item.url}-${index}`}>
                             <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
-                              <img src={item.url} alt={`Product image ${index + 1}`} style={{ width: '100%', height: 110, objectFit: 'cover' }} />
+                              <img src={item.url} alt={`Product ${index + 1}`} style={{ width: '100%', height: 110, objectFit: 'cover' }} />
                               {index === 0 ? (
                                 <Chip
                                   label="Cover"

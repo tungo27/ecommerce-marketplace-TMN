@@ -1,5 +1,4 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -31,7 +30,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleOAuthGuard)
-  async googleAuth(@Req() req) {
+  async googleAuth() {
     // Guards redirects to Google
   }
 

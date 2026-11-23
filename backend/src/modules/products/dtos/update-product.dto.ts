@@ -1,6 +1,5 @@
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category } from '@prisma/client';
 
 export class UpdateProductDto {
   @IsOptional()

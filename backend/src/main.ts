@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
-import { NestFactory, HttpAdapterHost, BaseExceptionFilter } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as Sentry from '@sentry/nestjs';

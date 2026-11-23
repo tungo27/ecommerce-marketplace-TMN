@@ -1,12 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { v2 as cloudinary, UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
-const toStream = require('buffer-to-stream');
+import toStream from 'buffer-to-stream';
 
 export type CloudinarySubFolder = 'Banner' | 'Seller Upload' | 'Default Product';
 
 @Injectable()
 export class UploadService {
   async uploadImage(file: Express.Multer.File, subFolder?: CloudinarySubFolder): Promise<string> {
+    const buffer = file.buffer;
+    if (!buffer) {
+      throw new InternalServerErrorException('Uploaded file buffer is missing');
+    }
+
     return new Promise((resolve, reject) => {
       const folderPath = subFolder ? `E-commerce MVP/${subFolder}` : 'E-commerce MVP/Seller Upload';
       const upload = cloudinary.uploader.upload_stream(
@@ -24,7 +29,7 @@ export class UploadService {
       );
 
       // Stream the buffer to Cloudinary
-      toStream(file.buffer).pipe(upload);
+      toStream(buffer).pipe(upload);
     });
   }
 }

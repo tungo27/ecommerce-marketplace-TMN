@@ -25,12 +25,6 @@ export default function ChatsListPage() {
     if (isHydrated && !user) router.push('/login');
   }, [user, isHydrated, router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchChats();
-    }
-  }, [user]);
-
   const fetchChats = async () => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -47,6 +41,12 @@ export default function ChatsListPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchChats();
+    }
+  }, [user]);
 
   if (!isHydrated || !user) return null;
 

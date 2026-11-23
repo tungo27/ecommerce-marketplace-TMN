@@ -154,7 +154,6 @@ export const CategoryManagementPage: React.FC = () => {
         </DialogTitle>
         <DialogContent dividers>
           <TextField
-            autoFocus
             margin="dense"
             label="Name"
             fullWidth

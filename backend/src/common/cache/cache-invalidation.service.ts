@@ -82,7 +82,7 @@ export class CacheInvalidationService {
     }
 
     const namespace = store.opts?.namespace ? `${store.opts.namespace}:` : '';
-    const rawKeys = await rawStore.keys!('*');
+    const rawKeys = await rawStore.keys('*');
     const matchingKeys: string[] = [];
 
     for (const rawKey of rawKeys) {

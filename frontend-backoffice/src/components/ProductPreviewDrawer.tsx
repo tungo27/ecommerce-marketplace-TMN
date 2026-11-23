@@ -69,7 +69,12 @@ export const ProductPreviewDrawer: React.FC<ProductPreviewDrawerProps> = ({ open
 
   return createPortal(
     <div className="fixed inset-0 z-[1300] overflow-hidden">
-      <div className="absolute inset-0 bg-slate-900/25 transition-opacity" onClick={onClose} />
+      <button
+        type="button"
+        aria-label="Close product preview"
+        className="absolute inset-0 h-full w-full border-0 bg-slate-900/25 p-0 transition-opacity"
+        onClick={onClose}
+      />
 
       <div className="fixed inset-y-0 right-0 z-[1301] max-w-full flex">
         <div className="w-full w-screen max-w-md lg:max-w-xl flex flex-col bg-white shadow-2xl h-full slide-in-right transform transition-all duration-300">
