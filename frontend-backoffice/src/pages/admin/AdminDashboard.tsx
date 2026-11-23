@@ -100,13 +100,19 @@ export const AdminDashboard: React.FC = () => {
     fetchData();
   }, []);
 
-  const formatCategory = (categoryValue: string) => {
+  // Recharts passes ReactNode as the tooltip label and an arbitrary value as
+  // the axis tick, so normalize both to a string before formatting.
+  const formatCategory = (categoryValue: unknown): string => {
+    const value =
+      typeof categoryValue === 'string' || typeof categoryValue === 'number'
+        ? String(categoryValue)
+        : '';
     // If it's found in the map, use the mapped name.
-    if (categoryMap[categoryValue]) {
-      return categoryMap[categoryValue];
+    if (categoryMap[value]) {
+      return categoryMap[value];
     }
     // Fallback formatting: replace underscores/hyphens and capitalize
-    return categoryValue
+    return value
       .replace(/[_\-]/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };

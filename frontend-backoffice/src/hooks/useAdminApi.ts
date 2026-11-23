@@ -99,6 +99,22 @@ export const adminApi = {
       headers: getHeaders(),
     }).then(handleResponse),
 
+  // Product Reports
+  getReports: () =>
+    fetch(`${API_BASE}/reports`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
+
+  reviewReport: (
+    reportId: string,
+    data: { status: 'APPROVED' | 'REJECTED'; adminNote?: string },
+  ) =>
+    fetch(`${API_BASE}/reports/${reportId}/review`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
   // Pending products (reuse existing endpoint)
   getPendingProducts: (page = 1, limit = 20) =>
     fetch(`${API_BASE}/admin/products/pending?page=${page}&limit=${limit}`, {
