@@ -59,12 +59,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.isActive) {
-      throw new UnauthorizedException(
-        'Account is disabled. Please contact support.',
-      );
-    }
-
     if (!user.passwordHash) {
       throw new UnauthorizedException('This account was registered via Google. Please log in with Google.');
     }
@@ -73,6 +67,14 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check the account status only after verifying credentials so callers
+    // cannot distinguish a disabled account from a wrong password.
+    if (!user.isActive) {
+      throw new UnauthorizedException(
+        'Account is disabled. Please contact support.',
+      );
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role, name: user.name };
