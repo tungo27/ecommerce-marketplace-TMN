@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, MaxLength, Min } from 'class-validator';
+import { Allow, IsInt, IsNotEmpty, IsNumber, IsString, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductDto {
@@ -25,4 +25,13 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   stock!: number;
+
+  /**
+   * Files arrive through `@UploadedFiles()`, but some multipart clients also
+   * send the `images` field name in the body. Whitelist it so the global
+   * ValidationPipe does not reject an otherwise valid product with
+   * "Property images should not exist".
+   */
+  @Allow()
+  images?: unknown;
 }
