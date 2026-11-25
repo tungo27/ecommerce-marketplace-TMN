@@ -93,3 +93,46 @@ export const adminProductApi = {
   reviewProduct: (id: string, action: 'APPROVE' | 'REJECT') =>
     apiClient.patch(`/admin/products/${id}/review`, { action }),
 };
+
+/**
+ * Backends may return `message` as a string, an array of validation messages,
+ * or a `{ fields: ... }` object. Always surface something meaningful to the
+ * seller instead of a generic failure.
+ */
+export const getApiErrorMessage = (error: unknown, fallback: string): string => {
+  const data = (error as { response?: { data?: unknown } })?.response?.data;
+
+  if (typeof data === 'string' && data.trim()) {
+    return data;
+  }
+  if (data && typeof data === 'object') {
+    const payload = data as {
+      message?: unknown;
+      fields?: Record<string, string>;
+      error?: unknown;
+    };
+
+    if (typeof payload.message === 'string' && payload.message.trim()) {
+      return payload.message;
+    }
+    if (Array.isArray(payload.message)) {
+      const messages = payload.message.filter(
+        (item): item is string => typeof item === 'string' && item.trim().length > 0,
+      );
+      if (messages.length > 0) {
+        return messages.join(' ');
+      }
+    }
+    if (payload.fields) {
+      const messages = Object.values(payload.fields).filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join(' ');
+      }
+    }
+    if (typeof payload.error === 'string' && payload.error.trim()) {
+      return payload.error;
+    }
+  }
+
+  return fallback;
+};

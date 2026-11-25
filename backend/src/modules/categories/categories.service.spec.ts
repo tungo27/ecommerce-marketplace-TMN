@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CacheInvalidationService } from '../../common/cache/cache-invalidation.service';
 import { CategoriesService } from './categories.service';
 
 describe('CategoriesService', () => {
@@ -10,6 +11,10 @@ describe('CategoriesService', () => {
       providers: [
         CategoriesService,
         { provide: PrismaService, useValue: {} },
+        {
+          provide: CacheInvalidationService,
+          useValue: { invalidateCategoryCaches: jest.fn() },
+        },
       ],
     }).compile();
 
