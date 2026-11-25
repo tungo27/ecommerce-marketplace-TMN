@@ -54,6 +54,14 @@ export class CacheInvalidationService {
     }
   }
 
+  /**
+   * The public category list is cached under an explicit CacheInterceptor key.
+   * Without this, a stale (possibly empty) list keeps showing in seller forms.
+   */
+  async invalidateCategoryCaches(): Promise<void> {
+    await this.deleteKey('public_categories');
+  }
+
   private getStores(): KeyvLikeStore[] {
     const stores = (this.cacheManager as unknown as { stores?: KeyvLikeStore[] })
       .stores;

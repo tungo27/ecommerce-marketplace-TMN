@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../../utils/api';
+import { apiClient, getApiErrorMessage } from '../../utils/api';
 import { useCategories } from '../../hooks/useCategories';
 
 interface FormErrors {
@@ -33,7 +33,12 @@ interface FormErrors {
 
 export const CreateProduct: React.FC = () => {
   const navigate = useNavigate();
-  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories();
+  const {
+    categories,
+    isLoading: isLoadingCategories,
+    error: categoriesError,
+    reload: reloadCategories,
+  } = useCategories();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -45,6 +50,19 @@ export const CreateProduct: React.FC = () => {
   const [submitError, setSubmitError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // The form used to hard-code a default category. Keep that behaviour by
+  // selecting the first available option as soon as the public list loads.
+  useEffect(() => {
+    if (isLoadingCategories || categoriesError || categories.length === 0) {
+      return;
+    }
+    setCategoryId((current) =>
+      categories.some((category) => category.id === current)
+        ? current
+        : categories[0].id,
+    );
+  }, [categories, categoriesError, isLoadingCategories]);
 
   const canSubmit = useMemo(() => {
     return name.trim() && description.trim() && price && categoryId && stock && images.length > 0;
@@ -160,19 +178,18 @@ export const CreateProduct: React.FC = () => {
 
     try {
       setIsSubmitting(true);
-      await apiClient.post('/seller/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Let axios/the browser set the multipart boundary; setting the header
+      // manually can produce "Multipart: Boundary not found" on some clients.
+      await apiClient.post('/seller/products', formData);
 
       setSuccessMessage('Product created successfully');
       setTimeout(() => {
         navigate('/seller/dashboard');
       }, 800);
-    } catch (error: any) {
-      const message = error?.response?.data?.message || 'Unable to create product. Please try again.';
-      setSubmitError(typeof message === 'string' ? message : 'Unable to create product. Please try again.');
+    } catch (error: unknown) {
+      setSubmitError(
+        getApiErrorMessage(error, 'Unable to create product. Please try again.'),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -279,7 +296,11 @@ export const CreateProduct: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <FormControl fullWidth error={Boolean(errors.categoryId)} disabled={isLoadingCategories}>
+                  <FormControl
+                    fullWidth
+                    error={Boolean(errors.categoryId) || Boolean(categoriesError)}
+                    disabled={isLoadingCategories || categories.length === 0}
+                  >
                     <InputLabel id="category-select-label" required>Category</InputLabel>
                     <Select
                       labelId="category-select-label"
@@ -296,8 +317,25 @@ export const CreateProduct: React.FC = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    {errors.categoryId ? <Typography color="error" variant="caption">{errors.categoryId}</Typography> : null}
-                    {categoriesError ? <Typography color="error" variant="caption">{categoriesError}</Typography> : null}
+                    {errors.categoryId ? (
+                      <Typography color="error" variant="caption">{errors.categoryId}</Typography>
+                    ) : null}
+                    {isLoadingCategories ? (
+                      <Typography color="text.secondary" variant="caption">Loading categories...</Typography>
+                    ) : null}
+                    {categoriesError ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <Typography color="error" variant="caption">{categoriesError}</Typography>
+                        <Button size="small" onClick={() => void reloadCategories()}>
+                          Retry
+                        </Button>
+                      </Box>
+                    ) : null}
+                    {!isLoadingCategories && !categoriesError && categories.length === 0 ? (
+                      <Typography color="text.secondary" variant="caption">
+                        No categories available. Add one in Category Management first.
+                      </Typography>
+                    ) : null}
                   </FormControl>
                 </Stack>
               </Box>

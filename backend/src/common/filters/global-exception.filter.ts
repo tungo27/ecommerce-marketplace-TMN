@@ -52,11 +52,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // 2. Xử lý lỗi Validation (400)
     if (status === HttpStatus.BAD_REQUEST && exception instanceof HttpException) {
-      const exceptionResponse = exception.getResponse() as any;
-      if (exceptionResponse && exceptionResponse.fields) {
+      const exceptionResponse = exception.getResponse() as {
+        fields?: Record<string, string>;
+      };
+      if (exceptionResponse?.fields) {
+        const details = Object.values(exceptionResponse.fields)
+          .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+          .join(' ');
+
         return response.status(HttpStatus.BAD_REQUEST).json({
           statusCode: 400,
-          message: 'Validation failed',
+          message: details || 'Validation failed',
           fields: exceptionResponse.fields,
         });
       }

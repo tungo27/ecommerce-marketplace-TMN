@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiClient } from '../../utils/api';
+import { apiClient, getApiErrorMessage } from '../../utils/api';
 import {
   Alert,
   Box,
@@ -42,7 +42,12 @@ interface ImageItem {
 export const EditProduct: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories();
+  const {
+    categories,
+    isLoading: isLoadingCategories,
+    error: categoriesError,
+    reload: reloadCategories,
+  } = useCategories();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -71,8 +76,8 @@ export const EditProduct: React.FC = () => {
         setCategoryId(response.data.categoryId);
         setStock(response.data.stock.toString());
         setImageItems((response.data.images ?? []).map((imageUrl) => ({ type: 'existing' as const, url: imageUrl })));
-      } catch (err: any) {
-        setError(err?.response?.data?.message || 'Unable to load product details.');
+      } catch (err: unknown) {
+        setError(getApiErrorMessage(err, 'Unable to load product details.'));
       } finally {
         setIsLoading(false);
       }
@@ -80,6 +85,19 @@ export const EditProduct: React.FC = () => {
 
     fetchProduct();
   }, [id]);
+
+  // A product can reference a category that is no longer public (or the list
+  // may load after the product). Keep the select from rendering blank.
+  useEffect(() => {
+    if (isLoading || isLoadingCategories || categoriesError || categories.length === 0) {
+      return;
+    }
+    setCategoryId((current) =>
+      categories.some((category) => category.id === current)
+        ? current
+        : categories[0].id,
+    );
+  }, [categories, categoriesError, isLoading, isLoadingCategories]);
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []);
@@ -165,17 +183,13 @@ export const EditProduct: React.FC = () => {
           formData.append('images', item.file as File);
         });
 
-      await apiClient.put(`/seller/products/${id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await apiClient.put(`/seller/products/${id}`, formData);
       setSuccessMessage('Product details saved successfully');
       setTimeout(() => {
         navigate('/seller/products');
       }, 1000);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to save product details.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to save product details.'));
     } finally {
       setIsSaving(false);
     }
@@ -265,7 +279,12 @@ export const EditProduct: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <FormControl fullWidth size="small" disabled={isLoadingCategories}>
+                  <FormControl
+                    fullWidth
+                    size="small"
+                    error={Boolean(categoriesError)}
+                    disabled={isLoadingCategories || categories.length === 0}
+                  >
                     <InputLabel id="edit-category-label" required>Category</InputLabel>
                     <Select
                       labelId="edit-category-label"
@@ -279,7 +298,22 @@ export const EditProduct: React.FC = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    {categoriesError ? <Typography color="error" variant="caption">{categoriesError}</Typography> : null}
+                    {isLoadingCategories ? (
+                      <Typography color="text.secondary" variant="caption">Loading categories...</Typography>
+                    ) : null}
+                    {categoriesError ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <Typography color="error" variant="caption">{categoriesError}</Typography>
+                        <Button size="small" onClick={() => void reloadCategories()}>
+                          Retry
+                        </Button>
+                      </Box>
+                    ) : null}
+                    {!isLoadingCategories && !categoriesError && categories.length === 0 ? (
+                      <Typography color="text.secondary" variant="caption">
+                        No categories available. Add one in Category Management first.
+                      </Typography>
+                    ) : null}
                   </FormControl>
                 </Stack>
               </Box>

@@ -303,6 +303,14 @@ async updateSellerProduct(
       updateData.price = dto.price;
     }
     if (dto.categoryId !== undefined) {
+      const category = await this.prismaService.category.findUnique({
+        where: { id: dto.categoryId },
+      });
+      if (!category || !category.isActive) {
+        throw new BadRequestException(
+          'Selected category is no longer available. Please refresh the page and choose another category.',
+        );
+      }
       updateData.categoryId = dto.categoryId;
     }
 
@@ -375,6 +383,17 @@ async updateSellerProduct(
   }
 
   async createProduct(sellerId: string, dto: CreateProductDto, files: Express.Multer.File[]) {
+    // A stale cached category id (e.g. after a reseed) would otherwise fail at
+    // the foreign key level with an opaque 500 instead of a clear 400.
+    const category = await this.prismaService.category.findUnique({
+      where: { id: dto.categoryId },
+    });
+    if (!category || !category.isActive) {
+      throw new BadRequestException(
+        'Selected category is no longer available. Please refresh the page and choose another category.',
+      );
+    }
+
     const uploadedImageUrls = await Promise.all(files.map((file) => this.uploadService.uploadImage(file)));
 
     return this.prismaService.product.create({
