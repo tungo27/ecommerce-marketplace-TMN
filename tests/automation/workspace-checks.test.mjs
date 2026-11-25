@@ -20,6 +20,13 @@ function source(relativePath) {
   return readFileSync(path.join(root, relativePath), 'utf8');
 }
 
+/** Source code with comments removed, for checks that must ignore documentation. */
+function code(relativePath) {
+  return source(relativePath)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/.*$/gm, '');
+}
+
 describe('Workspace checks for previously failing commands', () => {
   it('backend unit tests pass', () => {
     run('npm test --prefix backend -- --runInBand', 'backend unit tests');
@@ -46,35 +53,91 @@ describe('Workspace checks for previously failing commands', () => {
   });
 
   it('bug-fix implementation invariants are still present', () => {
-    const shipping = source('backend/src/common/constants/pricing.constants.ts');
-    assert.match(shipping, /SHIPPING_FEE\s*=\s*30000/);
-
-    const orders = source('backend/src/modules/orders/orders.service.ts');
+    // BUG_02 — shipping fee and grand total.
+    assert.match(
+      code('backend/src/common/constants/pricing.constants.ts'),
+      /SHIPPING_FEE\s*=\s*30000/,
+    );
+    const orders = code('backend/src/modules/orders/orders.service.ts');
     assert.match(orders, /shippingFeeApplied/);
+    assert.match(orders, /totalAmount:\s*orderTotal/);
+    assert.match(code('frontend-storefront/src/hooks/useCart.ts'), /DEFAULT_SHIPPING_FEE\s*=\s*30000/);
+    assert.match(code('frontend-storefront/src/app/cart/page.tsx'), /shippingFee/);
+    assert.match(code('frontend-storefront/src/app/cart/page.tsx'), /grandTotal/);
+    assert.match(code('frontend-storefront/src/app/(protected)/checkout/page.tsx'), /grandTotal/);
 
-    const cache = source('backend/src/common/cache/cache-invalidation.service.ts');
+    // BUG-REV-001/002/003 — hidden reviews, rating, cache invalidation.
+    assert.match(code('backend/src/modules/reviews/reviews.service.ts'), /isHidden:\s*false/);
+    assert.match(code('backend/src/modules/admin/admin.service.ts'), /recalculateProductRating/);
+    const cache = code('backend/src/common/cache/cache-invalidation.service.ts');
     assert.match(cache, /\.del\(/);
-    const cacheCode = cache
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/\/\/.*$/gm, '');
-    assert.doesNotMatch(cacheCode, /cacheManager\.clear\(/);
+    assert.doesNotMatch(cache, /cacheManager\.clear\(/);
+    assert.match(cache, /invalidateCategoryCaches/);
 
-    const reviews = source('backend/src/modules/reviews/reviews.service.ts');
-    assert.match(reviews, /isHidden/);
+    // BUG-REG-001/002 — trim and max length.
+    const registerDto = code('backend/src/auth/dto/register.dto.ts');
+    assert.match(registerDto, /@Transform/);
+    assert.match(registerDto, /@MaxLength\(100/);
 
-    const storefrontCart = source('frontend-storefront/src/hooks/useCart.ts');
-    assert.match(storefrontCart, /shippingFee/);
-    assert.match(storefrontCart, /grandTotal/);
+    // BUG-LOGIN-001 — status check must come after password comparison.
+    const authService = code('backend/src/auth/auth.service.ts');
+    assert.ok(
+      authService.indexOf('bcrypt.compare') < authService.indexOf('if (!user.isActive)'),
+      'isActive check must run after password verification',
+    );
 
-    const storefrontAuth = source('frontend-storefront/src/hooks/useAuth.ts');
-    const storefrontApi = source('frontend-storefront/src/utils/api.ts');
-    assert.match(storefrontAuth, /userCookie/);
-    assert.match(storefrontApi, /userCookie/);
+    // Banned accounts must be rejected on every authenticated request.
+    const jwtStrategy = code('backend/src/auth/strategies/jwt.strategy.ts');
+    assert.match(jwtStrategy, /prisma\.user\.findUnique/);
+    assert.match(jwtStrategy, /!user\.isActive/);
 
-    const editProduct = source('frontend-backoffice/src/pages/seller/EditProduct.tsx');
+    // BUG-LOGIN-002 — cookies cleared on logout and on 401.
+    for (const file of [
+      'frontend-storefront/src/hooks/useAuth.ts',
+      'frontend-storefront/src/utils/api.ts',
+    ]) {
+      const authCode = code(file);
+      assert.match(authCode, /userCookie/);
+      assert.match(authCode, /expires=Thu,\s*01 Jan 1970/);
+    }
+    assert.match(code('frontend-storefront/src/components/Header.tsx'), /logout\(\)/);
+
+    // BUG-PROD-001/002 — categoryId, multipart, stale category validation.
+    assert.match(code('backend/src/modules/products/dtos/create-product.dto.ts'), /categoryId!/);
+    assert.match(code('backend/src/modules/products/dtos/create-product.dto.ts'), /@Allow\(\)/);
+    assert.match(
+      code('backend/src/modules/products/products.service.ts'),
+      /Selected category is no longer available/,
+    );
+    const productsController = code('backend/src/modules/products/products.controller.ts');
+    assert.equal(
+      (productsController.match(/FilesInterceptor\('images', 5\)/g) ?? []).length,
+      2,
+      'both POST and PUT must parse multipart images',
+    );
+    const createProduct = code('frontend-backoffice/src/pages/seller/CreateProduct.tsx');
+    assert.match(createProduct, /append\('categoryId'/);
+    assert.match(createProduct, /useCategories/);
+    assert.doesNotMatch(createProduct, /multipart\/form-data/);
+    const editProduct = code('frontend-backoffice/src/pages/seller/EditProduct.tsx');
+    assert.match(editProduct, /append\('categoryId'/);
     assert.match(editProduct, /existingImages/);
+    assert.match(code('frontend-backoffice/src/hooks/useCategories.ts'), /extractCategories/);
 
-    const adminApi = source('frontend-backoffice/src/hooks/useAdminApi.ts');
+    // A JSON default header used to turn FormData into JSON and drop files.
+    assert.doesNotMatch(
+      code('frontend-backoffice/src/utils/api.ts'),
+      /'Content-Type':\s*'application\/json'/,
+    );
+
+    // Validation errors should expose field details, not just "Validation failed".
+    assert.match(code('backend/src/common/filters/global-exception.filter.ts'), /details \|\| 'Validation failed'/);
+
+    // Admin category creation without a slug.
+    assert.match(code('backend/src/modules/categories/dtos/create-category.dto.ts'), /slug\?: string/);
+    assert.match(code('backend/src/modules/categories/categories.service.ts'), /invalidatePublicCategories/);
+
+    const adminApi = code('frontend-backoffice/src/hooks/useAdminApi.ts');
     assert.match(adminApi, /getReports/);
     assert.match(adminApi, /reviewReport/);
   });

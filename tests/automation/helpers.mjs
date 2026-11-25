@@ -12,6 +12,7 @@ export function createContext() {
     orderIds: [],
     reviewIds: [],
     reportIds: [],
+    categoryIds: [],
     tokens: {},
   };
 }
@@ -27,19 +28,32 @@ export async function api(path, { method = 'GET', token, body } = {}) {
     payload = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers,
-    body: payload,
-  });
-  const text = await response.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    data = text;
+  // The API has a global rate limiter. Other suites/manual checks may have
+  // consumed the same window, so retry briefly instead of failing randomly.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: payload,
+    });
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+
+    if (response.status === 429 && attempt < 2) {
+      const seconds = Math.min(Number(data?.retryAfter) || 1, 60);
+      await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+      continue;
+    }
+
+    return { status: response.status, data, headers: response.headers };
   }
-  return { status: response.status, data, headers: response.headers };
+
+  throw new Error(`unreachable: ${path}`);
 }
 
 export function sql(query) {
@@ -135,6 +149,11 @@ export function cleanup(ctx) {
     trySql(`delete from "FlashSale" where "productId" in (${ids});`, 'flash sales');
     trySql(`delete from "AuditLog" where "targetId" in (${ids});`, 'product audit logs');
     trySql(`delete from "Product" where id in (${ids});`, 'products');
+  }
+  if (ctx.categoryIds.length > 0) {
+    const ids = inClause(ctx.categoryIds);
+    trySql(`delete from "AuditLog" where "targetId" in (${ids});`, 'category audit logs');
+    trySql(`delete from "Category" where id in (${ids});`, 'categories');
   }
   if (ctx.userIds.length > 0) {
     const ids = inClause(ctx.userIds);

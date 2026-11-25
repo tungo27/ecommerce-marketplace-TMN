@@ -36,19 +36,23 @@ npm run test:automation:workspace # unit/e2e/lint/build/typecheck + source invar
 
 | Check | Covered by |
 | --- | --- |
-| `BUG_02` — shipping fee shown in cart and charged once per checkout | `bugfix-api.test.mjs` |
+| `BUG_02` — 30000 shipping in cart, charged once at checkout, order total + history agree | `bugfix-api.test.mjs` + `workspace-checks.test.mjs` |
 | `BUG-PROD-001` — create product with `categoryId` + multipart image | `bugfix-api.test.mjs` |
-| `BUG-PROD-002` — update product with existing + new images | `bugfix-api.test.mjs` |
-| `BUG-REG-001` — trim registration fields | `bugfix-api.test.mjs` |
+| `BUG-PROD-001` — extra `images` field in body is whitelisted | `bugfix-api.test.mjs` |
+| `BUG-PROD-001` — stale category id returns a clear 400 | `bugfix-api.test.mjs` |
+| `BUG-PROD-002` — update product with existing + new images (multipart PUT) | `bugfix-api.test.mjs` |
+| `BUG-REG-001` — reject whitespace-only name and trim stored name | `bugfix-api.test.mjs` |
 | `BUG-REG-002` — reject name longer than 100 chars | `bugfix-api.test.mjs` |
-| `BUG-LOGIN-001` — reject disabled account | `bugfix-api.test.mjs` |
-| `BUG-LOGIN-002` — clear both session cookies | `workspace-checks.test.mjs` (source invariant) |
+| `BUG-LOGIN-001` — password checked before disabled status | `bugfix-api.test.mjs` + `workspace-checks.test.mjs` |
+| Banned account cannot reuse an existing JWT | `bugfix-api.test.mjs` + `workspace-checks.test.mjs` |
+| `BUG-LOGIN-002` — clear both session cookies on logout and 401 | `workspace-checks.test.mjs` (source invariant) |
 | `BUG-REV-001` — hidden reviews omitted | `bugfix-api.test.mjs` |
 | `BUG-REV-002` — rating recomputed after hide/unhide | `bugfix-api.test.mjs` |
 | `BUG-REV-003` — Redis-safe product cache invalidation (`X-Cache: MISS`) | `bugfix-api.test.mjs` |
+| Category cache invalidated; admin can create category without slug | `bugfix-api.test.mjs` + `workspace-checks.test.mjs` |
+| Backoffice FormData is never converted to JSON | `workspace-checks.test.mjs` |
 | Remaining report API mismatch (`getReports` / `reviewReport`) | `bugfix-api.test.mjs` |
-| Remaining backend spec DI failures | `workspace-checks.test.mjs` (`npm test --prefix backend`) |
-| Remaining frontend lint/build/typecheck failures | `workspace-checks.test.mjs` |
+| Backend unit/e2e tests, builds, lint, typecheck | `workspace-checks.test.mjs` |
 
 `BUG_01` was validated as invalid and is intentionally not implemented or tested.
 
