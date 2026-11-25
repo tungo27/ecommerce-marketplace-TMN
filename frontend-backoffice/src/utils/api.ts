@@ -9,9 +9,9 @@ export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Do not force a JSON content type here. Axios 1.x turns FormData into a
+  // JSON object when a JSON content type is already present, which silently
+  // drops uploaded files. Plain objects still get application/json automatically.
 });
 
 // Request interceptor to add the token
